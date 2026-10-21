@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -122,11 +122,19 @@ h3{font-size:18px;margin:0}
 .tips li{padding-left:1.3em;position:relative;margin:3px 0}
 .tips li::before{content:"💡";position:absolute;left:0;font-size:12px;top:2px}
 .place .img[data-full]{cursor:zoom-in}
-.lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px}
-.lightbox.on{display:flex}
-.lightbox img{max-width:100%;max-height:85vh;object-fit:contain}
-.lightbox .cap{position:absolute;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));color:#ddd;text-align:center;font-size:14px}
-.lightbox .x{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:22px}
+html{touch-action:manipulation}
+.lightbox{position:fixed;inset:0;z-index:300;display:none;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
+.lightbox.on{display:block}
+.lightbox .bg{position:absolute;inset:0;background:#000}
+.lightbox .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.lightbox .stage img{max-width:100%;max-height:100%;object-fit:contain;transform-origin:0 0;will-change:transform;-webkit-user-drag:none;pointer-events:none}
+.lightbox .anim img{transition:transform .25s ease}
+.lightbox .top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;
+  padding:calc(10px + env(safe-area-inset-top)) 12px 10px 16px;color:#fff;font-size:14px;background:linear-gradient(rgba(0,0,0,.5),transparent);transition:opacity .2s}
+.lightbox .x{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px}
+.lightbox .cap{position:absolute;left:0;right:0;bottom:0;color:#eee;text-align:center;font-size:14px;
+  padding:24px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6));transition:opacity .2s}
+.lightbox .hint{font-size:12px;opacity:.7}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.star{background:#3a2f0c;color:#ffd36b}}
 .btns{display:flex;gap:8px;margin-top:12px}
 .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border-radius:12px;
@@ -170,10 +178,13 @@ h3{font-size:18px;margin:0}
 .clock .date{font-size:12px;color:var(--muted);text-align:right}
 .fx-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line)}
 .fx-row:first-of-type{border-top:0}
-.fx-row label{width:68px;flex:0 0 auto}
-.fx-row label b{display:block;font-size:16px}
+.fx-row label{width:96px;flex:0 0 auto}
+.fx-row label > b{display:block;font-size:16px}
+.fx-row .sym{font-size:13px;color:var(--text)}
+.fx-in{flex:1;min-width:0;position:relative}
+.fx-in .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;font-size:16px;pointer-events:none}
 .fx-row label small{color:var(--muted);font-size:12px}
-.fx-row input{flex:1;min-width:0;font:inherit;font-size:22px;font-weight:700;text-align:right;border:1px solid var(--line);
+.fx-row input{width:100%;padding-left:48px !important;font:inherit;font-size:22px;font-weight:700;text-align:right;border:1px solid var(--line);
   background:var(--surface-2);color:var(--text);border-radius:12px;padding:8px 12px}
 .quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px}
 .quick button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:4px 12px;cursor:pointer}
@@ -181,6 +192,8 @@ h3{font-size:18px;margin:0}
 .wx-list .row:first-child{border-top:0}
 .wx-list .ic{font-size:28px;width:36px;text-align:center}
 .wx-list .nm{flex:1}
+.wx-list .ctry{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:0 6px;margin-right:6px;vertical-align:1px}
+.wx-list .ctry.uk{background:var(--uk)} .wx-list .ctry.is{background:var(--is)}
 .wx-list .nm small{display:block;color:var(--muted);font-size:12px}
 .wx-list .tt{text-align:right}
 .wx-list .tt b{font-size:20px}
@@ -309,10 +322,10 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 
     <h2>匯率換算</h2>
     <div class="card">
-      <div class="fx-row"><label><b>🇬🇧 GBP</b><small>英鎊</small></label><input inputmode="decimal" id="fx-GBP" autocomplete="off"></div>
-      <div class="fx-row"><label><b>🇮🇸 ISK</b><small>冰島克朗</small></label><input inputmode="decimal" id="fx-ISK" autocomplete="off"></div>
-      <div class="fx-row"><label><b>🇪🇺 EUR</b><small>歐元</small></label><input inputmode="decimal" id="fx-EUR" autocomplete="off"></div>
-      <div class="fx-row"><label><b>🇹🇼 TWD</b><small>新台幣</small></label><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div>
+      <div class="fx-row"><label for="fx-GBP"><b>🇬🇧 英鎊</b><small>符號 <b class="sym">£</b>・GBP</small></label><div class="fx-in"><span class="pre">£</span><input inputmode="decimal" id="fx-GBP" autocomplete="off"></div></div>
+      <div class="fx-row"><label for="fx-ISK"><b>🇮🇸 冰島克朗</b><small>符號 <b class="sym">kr</b>・ISK</small></label><div class="fx-in"><span class="pre">kr</span><input inputmode="decimal" id="fx-ISK" autocomplete="off"></div></div>
+      <div class="fx-row"><label for="fx-EUR"><b>🇪🇺 歐元</b><small>符號 <b class="sym">€</b>・EUR</small></label><div class="fx-in"><span class="pre">€</span><input inputmode="decimal" id="fx-EUR" autocomplete="off"></div></div>
+      <div class="fx-row"><label for="fx-TWD"><b>🇹🇼 新台幣</b><small>符號 <b class="sym">NT$</b>・TWD</small></label><div class="fx-in"><span class="pre">NT$</span><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div></div>
       <div class="quick" id="fxQuick"></div>
       <div class="pad small muted" style="padding-top:0" id="fxInfo">讀取匯率中…</div>
     </div>
@@ -459,7 +472,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   <button data-v="info"><span class="i"><img src="assets/icons/info.png" alt="" width="30" height="30"></span>須知</button>
 </div></nav>
 
-<div class="lightbox" id="lightbox"><button class="x" aria-label="關閉">✕</button><img alt=""><div class="cap"></div></div>
+<div class="lightbox" id="lightbox"><div class="bg"></div><div class="stage"><img alt=""></div><div class="top"><span class="count"></span><button class="x" aria-label="關閉">✕</button></div><div class="cap"><div class="txt"></div><div class="hint">雙指縮放・雙擊放大・上下滑關閉・左右滑看下一張</div></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -963,13 +976,13 @@ async function renderDayWx(day, el) {
 }
 
 const WX_CITIES = [
-  { name:'倫敦', sub:'London', lat:51.5072, lon:-0.1276 },
-  { name:'塞爾福斯', sub:'Selfoss', lat:63.9333, lon:-21.0 },
-  { name:'維克（南岸）', sub:'Vík', lat:63.4186, lon:-19.006 },
-  { name:'傑古沙龍冰河湖', sub:'Jökulsárlón', lat:64.0703, lon:-16.2117 },
-  { name:'赫本', sub:'Höfn', lat:64.2539, lon:-15.2082 },
-  { name:'雷克雅未克', sub:'Reykjavík', lat:64.1466, lon:-21.9426 },
-  { name:'牛津', sub:'Oxford', lat:51.752, lon:-1.2577 },
+  { c:'uk', name:'倫敦', sub:'London', lat:51.5072, lon:-0.1276 },
+  { c:'is', name:'塞爾福斯', sub:'Selfoss', lat:63.9333, lon:-21.0 },
+  { c:'is', name:'維克（南岸）', sub:'Vík', lat:63.4186, lon:-19.006 },
+  { c:'is', name:'傑古沙龍冰河湖', sub:'Jökulsárlón', lat:64.0703, lon:-16.2117 },
+  { c:'is', name:'赫本', sub:'Höfn', lat:64.2539, lon:-15.2082 },
+  { c:'is', name:'雷克雅未克', sub:'Reykjavík', lat:64.1466, lon:-21.9426 },
+  { c:'uk', name:'牛津', sub:'Oxford', lat:51.752, lon:-1.2577 },
 ];
 async function renderWxList() {
   const rows = await Promise.all(WX_CITIES.map(async c => {
@@ -977,7 +990,7 @@ async function renderWxList() {
       const d = await fetchWx(c.lat, c.lon);
       const [ic, tx] = wmo(d.current.weather_code);
       return `<div class="row"><div class="ic">${ic}</div>
-        <div class="nm">${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°</small></div>
+        <div class="nm"><span class="ctry ${c.c}">${c.c === 'uk' ? '🇬🇧 英國' : '🇮🇸 冰島'}</span>${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°</small></div>
         <div class="tt"><b>${Math.round(d.current.temperature_2m)}°</b><small>${Math.round(d.daily.temperature_2m_min[0])}° / ${Math.round(d.daily.temperature_2m_max[0])}°</small></div></div>`;
     } catch {
       return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取</small></div></div>`;
@@ -1269,10 +1282,8 @@ function convertFrom(src) {
   store.set('fxLast', { src, v: $('#fx-' + src).value });
 }
 function fxInfo() {
-  const r1 = `£1 ≈ ${fx.GBP.toFixed(2)} 台幣・€1 ≈ ${fx.EUR.toFixed(2)} 台幣・100 kr ≈ ${(fx.ISK * 100).toFixed(1)} 台幣・€1 ≈ ${(fx.EUR / fx.ISK).toFixed(0)} kr`;
-  $('#fxInfo').innerHTML = fx.fallback
-    ? `${r1}<br>⚠️ 目前為離線估計匯率，連上網路後會自動更新`
-    : `${r1}<br>更新時間：${new Date(fx.at).toLocaleString('zh-TW')}（實際刷卡匯率以銀行為準）`;
+  $('#fxInfo').innerHTML = `參考匯率：£1 英鎊 ≈ NT$${fx.GBP.toFixed(1)}・€1 歐元 ≈ NT$${fx.EUR.toFixed(1)}・100 kr 克朗 ≈ NT$${(fx.ISK * 100).toFixed(1)}`
+    + (fx.fallback ? '<br>⚠️ 目前離線，使用估計匯率' : '<br>實際刷卡匯率以銀行為準');
 }
 async function loadFx() {
   try {
@@ -1340,15 +1351,132 @@ let theme = store.get('theme', 'auto'); applyTheme(theme);
 $('#themeBtn').onclick = () => { theme = themeOrder[(themeOrder.indexOf(theme) + 1) % 3]; store.set('theme', theme); applyTheme(theme); };
 
 /* ---------------- lightbox ---------------- */
-const lb = $('#lightbox');
+// Photo viewer: pinch / double-tap zoom, drag to pan, swipe down/up to close,
+// swipe left/right through the other photos of the same place.
+const lb = $('#lightbox'), lbStage = lb.querySelector('.stage'), lbImg = lbStage.querySelector('img');
+let lbList = [], lbIdx = 0, z = { s: 1, x: 0, y: 0 }, lbBase = null;
+const ptrs = new Map();
+let gesture = null, lastTap = 0;
+
+function lbShow(i) {
+  lbIdx = (i + lbList.length) % lbList.length;
+  const t = lbList[lbIdx];
+  lbImg.src = t.dataset.full;
+  lb.querySelector('.txt').textContent = t.alt || t.closest('.place')?.querySelector('h3')?.textContent || '';
+  lb.querySelector('.count').textContent = lbList.length > 1 ? `${lbIdx + 1} / ${lbList.length}` : '';
+  zReset(false);
+}
+function lbOpen(t) {
+  const scope = t.closest('.place') || document;
+  lbList = [...scope.querySelectorAll('[data-full]')];
+  lb.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  lbShow(lbList.indexOf(t));
+}
+function lbClose() {
+  lb.classList.remove('on');
+  document.body.style.overflow = $('#mapBox.full') ? 'hidden' : '';
+  ptrs.clear(); gesture = null;
+}
+// the image's untransformed box, used to keep panning inside its edges
+function baseBox() {
+  const r = lbStage.getBoundingClientRect(), w = lbImg.offsetWidth, h = lbImg.offsetHeight;
+  return { left: (r.width - w) / 2, top: (r.height - h) / 2, w, h, W: r.width, H: r.height };
+}
+function zApply(anim, dimFor) {
+  lbStage.classList.toggle('anim', !!anim);
+  const b = lbBase || (lbBase = baseBox());
+  lbImg.style.transform = `translate(${z.x}px,${z.y}px) scale(${z.s})`;
+  lbImg.style.marginLeft = lbImg.style.marginTop = '0';
+  const fade = dimFor == null ? 1 : Math.max(0.2, 1 - Math.abs(dimFor) / 400);
+  lb.querySelector('.bg').style.opacity = fade;
+  lb.querySelector('.top').style.opacity = lb.querySelector('.cap').style.opacity = z.s > 1.01 || dimFor ? 0 : 1;
+}
+function zReset(anim) { z = { s: 1, x: 0, y: 0 }; lbBase = null; zApply(anim); }
+function clampPan() {
+  const b = lbBase, w = b.w * z.s, h = b.h * z.s;
+  // transform origin is the image's top-left, so x/y are offsets from that corner
+  const minX = Math.min(0, b.W - w - b.left) , maxX = Math.max(0, -b.left);
+  const minY = Math.min(0, b.H - h - b.top), maxY = Math.max(0, -b.top);
+  if (w <= b.W) z.x = (b.W - w) / 2 - b.left; else z.x = Math.min(maxX, Math.max(minX, z.x));
+  if (h <= b.H) z.y = (b.H - h) / 2 - b.top; else z.y = Math.min(maxY, Math.max(minY, z.y));
+}
+function zoomAt(px, py, ns) {
+  const b = lbBase || (lbBase = baseBox());
+  ns = Math.min(5, Math.max(1, ns));
+  // keep the point under the finger fixed: p = left + x + s*u
+  const ux = (px - b.left - z.x) / z.s, uy = (py - b.top - z.y) / z.s;
+  z.x = px - b.left - ns * ux; z.y = py - b.top - ns * uy; z.s = ns;
+}
+const mid = () => { const [a, c] = [...ptrs.values()]; return { x: (a.x + c.x) / 2, y: (a.y + c.y) / 2, d: Math.hypot(a.x - c.x, a.y - c.y) }; };
+
+lbStage.addEventListener('pointerdown', e => {
+  try { lbStage.setPointerCapture(e.pointerId); } catch {}
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  lbBase = lbBase || baseBox();
+  if (ptrs.size === 2) { const m = mid(); gesture = { type: 'pinch', d: m.d, s: z.s, mx: m.x, my: m.y }; }
+  else if (ptrs.size === 1) gesture = { type: 'drag', sx: e.clientX, sy: e.clientY, x: z.x, y: z.y, t: Date.now(), moved: false };
+});
+lbStage.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId) || !gesture) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture.type === 'pinch' && ptrs.size === 2) {
+    const m = mid();
+    zoomAt(m.x, m.y, gesture.s * m.d / gesture.d);
+    z.x += m.x - gesture.mx; z.y += m.y - gesture.my; gesture.mx = m.x; gesture.my = m.y;
+    zApply(false);
+  } else if (gesture.type === 'drag') {
+    const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+    if (Math.hypot(dx, dy) > 6) gesture.moved = true;
+    if (z.s > 1.01) { z.x = gesture.x + dx; z.y = gesture.y + dy; clampPan(); zApply(false); }
+    else {
+      // not zoomed: vertical = dismiss preview, horizontal = gallery swipe preview
+      gesture.axis = gesture.axis || (Math.abs(dy) > Math.abs(dx) ? 'y' : 'x');
+      if (gesture.axis === 'y') { z.x = 0; z.y = dy; zApply(false, dy); }
+      else { z.x = dx; z.y = 0; zApply(false); }
+    }
+  }
+});
+function pointerEnd(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  const g = gesture;
+  if (g && g.type === 'pinch') {
+    if (ptrs.size === 1) { const [p] = [...ptrs.values()]; gesture = { type: 'drag', sx: p.x, sy: p.y, x: z.x, y: z.y, moved: true }; }
+    if (z.s <= 1.01) zReset(true); else { clampPan(); zApply(true); }
+    return;
+  }
+  if (!g || ptrs.size) return;
+  gesture = null;
+  const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+  if (!g.moved) {
+    // double tap toggles zoom around the tap point
+    const now = Date.now();
+    if (now - lastTap < 300) { lastTap = 0; if (z.s > 1.01) zReset(true); else { zoomAt(e.clientX, e.clientY, 2.5); clampPan(); zApply(true); } }
+    else lastTap = now;
+    return;
+  }
+  if (z.s > 1.01) return;
+  if (g.axis === 'y' && Math.abs(dy) > 90) return lbClose();
+  if (g.axis === 'x' && Math.abs(dx) > 60 && lbList.length > 1) return lbShow(lbIdx + (dx < 0 ? 1 : -1));
+  zReset(true);
+}
+lbStage.addEventListener('pointerup', pointerEnd);
+lbStage.addEventListener('pointercancel', pointerEnd);
+lb.querySelector('.x').onclick = lbClose;
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('on')) return;
+  if (e.key === 'Escape') lbClose();
+  if (e.key === 'ArrowRight') lbShow(lbIdx + 1);
+  if (e.key === 'ArrowLeft') lbShow(lbIdx - 1);
+});
+window.addEventListener('resize', () => { if (lb.classList.contains('on')) zReset(false); });
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-full]');
-  if (!t) return;
-  lb.querySelector('img').src = t.dataset.full;
-  lb.querySelector('.cap').textContent = t.alt || t.closest('.place')?.querySelector('h3')?.textContent || '';
-  lb.classList.add('on');
+  if (t && !lb.contains(t)) lbOpen(t);
 });
-lb.onclick = () => lb.classList.remove('on');
+// iOS Safari ignores user-scalable=no; block its page pinch-zoom gesture directly
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 
 /* ---------------- init ---------------- */
 const ti = todayIndex();
