@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>英國冰島極光之旅</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
   --bg:#f4f6fa; --surface:#ffffff; --surface-2:#eef1f6; --text:#121826; --muted:#5b6475; --line:#e2e6ee;
@@ -51,7 +50,14 @@ h3{font-size:18px;margin:0}
 
 /* day chips */
 .chips{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
-.chips .row{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;max-width:560px;margin:0 auto}
+.chips-in{position:relative;max-width:560px;margin:0 auto}
+.chips .row{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;scroll-behavior:smooth;scroll-snap-type:x proximity}
+.chip{scroll-snap-align:center}
+.arrow{position:absolute;top:0;bottom:0;z-index:2;width:44px;border:0;font-size:28px;line-height:1;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;transition:opacity .2s}
+.arrow.left{left:0;justify-content:flex-start;padding-left:6px;background:linear-gradient(90deg,var(--bg) 45%,transparent)}
+.arrow.right{right:0;justify-content:flex-end;padding-right:6px;background:linear-gradient(270deg,var(--bg) 45%,transparent)}
+.arrow[hidden]{display:flex;opacity:0;pointer-events:none}
 .chips .row::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;
   padding:6px 10px;text-align:center;min-width:58px;font:inherit;cursor:pointer}
@@ -84,7 +90,7 @@ h3{font-size:18px;margin:0}
 .pill.good{background:var(--accent-soft);color:var(--accent)}
 .pill.bad{background:var(--warn-soft);color:var(--warn)}
 
-.map{height:220px;background:var(--surface-2)}
+.map{height:260px;background:var(--surface-2)}
 .map-actions{display:flex;gap:8px;padding:10px 12px}
 
 /* place card */
@@ -194,9 +200,10 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 .footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
 .theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
-.leaflet-container{font:inherit}
-.mk{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;
-  border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.map iframe{display:block;width:100%;height:100%;border:0}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;padding:10px 12px 0;font-size:13px}
+.legend:empty{display:none}
+.legend b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#ea4335;color:#fff;font-size:11px;margin-right:4px}
 </style>
 </head>
 <body>
@@ -213,7 +220,11 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 
 <!-- ============ 行程 ============ -->
 <section class="view on" id="v-days">
-  <div class="chips"><div class="row" id="chips"></div></div>
+  <div class="chips"><div class="chips-in">
+    <button class="arrow left" id="chipsL" aria-label="前幾天">‹</button>
+    <div class="row" id="chips"></div>
+    <button class="arrow right" id="chipsR" aria-label="後幾天">›</button>
+  </div></div>
   <div class="wrap" id="day"></div>
 </section>
 
@@ -355,7 +366,6 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 
 <div class="lightbox" id="lightbox"><button class="x" aria-label="關閉">✕</button><img alt=""><div class="cap"></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ---------------- helpers ---------------- */
 const W = (path, w = 960) => {
@@ -364,7 +374,7 @@ const W = (path, w = 960) => {
 };
 const gmap = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 const gnav = (lat, lon) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
-const gembed = q => `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=14&output=embed`;
+const gembed = q => `https://maps.google.com/maps?hl=zh-TW&q=${encodeURIComponent(q)}&z=14&output=embed`;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const store = {
@@ -866,8 +876,7 @@ async function renderWxList() {
 }
 
 /* ---------------- day view ---------------- */
-let current = 0, dayMap = null;
-const MK_COLOR = { uk:'#c8102e', is:'#02529c', tw:'#555' };
+let current = 0;
 
 function placeCard(p, n) {
   const img = p.img
@@ -925,7 +934,25 @@ function renderChips() {
       <small>D${i + 1}・${wk(d.date)}</small><b>${md(d.date)}</b>${i === ti ? '<span class="today">今天</span>' : ''}</button>`).join('');
   $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => selectDay(+b.dataset.i, true));
   const on = $('#chips .chip.on');
-  if (on) on.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' });
+  if (on) { const row = $('#chips'); row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2; }
+  setTimeout(updateArrows, 350);
+}
+
+function updateArrows() {
+  const row = $('#chips');
+  $('#chipsL').hidden = row.scrollLeft <= 4;
+  $('#chipsR').hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+}
+function initChipScroll() {
+  const row = $('#chips');
+  row.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows);
+  // mouse wheel scrolls the date row sideways on desktop
+  row.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { row.scrollLeft += e.deltaY; e.preventDefault(); }
+  }, { passive: false });
+  $('#chipsL').onclick = () => { row.scrollLeft -= row.clientWidth * 0.7; };
+  $('#chipsR').onclick = () => { row.scrollLeft += row.clientWidth * 0.7; };
 }
 
 function selectDay(i, scroll) {
@@ -958,6 +985,7 @@ function renderDay() {
     <div class="card pad" id="dayWx"><div class="small muted">讀取天氣中…</div></div>
     <div class="card">
       <div class="map" id="dayMap"></div>
+      <div class="legend" id="mapLegend"></div>
       <div class="map-actions">
         <a class="btn" href="${dirUrl}" target="_blank" rel="noopener">🗺️ 在 Google Maps 開啟今日路線</a>
       </div>
@@ -985,30 +1013,24 @@ function renderDay() {
   drawMap(d, hotel);
 }
 
+// Google Maps embed (no API key). hl=zh-TW pins map labels to Traditional Chinese
+// regardless of the phone's system language. Multiple stops use the legacy
+// saddr/daddr "+to:" route embed, which draws lettered A, B, C… markers.
 function drawMap(d, hotel) {
-  if (dayMap) { dayMap.remove(); dayMap = null; }
-  if (!window.L) { $('#dayMap').innerHTML = '<div class="pad small muted">地圖載入失敗</div>'; return; }
-  dayMap = L.map('dayMap', { scrollWheelZoom:false, attributionControl:true, zoomControl:false });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18, attribution:'© OpenStreetMap' }).addTo(dayMap);
-  const color = MK_COLOR[d.country];
-  const pts = [];
-  // skip far-away airports (e.g. Taoyuan on a London day) so the map stays zoomed on the action
-  d.places.forEach((p, i) => {
-    const icon = L.divIcon({ className:'', html:`<div class="mk" style="background:${color}">${i + 1}</div>`, iconSize:[26,26], iconAnchor:[13,13] });
-    L.marker([p.lat, p.lon], { icon }).addTo(dayMap).bindPopup(`<b>${esc(p.zh)}</b><br>${esc(p.en)}`);
-    pts.push([p.lat, p.lon]);
-  });
-  if (hotel) {
-    const icon = L.divIcon({ className:'', html:`<div class="mk" style="background:#0f9d8a">🏨</div>`, iconSize:[26,26], iconAnchor:[13,13] });
-    L.marker([hotel.lat, hotel.lon], { icon }).addTo(dayMap).bindPopup(`<b>${esc(hotel.name)}</b>`);
-    pts.push([hotel.lat, hotel.lon]);
-  }
-  // fit to the cluster nearest the day's destination, ignoring the >1500km outlier (TPE)
-  const ref = pts[pts.length - 1];
-  const near = pts.filter(q => Math.abs(q[0] - ref[0]) < 15 && Math.abs(q[1] - ref[1]) < 30);
-  L.polyline(near, { color, weight:3, opacity:.5, dashArray:'6 6' }).addTo(dayMap);
-  if (near.length > 1) dayMap.fitBounds(near, { padding:[28, 28] });
-  else dayMap.setView(near[0], 11);
+  const stops = d.places.map(p => ({ q: p.q, zh: p.zh, lat: p.lat, lon: p.lon }));
+  if (hotel) stops.push({ q: `${hotel.name}, ${hotel.addr}`, zh: `🏨 ${hotel.zh}`, lat: hotel.lat, lon: hotel.lon });
+  // drop far-away airports (e.g. Taoyuan on a London day) so the route can be driven
+  const ref = stops[stops.length - 1];
+  const near = stops.filter(s => Math.abs(s.lat - ref.lat) < 15 && Math.abs(s.lon - ref.lon) < 30);
+  // coordinates resolve far more reliably than place names in the keyless route embed
+  const enc = s => `${s.lat},${s.lon}`;
+  const src = near.length > 1
+    ? `https://maps.google.com/maps?hl=zh-TW&saddr=${enc(near[0])}&daddr=${near.slice(1).map(enc).join('+to:')}&output=embed`
+    : gembed(near[0].q);
+  $('#dayMap').innerHTML = `<iframe loading="lazy" src="${src}" title="今日路線地圖"></iframe>`;
+  $('#mapLegend').innerHTML = near.length > 1
+    ? near.map((s, i) => `<span><b>${String.fromCharCode(65 + i)}</b>${esc(s.zh)}</span>`).join('')
+    : '';
 }
 
 /* ---------------- flights & hotels tabs ---------------- */
@@ -1100,7 +1122,6 @@ function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   store.set('view', v);
-  if (v === 'days' && dayMap) setTimeout(() => dayMap.invalidateSize(), 50);
   if (v === 'tools') renderWxList();
   window.scrollTo({ top: v === 'days' ? 0 : $('.hero').offsetHeight - 8 });
 }
@@ -1129,6 +1150,7 @@ lb.onclick = () => lb.classList.remove('on');
 const ti = todayIndex();
 current = ti >= 0 ? ti : Math.min(store.get('day', 0), DAYS.length - 1);
 renderCountdown();
+initChipScroll();
 renderChips();
 renderDay();
 renderFlights();
