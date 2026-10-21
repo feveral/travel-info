@@ -93,6 +93,14 @@ h3{font-size:18px;margin:0}
 
 .map{height:260px;background:var(--surface-2)}
 .map-actions{display:flex;gap:8px;padding:10px 12px}
+.mapbox{position:relative}
+.map-close{display:none}
+.mapbox.full{position:fixed;inset:0;z-index:150;background:var(--surface);display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.mapbox.full .map{flex:1;height:auto}
+.mapbox.full .legend{padding:10px 16px 14px}
+.mapbox.full .map-close{display:block;position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:1000;
+  border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 
 /* place card */
 .place .img{aspect-ratio:16/9;background:var(--surface-2) center/cover no-repeat;position:relative}
@@ -978,8 +986,7 @@ function placeCard(p, n) {
     ${story ? `<div class="story">${story}</div>` : ''}
     ${tips ? `<ul class="tips">${tips}</ul>` : ''}
     <div class="btns">
-      <a class="btn" href="${gmap(p.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>
-      <a class="btn primary" href="${gnav(p.lat, p.lon)}" target="_blank" rel="noopener">🧭 導航</a>
+      <a class="btn" href="${gmap(p.q)}" target="_blank" rel="noopener">📍 在 Google 地圖開啟</a>
     </div></div></article>`;
 }
 
@@ -1048,15 +1055,10 @@ function selectDay(i, scroll) {
 }
 
 function renderDay() {
+  document.body.style.overflow = '';
   const d = DAYS[current];
   const flag = { uk:['uk','🇬🇧 英國'], is:['is','🇮🇸 冰島'], tw:['tw','🇹🇼 台灣'] }[d.country];
-  const pts = d.places.map(p => [p.lat, p.lon]);
   const hotel = d.hotel && HOTELS[d.hotel];
-  const routePts = d.places.filter(p => p.lat).map(p => `${p.lat},${p.lon}`);
-  if (hotel) routePts.push(`${hotel.lat},${hotel.lon}`);
-  const dirUrl = routePts.length > 1
-    ? `https://www.google.com/maps/dir/${routePts.join('/')}`
-    : gmap(d.places[0].q);
   const flight = d.flight && FLIGHTS.find(f => f.no === d.flight);
 
   $('#day').innerHTML = `
@@ -1068,10 +1070,13 @@ function renderDay() {
     </div>
     <div class="card pad" id="dayWx"><div class="small muted">讀取天氣中…</div></div>
     <div class="card">
-      <div class="map" id="dayMap"></div>
-      <div class="legend" id="mapLegend"></div>
+      <div class="mapbox" id="mapBox">
+        <div class="map" id="dayMap"></div>
+        <button class="map-close" id="mapClose" aria-label="關閉全螢幕地圖">✕ 關閉</button>
+        <div class="legend" id="mapLegend"></div>
+      </div>
       <div class="map-actions">
-        <a class="btn" href="${dirUrl}" target="_blank" rel="noopener">🗺️ 在 Google Maps 開啟今日路線</a>
+        <button class="btn" id="mapFull">⛶ 全螢幕地圖</button>
       </div>
     </div>
     ${flight ? flightCard(flight) : ''}
@@ -1089,6 +1094,8 @@ function renderDay() {
       ${current < DAYS.length - 1 ? `<button class="btn" id="nextDay">後一天 →</button>` : ''}
     </div>`;
 
+  $('#mapFull').onclick = () => setMapFull(true);
+  $('#mapClose').onclick = () => setMapFull(false);
   const p = $('#prevDay'), n = $('#nextDay');
   if (p) p.onclick = () => selectDay(current - 1, true);
   if (n) n.onclick = () => selectDay(current + 1, true);
@@ -1103,7 +1110,14 @@ function renderDay() {
 // travel-info-maps-2610. Without a key (e.g. local preview) the day map falls back to Leaflet.
 const GMAPS_KEY = '__GMAPS_KEY__'.startsWith('__') ? '' : '__GMAPS_KEY__';
 
-let dayMap = null;
+let dayMap = null, refitMap = () => {};
+function setMapFull(on) {
+  $('#mapBox').classList.toggle('full', on);
+  document.body.style.overflow = on ? 'hidden' : '';
+  if (gmap1) gmap1.setOptions({ gestureHandling: on ? 'greedy' : 'cooperative' });
+  if (dayMap && dayMap.invalidateSize) dayMap.invalidateSize();
+  setTimeout(refitMap, 120);
+}
 function drawMap(d, hotel) {
   if (dayMap && dayMap.remove) dayMap.remove();
   dayMap = null;
@@ -1161,8 +1175,11 @@ async function drawGoogle(near, popup) {
     bounds.extend(pos);
     return m;
   });
-  if (near.length > 1) gmap1.fitBounds(bounds, 36);
-  else { gmap1.setCenter(bounds.getCenter()); gmap1.setZoom(11); }
+  refitMap = () => {
+    if (near.length > 1) gmap1.fitBounds(bounds, 36);
+    else { gmap1.setCenter(bounds.getCenter()); gmap1.setZoom(11); }
+  };
+  refitMap();
 }
 
 // keyless fallback: label-free basemap, so every visible label is our own Chinese pin/legend
@@ -1180,8 +1197,13 @@ function drawLeaflet(near, popup) {
       html: `<div class="pin ${s.hotel ? 'h' : ''}">${s.n}</div>` });
     L.marker([s.lat, s.lon], { icon }).addTo(dayMap).bindPopup(popup(s));
   });
-  if (near.length > 1) dayMap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
-  else dayMap.setView([near[0].lat, near[0].lon], 11);
+  const lmap = dayMap;
+  refitMap = () => {
+    lmap.invalidateSize();
+    if (near.length > 1) lmap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
+    else lmap.setView([near[0].lat, near[0].lon], 11);
+  };
+  refitMap();
 }
 
 /* ---------------- flights & hotels tabs ---------------- */
