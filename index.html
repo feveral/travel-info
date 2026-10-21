@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>英國冰島極光之旅</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
   --bg:#f4f6fa; --surface:#ffffff; --surface-2:#eef1f6; --text:#121826; --muted:#5b6475; --line:#e2e6ee;
@@ -200,10 +201,14 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 .footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
 .theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
-.map iframe{display:block;width:100%;height:100%;border:0}
+.leaflet-container{font:inherit;background:#e8edf2}
+.pin{width:30px;height:30px;border-radius:50%;background:#e8590c;color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;
+  border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin.h{background:#0f9d8a;font-size:15px}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px;padding:10px 12px 0;font-size:13px}
 .legend:empty{display:none}
-.legend b{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#ea4335;color:#fff;font-size:11px;margin-right:4px}
+.legend b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e8590c;color:#fff;font-size:11px;margin-right:4px}
+.legend b.h{background:#0f9d8a}
 </style>
 </head>
 <body>
@@ -366,6 +371,7 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 
 <div class="lightbox" id="lightbox"><button class="x" aria-label="關閉">✕</button><img alt=""><div class="cap"></div></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ---------------- helpers ---------------- */
 const W = (path, w = 960) => {
@@ -1013,24 +1019,33 @@ function renderDay() {
   drawMap(d, hotel);
 }
 
-// Google Maps embed (no API key). hl=zh-TW pins map labels to Traditional Chinese
-// regardless of the phone's system language. Multiple stops use the legacy
-// saddr/daddr "+to:" route embed, which draws lettered A, B, C… markers.
+// Leaflet on a label-free basemap: every visible label is our own Traditional Chinese
+// pin/legend, so nothing switches with the phone's system language.
+let dayMap = null;
 function drawMap(d, hotel) {
-  const stops = d.places.map(p => ({ q: p.q, zh: p.zh, lat: p.lat, lon: p.lon }));
-  if (hotel) stops.push({ q: `${hotel.name}, ${hotel.addr}`, zh: `🏨 ${hotel.zh}`, lat: hotel.lat, lon: hotel.lon });
-  // drop far-away airports (e.g. Taoyuan on a London day) so the route can be driven
+  if (dayMap) { dayMap.remove(); dayMap = null; }
+  const stops = d.places.map((p, i) => ({ n: String(i + 1), zh: p.zh, q: p.q, lat: p.lat, lon: p.lon }));
+  if (hotel) stops.push({ n: '🏨', zh: hotel.zh, q: `${hotel.name} ${hotel.addr}`, lat: hotel.lat, lon: hotel.lon, hotel: true });
+  // keep the cluster around tonight's stay; drop far-away airports (e.g. Taoyuan on a London day)
   const ref = stops[stops.length - 1];
   const near = stops.filter(s => Math.abs(s.lat - ref.lat) < 15 && Math.abs(s.lon - ref.lon) < 30);
-  // coordinates resolve far more reliably than place names in the keyless route embed
-  const enc = s => `${s.lat},${s.lon}`;
-  const src = near.length > 1
-    ? `https://maps.google.com/maps?hl=zh-TW&saddr=${enc(near[0])}&daddr=${near.slice(1).map(enc).join('+to:')}&output=embed`
-    : gembed(near[0].q);
-  $('#dayMap').innerHTML = `<iframe loading="lazy" src="${src}" title="今日路線地圖"></iframe>`;
-  $('#mapLegend').innerHTML = near.length > 1
-    ? near.map((s, i) => `<span><b>${String.fromCharCode(65 + i)}</b>${esc(s.zh)}</span>`).join('')
-    : '';
+  $('#mapLegend').innerHTML = near.map(s => `<span><b class="${s.hotel ? 'h' : ''}">${s.n}</b>${esc(s.zh)}</span>`).join('');
+  if (!window.L) { $('#dayMap').innerHTML = '<div class="pad small muted">地圖載入失敗</div>'; return; }
+  dayMap = L.map('dayMap', { scrollWheelZoom: false, zoomControl: false, attributionControl: true });
+  const dark = document.documentElement.dataset.theme === 'dark'
+    || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark ? 'Dark' : 'Light'}_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    { maxZoom: 16, attribution: '© Esri' }).addTo(dayMap);
+  L.control.zoom({ position: 'bottomright', zoomInTitle: '放大', zoomOutTitle: '縮小' }).addTo(dayMap);
+  dayMap.attributionControl.setPrefix(false);
+  near.forEach(s => {
+    const icon = L.divIcon({ className: '', iconSize: [30, 30], iconAnchor: [15, 15],
+      html: `<div class="pin ${s.hotel ? 'h' : ''}">${s.n}</div>` });
+    L.marker([s.lat, s.lon], { icon }).addTo(dayMap)
+      .bindPopup(`<b>${esc(s.zh)}</b><br><a href="${gmap(s.q)}" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>`);
+  });
+  if (near.length > 1) dayMap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
+  else dayMap.setView([near[0].lat, near[0].lon], 11);
 }
 
 /* ---------------- flights & hotels tabs ---------------- */
@@ -1122,6 +1137,7 @@ function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   store.set('view', v);
+  if (v === 'days' && dayMap) setTimeout(() => dayMap.invalidateSize(), 50);
   if (v === 'tools') renderWxList();
   window.scrollTo({ top: v === 'days' ? 0 : $('.hero').offsetHeight - 8 });
 }
