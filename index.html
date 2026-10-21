@@ -207,8 +207,20 @@ html{touch-action:manipulation}
 .check .why{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:1px}
 .check .opt{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:6px;vertical-align:1px}
 .check.done .t{text-decoration:line-through;color:var(--muted)}
-.check-group{font-weight:700;font-size:14px;padding:12px 16px 6px;background:var(--surface-2);border-top:1px solid var(--line)}
-.check-sum{padding:10px 16px;font-size:13px;color:var(--accent);font-weight:700}
+.check-group{border-top:1px solid var(--line)}
+.check-group summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;font-weight:700;font-size:15px;
+  padding:12px 16px;background:var(--surface-2);-webkit-tap-highlight-color:transparent}
+.check-group summary::-webkit-details-marker{display:none}
+.check-group summary span:first-child{flex:1}
+.check-group summary::after{content:"›";font-size:22px;line-height:1;color:var(--muted);width:16px;text-align:center;
+  transform:rotate(90deg);transition:transform .2s}
+.check-group[open] summary::after{transform:rotate(-90deg)}
+.gcount{font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);border-radius:999px;padding:1px 8px}
+.gcount.full{color:#fff;background:var(--accent)}
+.check-group .check:first-of-type{border-top:0}
+.check-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;font-size:13px;color:var(--accent);font-weight:700}
+.check-all{display:flex;gap:6px}
+.check-all button{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:3px 10px;cursor:pointer}
 table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 table.tbl th,table.tbl td{text-align:left;padding:8px 0;border-top:1px solid var(--line);vertical-align:top}
 table.tbl th{color:var(--muted);font-weight:500;width:92px}
@@ -238,7 +250,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   .chips .row{padding:8px 8px}
   .flight{padding:14px 12px}
   .perf{margin:12px -12px 0;padding:10px 12px 0}
-  .fx-row,.clock,.wx-list .row,.check,.check-group,.check-sum{padding-left:12px;padding-right:12px}
+  .fx-row,.clock,.wx-list .row,.check,.check-group summary,.check-sum{padding-left:12px;padding-right:12px}
   .quick{padding:0 12px 12px}
   .hero .wrap{padding-left:16px;padding-right:16px}
 }
@@ -1360,22 +1372,49 @@ const CHECK = [
     { id:'tripod', t:'手機小腳架', why:'拍極光要長曝光 3–10 秒，手持會糊', opt:true },
   ]},
 ];
+// Each group is a <details>: tap the header to fold it. Folded state is remembered per group;
+// a group starts folded once everything in it is ticked.
 function renderChecklist() {
   const done = store.get('check2', {});
+  const folded = store.get('checkFold', null);
   const total = CHECK.reduce((n, g) => n + g.items.length, 0);
-  const count = () => Object.values(store.get('check2', {})).filter(Boolean).length;
-  $('#checklist').innerHTML = `<div class="check-sum" id="checkSum"></div>` + CHECK.map(g => `
-    <div class="check-group">${esc(g.group)}</div>
-    ${g.items.map(it => `<label class="check ${done[it.id] ? 'done' : ''}">
-      <input type="checkbox" data-id="${it.id}" ${done[it.id] ? 'checked' : ''}>
-      <span class="ct"><span class="t">${esc(it.t)}${it.opt ? '<em class="opt">可選</em>' : ''}</span>
-      <small class="why">${esc(it.why)}</small></span></label>`).join('')}`).join('');
-  const sum = () => { $('#checkSum').textContent = `已準備 ${count()} / ${total} 項`; };
-  sum();
+  const gDone = g => g.items.filter(it => done[it.id]).length;
+  $('#checklist').innerHTML = `<div class="check-sum"><span id="checkSum"></span>
+      <span class="check-all"><button data-act="open">全部展開</button><button data-act="close">全部收合</button></span></div>`
+    + CHECK.map((g, gi) => {
+      const isOpen = folded ? !folded[gi] : gDone(g) < g.items.length;
+      return `<details class="check-group" data-g="${gi}" ${isOpen ? 'open' : ''}>
+      <summary><span>${esc(g.group)}</span><span class="gcount" data-gc="${gi}">${gDone(g)}/${g.items.length}</span></summary>
+      ${g.items.map(it => `<label class="check ${done[it.id] ? 'done' : ''}">
+        <input type="checkbox" data-id="${it.id}" data-g="${gi}" ${done[it.id] ? 'checked' : ''}>
+        <span class="ct"><span class="t">${esc(it.t)}${it.opt ? '<em class="opt">可選</em>' : ''}</span>
+        <small class="why">${esc(it.why)}</small></span></label>`).join('')}
+    </details>`; }).join('');
+
+  const refresh = () => {
+    const st = store.get('check2', {});
+    $('#checkSum').textContent = `已準備 ${Object.values(st).filter(Boolean).length} / ${total} 項`;
+    CHECK.forEach((g, gi) => {
+      const n = g.items.filter(it => st[it.id]).length, el = $(`[data-gc="${gi}"]`);
+      el.textContent = `${n}/${g.items.length}`;
+      el.classList.toggle('full', n === g.items.length);
+    });
+  };
+  const saveFold = () => {
+    const f = {};
+    $('#checklist').querySelectorAll('details').forEach(d => { f[d.dataset.g] = !d.open; });
+    store.set('checkFold', f);
+  };
+  refresh();
   $('#checklist').querySelectorAll('input').forEach(c => c.onchange = () => {
     const st = store.get('check2', {}); st[c.dataset.id] = c.checked; store.set('check2', st);
     c.closest('.check').classList.toggle('done', c.checked);
-    sum();
+    refresh();
+  });
+  $('#checklist').querySelectorAll('details').forEach(d => d.addEventListener('toggle', saveFold));
+  $('#checklist').querySelectorAll('[data-act]').forEach(btn => btn.onclick = () => {
+    $('#checklist').querySelectorAll('details').forEach(d => { d.open = btn.dataset.act === 'open'; });
+    saveFold();
   });
 }
 
