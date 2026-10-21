@@ -1,4 +1,4 @@
 .DS_Store
 app-example-images/
-*.PNG
+/IMG_*.PNG
 .claude/

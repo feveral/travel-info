@@ -202,8 +202,13 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surf
 nav.tabs .in{display:flex;max-width:560px;margin:0 auto;height:var(--nav-h)}
 nav.tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-size:11px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;cursor:pointer}
-nav.tabs button .i{font-size:22px;line-height:1}
+nav.tabs button .i{display:grid;place-items:center;width:44px;height:32px;border-radius:999px;transition:background .2s}
+nav.tabs button .i img{width:28px;height:28px;filter:saturate(.85) opacity(.8);transition:filter .2s,transform .2s}
 nav.tabs button.on{color:var(--accent);font-weight:700}
+nav.tabs button.on .i{background:var(--accent-soft)}
+nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s ease}
+@keyframes hop{0%{transform:scale(1)}40%{transform:translateY(-5px) scale(1.18)}70%{transform:translateY(1px) scale(1.08)}100%{transform:scale(1.12)}}
+@media (prefers-reduced-motion: reduce){nav.tabs button.on .i img{animation:none}}
 .view{display:none}
 .view.on{display:block}
 /* phones: tighter gutters so cards show more content */
@@ -447,11 +452,11 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 </section>
 
 <nav class="tabs"><div class="in">
-  <button data-v="days" class="on"><span class="i">🗺️</span>行程</button>
-  <button data-v="flights"><span class="i">✈️</span>航班</button>
-  <button data-v="hotels"><span class="i">🏨</span>住宿</button>
-  <button data-v="tools"><span class="i">🧰</span>工具</button>
-  <button data-v="info"><span class="i">📋</span>須知</button>
+  <button data-v="days" class="on"><span class="i"><img src="assets/icons/days.png" alt="" width="30" height="30"></span>行程</button>
+  <button data-v="flights"><span class="i"><img src="assets/icons/flights.png" alt="" width="30" height="30"></span>航班</button>
+  <button data-v="hotels"><span class="i"><img src="assets/icons/hotels.png" alt="" width="30" height="30"></span>住宿</button>
+  <button data-v="tools"><span class="i"><img src="assets/icons/tools.png" alt="" width="30" height="30"></span>工具</button>
+  <button data-v="info"><span class="i"><img src="assets/icons/info.png" alt="" width="30" height="30"></span>須知</button>
 </div></nav>
 
 <div class="lightbox" id="lightbox"><button class="x" aria-label="關閉">✕</button><img alt=""><div class="cap"></div></div>

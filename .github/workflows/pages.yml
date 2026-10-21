@@ -30,6 +30,7 @@ jobs:
         run: |
           mkdir -p _site
           sed "s/__GMAPS_KEY__/${GMAPS_KEY}/g" index.html > _site/index.html
+          cp -r assets _site/
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
