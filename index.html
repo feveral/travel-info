@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>英國冰島極光之旅</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#f4f6fa; --surface:#ffffff; --surface-2:#eef1f6; --text:#121826; --muted:#5b6475; --line:#e2e6ee;
+  --accent:#0f9d8a; --accent-2:#6d4bd8; --accent-soft:#e3f6f2; --warn:#b4540a; --warn-soft:#fff3e4;
+  --uk:#c8102e; --is:#02529c; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+  --radius:16px; --nav-h:64px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1220; --surface:#131c2e; --surface-2:#1a2539; --text:#e8edf6; --muted:#97a3b8; --line:#243149;
+    --accent:#3fd9be; --accent-2:#a58bff; --accent-soft:#12302e; --warn:#ffb36b; --warn-soft:#33240f;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#131c2e; --surface-2:#1a2539; --text:#e8edf6; --muted:#97a3b8; --line:#243149;
+  --accent:#3fd9be; --accent-2:#a58bff; --accent-soft:#12302e; --warn:#ffb36b; --warn-soft:#33240f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:16px;line-height:1.6;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px)}
+a{color:var(--accent)}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+h2{font-size:22px;margin:24px 0 12px}
+h3{font-size:18px;margin:0}
+
+/* hero */
+.hero{position:relative;color:#fff;min-height:300px;display:flex;align-items:flex-end;
+  background:#0b1220 url("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Aurora_Borealis_-_Iceland_-_2_Nov._2013.jpg/1280px-Aurora_Borealis_-_Iceland_-_2_Nov._2013.jpg") center/cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,20,.15) 0%,rgba(5,10,20,.85) 100%)}
+.hero .wrap{position:relative;z-index:1;width:100%;padding-top:calc(48px + env(safe-area-inset-top));padding-bottom:20px}
+.hero .eyebrow{font-size:13px;letter-spacing:.08em;opacity:.85}
+.hero h1{font-size:28px;line-height:1.25;margin:6px 0 8px}
+.hero .sub{font-size:14px;opacity:.9}
+.countdown{display:inline-flex;gap:8px;align-items:center;margin-top:14px;background:rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px;font-size:14px}
+.countdown b{font-size:18px}
+
+/* day chips */
+.chips{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.chips .row{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;max-width:560px;margin:0 auto}
+.chips .row::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;
+  padding:6px 10px;text-align:center;min-width:58px;font:inherit;cursor:pointer}
+.chip small{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.chip b{display:block;font-size:15px;line-height:1.3}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.on small{color:rgba(255,255,255,.85)}
+.chip .today{display:block;font-size:10px;font-weight:700;color:var(--warn)}
+.chip.on .today{color:#fff}
+
+/* cards */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin:12px 0}
+.pad{padding:14px 16px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.day-head{margin-top:16px}
+.day-head .meta{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.flag{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:1px 7px}
+.flag.uk{background:var(--uk)} .flag.is{background:var(--is)} .flag.tw{background:#555}
+.day-head h2{margin:6px 0 4px;font-size:21px;line-height:1.35}
+.aurora-tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:#fff;
+  background:linear-gradient(90deg,#11b98f,#6d4bd8);border-radius:999px;padding:2px 10px}
+
+.weather{display:flex;align-items:center;gap:12px}
+.weather .ic{font-size:34px;line-height:1}
+.weather .t{font-size:24px;font-weight:700}
+.weather .d{font-size:13px;color:var(--muted);line-height:1.4}
+.wx-extra{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pill{font-size:12px;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.pill.good{background:var(--accent-soft);color:var(--accent)}
+.pill.bad{background:var(--warn-soft);color:var(--warn)}
+
+.map{height:220px;background:var(--surface-2)}
+.map-actions{display:flex;gap:8px;padding:10px 12px}
+
+/* place card */
+.place .img{aspect-ratio:16/9;background:var(--surface-2) center/cover no-repeat;position:relative}
+.place .img .num{position:absolute;left:12px;top:12px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);
+  color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center}
+.place .img .noimg{position:absolute;inset:0;display:grid;place-items:center;font-size:44px}
+.place .en{font-size:13px;color:var(--muted)}
+.place p{margin:8px 0 0;font-size:15px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent)}
+.tag.star{background:#fff1c2;color:#7a5600}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.place .lead{font-weight:500}
+.story p{margin:10px 0 0;color:var(--text)}
+.story figure{margin:12px -16px 0}
+.story figure img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;background:var(--surface-2);cursor:zoom-in}
+.story figcaption{font-size:12px;color:var(--muted);padding:6px 16px 0}
+.tips{list-style:none;margin:12px 0 0;padding:10px 12px;background:var(--surface-2);border-radius:12px;font-size:14px}
+.tips li{padding-left:1.3em;position:relative;margin:3px 0}
+.tips li::before{content:"💡";position:absolute;left:0;font-size:12px;top:2px}
+.place .img[data-full]{cursor:zoom-in}
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px}
+.lightbox.on{display:flex}
+.lightbox img{max-width:100%;max-height:85vh;object-fit:contain}
+.lightbox .cap{position:absolute;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));color:#ddd;text-align:center;font-size:14px}
+.lightbox .x{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:22px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.star{background:#3a2f0c;color:#ffd36b}}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border-radius:12px;
+  border:1px solid var(--line);background:var(--surface);color:var(--text);text-decoration:none;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.note{background:var(--warn-soft);color:var(--text);border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.note b{color:var(--warn)}
+
+.meals{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px}
+.meals dt{color:var(--muted);font-size:13px;padding-top:2px}
+.meals dd{margin:0}
+
+/* flight */
+.flight{padding:16px}
+.flight .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.flight .no{font-weight:700;color:var(--text);font-size:15px}
+.flight .route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin:10px 0 4px;gap:8px}
+.flight .code{font-size:30px;font-weight:800;letter-spacing:.02em;line-height:1.1}
+.flight .time{font-size:20px;font-weight:700}
+.flight .city{font-size:13px;color:var(--muted)}
+.flight .mid{text-align:center;color:var(--muted);font-size:12px}
+.flight .mid .line{width:64px;height:2px;background:var(--line);margin:6px auto;position:relative}
+.flight .mid .line::after{content:"✈";position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);background:var(--surface);padding:0 4px;color:var(--accent);font-size:14px}
+.r{text-align:right}
+.perf{border-top:1px dashed var(--line);margin:12px -16px 0;padding:10px 16px 0;font-size:13px;color:var(--muted)}
+
+/* hotel */
+.hotel .hdr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.hotel .nights{font-size:12px;background:var(--surface-2);border-radius:8px;padding:2px 8px;white-space:nowrap;color:var(--muted)}
+.hotel iframe{display:block;width:100%;height:180px;border:0;background:var(--surface-2)}
+.kv{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;font-size:14px;margin-top:8px}
+.kv span:nth-child(odd){color:var(--muted)}
+
+/* tools */
+.clock{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.clock:first-child{border-top:0}
+.clock .name{font-weight:600}
+.clock .diff{font-size:12px;color:var(--muted)}
+.clock .time{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.clock .date{font-size:12px;color:var(--muted);text-align:right}
+.fx-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line)}
+.fx-row:first-of-type{border-top:0}
+.fx-row label{width:68px;flex:0 0 auto}
+.fx-row label b{display:block;font-size:16px}
+.fx-row label small{color:var(--muted);font-size:12px}
+.fx-row input{flex:1;min-width:0;font:inherit;font-size:22px;font-weight:700;text-align:right;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);border-radius:12px;padding:8px 12px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px}
+.quick button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:4px 12px;cursor:pointer}
+.wx-list .row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.wx-list .row:first-child{border-top:0}
+.wx-list .ic{font-size:28px;width:36px;text-align:center}
+.wx-list .nm{flex:1}
+.wx-list .nm small{display:block;color:var(--muted);font-size:12px}
+.wx-list .tt{text-align:right}
+.wx-list .tt b{font-size:20px}
+.wx-list .tt small{display:block;color:var(--muted);font-size:12px}
+
+.list{margin:0;padding-left:20px}
+.list li{margin:4px 0}
+.check{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:15px;cursor:pointer}
+.check:first-child{border-top:0}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.check.done span{text-decoration:line-through;color:var(--muted)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+table.tbl th,table.tbl td{text-align:left;padding:8px 0;border-top:1px solid var(--line);vertical-align:top}
+table.tbl th{color:var(--muted);font-weight:500;width:92px}
+
+/* bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{display:flex;max-width:560px;margin:0 auto;height:var(--nav-h)}
+nav.tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-size:11px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;cursor:pointer}
+nav.tabs button .i{font-size:22px;line-height:1}
+nav.tabs button.on{color:var(--accent);font-weight:700}
+.view{display:none}
+.view.on{display:block}
+.footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
+.theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
+.leaflet-container{font:inherit}
+.mk{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;
+  border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <button class="theme-toggle" id="themeBtn" aria-label="切換深淺色">◐</button>
+  <div class="wrap">
+    <div class="eyebrow">2026.10.31 – 11.08 · 9 天 7 夜</div>
+    <h1>英國・冰島<br>幸福極光之旅</h1>
+    <div class="sub">溫泉冰河湖・藍冰洞健行・金環之旅・倫敦・牛津</div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</header>
+
+<!-- ============ 行程 ============ -->
+<section class="view on" id="v-days">
+  <div class="chips"><div class="row" id="chips"></div></div>
+  <div class="wrap" id="day"></div>
+</section>
+
+<!-- ============ 航班 ============ -->
+<section class="view" id="v-flights">
+  <div class="wrap">
+    <h2>航班資訊</h2>
+    <div id="flights"></div>
+    <div class="card pad">
+      <h3>行李規定</h3>
+      <table class="tbl" style="margin-top:8px">
+        <tr><th>中華航空<br><small>長程・經濟艙</small></th><td>托運 <b>2 件 × 23kg</b><br>手提 1 件 7kg ＋ 隨身小包 1 個</td></tr>
+        <tr><th>冰島航空<br><small>中段航班</small></th><td>托運 <b>1 件 × 23kg</b>（長寬高合計 ≤ 158cm）<br>手提 1 件 10kg（≤ 55×40×20cm）＋ 隨身軟包 1 個（≤ 40×30×15cm）</td></tr>
+      </table>
+      <div class="note"><b>注意：</b>冰島航空只能托運 1 件！中華航空可托運 2 件，但中段航班超重或超件數需現場自費（領隊協助）。</div>
+    </div>
+    <div class="card pad small">
+      <b>選位：</b>中華航空團體票開票後至起飛前 72 小時，可上華航官網付費選位（需向業務索取機票號碼）。
+      <a href="https://www.china-airlines.com/" target="_blank" rel="noopener">華航官網 ↗</a><br>
+      <b>特殊餐：</b>需於出發前 72 小時（工作天）告知業務人員。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 住宿 ============ -->
+<section class="view" id="v-hotels">
+  <div class="wrap">
+    <h2>住宿資訊</h2>
+    <div id="hotels"></div>
+  </div>
+</section>
+
+<!-- ============ 工具 ============ -->
+<section class="view" id="v-tools">
+  <div class="wrap">
+    <h2>時區</h2>
+    <div class="card" id="clocks"></div>
+    <p class="small muted">英國 10/25 結束夏令時間，旅程期間英國、冰島都比台灣慢 8 小時。</p>
+
+    <h2>匯率換算</h2>
+    <div class="card">
+      <div class="fx-row"><label><b>🇬🇧 GBP</b><small>英鎊</small></label><input inputmode="decimal" id="fx-GBP" autocomplete="off"></div>
+      <div class="fx-row"><label><b>🇮🇸 ISK</b><small>冰島克朗</small></label><input inputmode="decimal" id="fx-ISK" autocomplete="off"></div>
+      <div class="fx-row"><label><b>🇹🇼 TWD</b><small>新台幣</small></label><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div>
+      <div class="quick" id="fxQuick"></div>
+      <div class="pad small muted" style="padding-top:0" id="fxInfo">讀取匯率中…</div>
+    </div>
+
+    <h2>各地天氣</h2>
+    <div class="card wx-list" id="wxList"><div class="pad muted">讀取天氣中…</div></div>
+    <p class="small muted">資料來源：Open-Meteo。冰島天氣變化快，出發前再看一次；極光預報可看 <a href="https://en.vedur.is/weather/forecasts/aurora/" target="_blank" rel="noopener">冰島氣象局 ↗</a></p>
+  </div>
+</section>
+
+<!-- ============ 須知 ============ -->
+<section class="view" id="v-info">
+  <div class="wrap">
+    <h2>行前清單</h2>
+    <div class="card" id="checklist"></div>
+
+    <h2>實用資訊</h2>
+    <div class="card pad">
+      <table class="tbl">
+        <tr><th>時差</th><td>英國、冰島都比台灣 <b>慢 8 小時</b>（英國 10/25 起已改回冬令時間）</td></tr>
+        <tr><th>電壓插座</th><td>🇬🇧 英國 230V・<b>英規三角扁型（G）</b><br>🇮🇸 冰島 230V・<b>歐規雙腳圓型（C/F）</b><br>請帶萬用轉接頭</td></tr>
+        <tr><th>貨幣</th><td>英鎊 GBP、冰島克朗 ISK。兩地幾乎都可刷卡，建議帶<b>晶片感應信用卡</b>（部分收費廁所只收感應卡）</td></tr>
+        <tr><th>國碼</th><td>英國 +44・冰島 +354・台灣 +886<br>打回台灣：+886 ＋ 區碼去 0 ＋ 號碼</td></tr>
+        <tr><th>緊急電話</th><td>英國 <a href="tel:999">999</a>・冰島 <a href="tel:112">112</a></td></tr>
+      </table>
+    </div>
+
+    <h2>退稅</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>購物時一定要在店內<b>當場索取退稅單</b>，事後無法補辦。</li>
+        <li>一般食品、菸酒不能退稅。可退稅金額門檻可問領隊或店家。</li>
+        <li>非歐盟國家（英國、冰島都是）要在<b>離開該國海關時</b>辦理。</li>
+        <li>機場退稅可選領現金或退回信用卡。</li>
+        <li>⚠️ 英國自 2021 年起已取消一般旅客購物退稅，Bicester Village 購物請先向店家確認。</li>
+      </ul>
+    </div>
+
+    <h2>極光小知識</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>需要：晴朗無雲、遠離燈光、太陽活動夠強。</li>
+        <li>晚上 <b>8 點到 12 點</b>出現機率較高。</li>
+        <li>行程中 11/2–11/5 共 4 晚有機會（「行程」頁可看當晚雲量）。</li>
+        <li>極光是自然現象，不保證看得到 🙏</li>
+      </ul>
+      <h3 style="margin-top:14px">📱 用手機拍極光</h3>
+      <ul class="list">
+        <li>iPhone 開「夜間模式」並把秒數拉到最長（3–10 秒）；Android 用「夜景／專業模式」，ISO 800–1600、快門 5–10 秒。</li>
+        <li>手機一定要固定不動：小腳架最好，沒有就靠在欄杆、車頂上。</li>
+        <li>關閉閃光燈，手動把對焦拉到無限遠。</li>
+        <li>低溫很耗電，手機放內層口袋保暖，帶行動電源。</li>
+      </ul>
+    </div>
+
+    <h2>在地生活</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>小費</th><td>🇬🇧 餐廳帳單常已含 12.5% 服務費，沒含的話給 10% 左右<br>🇮🇸 冰島不需要給小費</td></tr>
+        <tr><th>喝水</th><td>兩地自來水都可生飲。冰島的熱水來自地熱，有淡淡硫磺味是正常的</td></tr>
+        <tr><th>穿著</th><td>倫敦約 5–12°C、常下雨；冰島約 −3–5°C、風很大。洋蔥式穿搭＋防風防水外套</td></tr>
+        <tr><th>日照</th><td>11 月初倫敦約 16:30 天黑；冰島白天只有約 8 小時</td></tr>
+        <tr><th>網路</th><td>英國與冰島可以用同一張歐洲 eSIM／漫遊，出發前確認方案涵蓋冰島</td></tr>
+      </table>
+    </div>
+
+    <h2>天候取消退費</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>泰晤士河遊船</th><td>漲潮或水位不佳停駛，每人退 £9</td></tr>
+        <tr><th>藍色溫泉湖</th><td>關閉且無替代溫泉，每人退 €30</td></tr>
+        <tr><th>藍冰洞健行</th><td>關閉且無替代活動，每人退 €40，並加贈鑽石沙灘</td></tr>
+      </table>
+    </div>
+
+    <h2>其他提醒</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>長途飛行請適度活動，可自備口罩、眼罩、頸枕。</li>
+        <li>自備個人藥品（暈車、感冒、腸胃、個人用藥）。</li>
+        <li>飲食不過量，不吃保育類野生動物。</li>
+      </ul>
+    </div>
+    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・匯率：ExchangeRate-API</div>
+  </div>
+</section>
+
+<nav class="tabs"><div class="in">
+  <button data-v="days" class="on"><span class="i">🗺️</span>行程</button>
+  <button data-v="flights"><span class="i">✈️</span>航班</button>
+  <button data-v="hotels"><span class="i">🏨</span>住宿</button>
+  <button data-v="tools"><span class="i">🧰</span>工具</button>
+  <button data-v="info"><span class="i">📋</span>須知</button>
+</div></nav>
+
+<div class="lightbox" id="lightbox"><button class="x" aria-label="關閉">✕</button><img alt=""><div class="cap"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ---------------- helpers ---------------- */
+const W = (path, w = 960) => {
+  const name = path.split('/').pop();
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${path}/${w}px-${name}`;
+};
+const gmap = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const gnav = (lat, lon) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+const gembed = q => `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=14&output=embed`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------------- data ---------------- */
+const HOTELS = {
+  hilton: { name:'Hilton London Kensington', zh:'倫敦肯辛頓希爾頓', city:'倫敦', country:'uk',
+    tel:'+442076033355', telShow:'+44 20 7603 3355', addr:'179-199 Holland Park Avenue, London W11 4UL',
+    lat:51.5066, lon:-0.2128, nights:['10/31','11/1'] },
+  selfoss: { name:'Selfoss Hotel', zh:'塞爾福斯飯店', city:'塞爾福斯', country:'is',
+    tel:'+3544802500', telShow:'+354 480 2500', addr:'Eyravegur 2, 800 Selfoss, Iceland',
+    lat:63.9376, lon:-21.0012, nights:['11/2'] },
+  jokull: { name:'Hotel Jökull', zh:'約庫爾飯店', city:'赫本 Höfn', country:'is',
+    tel:'+3544781400', telShow:'+354 478 1400', addr:'Nesjum, 781 Höfn, Iceland',
+    lat:64.3009, lon:-15.2730, nights:['11/3'] },
+  stracta: { name:'Stracta Hotel', zh:'史特拉克塔飯店', city:'赫拉 Hella', country:'is',
+    tel:'+3545318010', telShow:'+354 531 8010', addr:'Rangárflatir 4, 850 Hella, Iceland',
+    lat:63.8348, lon:-20.4049, nights:['11/4'] },
+  grand: { name:'Grand Hotel Reykjavík', zh:'雷克雅未克大飯店', city:'雷克雅未克', country:'is',
+    tel:'+3545148000', telShow:'+354 514 8000', addr:'Sigtún 28, 105 Reykjavík, Iceland',
+    lat:64.1426, lon:-21.8786, nights:['11/5'] },
+  oxford: { name:'Holiday Inn Oxford', zh:'牛津假日酒店', city:'牛津', country:'uk',
+    tel:'+448719429086', telShow:'+44 871 942 9086', addr:'Peartree Roundabout, Oxford OX2 8JD',
+    lat:51.7853, lon:-1.2857, nights:['11/6'] },
+};
+
+const FLIGHTS = [
+  { date:'2026-10-31', no:'CI081', airline:'中華航空', from:'TPE', fromCity:'台北 桃園', dep:'09:25', to:'LHR', toCity:'倫敦 希斯洛', arr:'16:55', dur:'約 15 小時 30 分', tzNote:'時間皆為當地時間' },
+  { date:'2026-11-02', no:'FI471', airline:'冰島航空', from:'LHR', fromCity:'倫敦 希斯洛', dep:'11:55', to:'KEF', toCity:'雷克雅未克 凱夫拉維克', arr:'15:15', dur:'約 3 小時 20 分' },
+  { date:'2026-11-06', no:'FI470', airline:'冰島航空', from:'KEF', fromCity:'雷克雅未克 凱夫拉維克', dep:'07:40', to:'LHR', toCity:'倫敦 希斯洛', arr:'10:55', dur:'約 3 小時 15 分' },
+  { date:'2026-11-07', no:'CI082', airline:'中華航空', from:'LHR', fromCity:'倫敦 希斯洛', dep:'21:15', to:'TPE', toCity:'台北 桃園', arr:'11/08 18:25', dur:'約 13 小時 10 分' },
+];
+
+const DAYS = [
+  { date:'2026-10-31', country:'tw', title:'桃園 ✈ 倫敦', subtitle:'早班機出發，當地時間傍晚抵達希斯洛',
+    wx:{ name:'倫敦', lat:51.5072, lon:-0.1276 }, hotel:'hilton', flight:'CI081',
+    meals:{ b:'—', l:'機上', d:'機上' },
+    places:[
+      { zh:'桃園國際機場', en:'Taoyuan International Airport', img:'7/72/Exterior_of_Terminal_1%2C_Taoyuan_Airport_20141230.jpg',
+        lat:25.0797, lon:121.2342, q:'Taoyuan International Airport Terminal 2',
+        desc:'一早集合於桃園機場，搭乘中華航空 CI081 直飛倫敦，飛行約 15.5 小時。', tags:['集合'],
+        tips:['華航在第二航廈，集合時間以領隊通知為準','機上很乾，帶保濕噴霧、護唇膏；可穿壓力襪'] },
+      { zh:'倫敦希斯洛機場', en:'London Heathrow Airport', img:'0/0d/London_-_Heathrow_%28LHR_-_EGLL%29_AN1572653.jpg',
+        lat:51.4700, lon:-0.4543, q:'London Heathrow Airport',
+        desc:'時差的關係，同一天傍晚就抵達倫敦。今天不安排遊覽車，由領隊帶大家搭電車到飯店。不用在機上過夜，好好睡一覺。', tags:['搭電車'],
+        tips:['入境英國需事先申請 ETA 電子旅行許可（請跟業務確認是否已辦）','倫敦地鐵、電車可直接用感應信用卡 / Apple Pay 刷進出站'] },
+    ],
+    notes:['歐洲部分收費廁所只收感應式信用卡，建議帶晶片感應卡。','長途飛行請適度起身活動，避免水腫。'] },
+
+  { date:'2026-11-01', country:'uk', title:'倫敦市區全日遊', subtitle:'白金漢宮・大英博物館・西敏寺・塔橋・泰晤士河遊船',
+    wx:{ name:'倫敦', lat:51.5072, lon:-0.1276 }, hotel:'hilton',
+    meals:{ b:'飯店內自助式', l:'倫敦華埠 港式飲茶', d:'Burger & Lobster 火焰烤龍蝦（每人半隻）＋漢堡套餐' },
+    places:[
+      { zh:'白金漢宮', en:'Buckingham Palace', img:'8/8d/Buckingham_Palace_London_Morning_2020_01_%28cropped%29.jpg',
+        lat:51.5014, lon:-0.1419, q:'Buckingham Palace',
+        desc:'英國君主在倫敦的官邸與辦公處，宮前的維多利亞女王紀念碑是必拍角度。', tags:['外觀'],
+        story:[
+          '白金漢宮從 1837 年維多利亞女王時代開始成為王室正式住所，共有 775 個房間。看屋頂的旗子就知道國王在不在：國王在宮內時升起「王室旗」，不在時則是英國國旗。',
+          { img:'9/90/Guard_of_Buckingham_Palace_-_01.jpg', cap:'戴熊皮帽的御林軍衛兵' },
+          '最有名的是「衛兵交接儀式」，通常在上午 11 點左右舉行，但不是每天都有，時間依官方公告。就算沒碰上，站崗的紅衣衛兵也很上鏡。',
+        ],
+        tips:['📸 站到維多利亞女王紀念碑的台階上，可以把整個宮殿正面拍進去','人多的地方注意隨身包包，扒手不少'] },
+      { zh:'大英博物館', en:'The British Museum', img:'3/3a/British_Museum_from_NE_2.JPG',
+        lat:51.5194, lon:-0.1270, q:'British Museum',
+        desc:'1753 年成立、世界最早的國家博物館之一，館藏超過 800 萬件。由合格藍牌中文導遊專業導覽。', tags:['★入內參觀','★中文導覽'],
+        story:[
+          '一進門就是巨大的「大中庭」(Great Court)，玻璃與鋼構組成的屋頂是 2000 年由建築師 Norman Foster 設計，把舊圖書館包在正中間。',
+          { img:'2/2e/British_Museum_Dome.jpg', cap:'大中庭的玻璃穹頂' },
+          '必看鎮館之寶：解開埃及象形文字之謎的「羅塞塔石碑」（4 號廳）、帕德嫩神殿雕刻（18 號廳），以及全世界數一數二完整的埃及木乃伊收藏（62–63 號廳）。',
+          { img:'d/d2/Egyptian_Mummy_%2836571107366%29.jpg', cap:'埃及館的木乃伊與彩繪棺木' },
+        ],
+        tips:['跟緊導遊，館內很大容易走散；先約好走散時的集合點','館內可拍照但不能開閃光燈'] },
+      { zh:'西敏寺', en:'Westminster Abbey', img:'4/47/Westminster_Abbey%2C_Westminster.jpg',
+        lat:51.4994, lon:-0.1273, q:'Westminster Abbey',
+        desc:'自 1066 年起英國君主幾乎都在此加冕，2023 年查爾斯三世也在這裡登基。', tags:['外觀'],
+        story:[
+          '西敏寺是英國最重要的哥德式教堂，也是王室婚禮的舞台：威廉王子與凱特王妃 2011 年就在這裡成婚。',
+          { img:'9/9d/Westminster_Abbey_Interior.jpg', cap:'高聳的中殿拱頂' },
+          '教堂內安葬了 3,000 多位名人，包括牛頓、達爾文、霍金，還有「詩人角」紀念莎士比亞、狄更斯等文學家。',
+        ] },
+      { zh:'英國國會大廈・大笨鐘', en:'Palace of Westminster & Big Ben', img:'d/db/Palace_of_Westminster_as_seen_from_Westminster_Bridge.jpg',
+        lat:51.5003, lon:-0.1246, q:'Big Ben London',
+        desc:'議會制度的發源地，沿泰晤士河延伸近 300 公尺的新哥德式建築，與西敏寺一起列為世界遺產。', tags:['拍照點','世界遺產'],
+        story:[
+          '現在看到的國會大廈是 1834 年大火後重建的，由建築師 Charles Barry 與 Augustus Pugin 設計，裡面有超過 1,100 個房間。',
+          { img:'0/05/Elizabeth_Tower_and_the_north_front_of_the_Palace_of_Westminster%2C_London.jpg', cap:'伊莉莎白塔（大笨鐘）' },
+          '冷知識：「大笨鐘 Big Ben」其實是鐘樓裡那口 13.7 噸大鐘的名字，鐘樓本身在 2012 年為紀念伊莉莎白二世登基 60 年，改名為「伊莉莎白塔」。經過 5 年整修，2022 年重新敲響。',
+        ],
+        tips:['📸 最經典角度：走上西敏橋，拍國會大廈＋大笨鐘＋紅色雙層巴士','📸 對岸的倫敦眼旁河堤可拍到國會全景'] },
+      { zh:'倫敦華埠', en:'Chinatown London', img:'a/a6/London%2C_China_Town_--_2016_--_4868.jpg',
+        lat:51.5113, lon:-0.1313, q:'Chinatown London Gerrard Street',
+        desc:'位於蘇活區的中國城，午餐在這裡享用港式飲茶。', tags:['午餐'],
+        story:[
+          { img:'0/04/Chinatown_Gateway%2C_Wardour_Street_2024-05-13.jpg', cap:'Wardour Street 上的中國城牌樓' },
+          '中國城以 Gerrard Street 為中心，旁邊就是萊斯特廣場和西區劇院區。有亞洲超市，想念家鄉味可以買泡麵、零食備用。',
+        ] },
+      { zh:'倫敦塔橋', en:'Tower Bridge', img:'5/59/Tower_Bridge_at_Dawn.jpg',
+        lat:51.5055, lon:-0.0754, q:'Tower Bridge',
+        desc:'1894 年完工的開合橋，倫敦最具代表性的地標，常被誤認為「倫敦橋」。', tags:['拍照點'],
+        story:[
+          '兩座哥德式塔樓中間的橋面可以向上打開，讓大船通過，至今每年仍開合數百次。上層的空中走道有一段玻璃地板，可以直接俯瞰橋下的車流與河面。',
+          { img:'5/5f/Tower_Bridge_London_Dusk_Feb_2006.jpg', cap:'黃昏點燈後的塔橋' },
+          '真正的「倫敦橋」(London Bridge) 其實就在上游不遠處，是一座很普通的水泥橋，很多遊客第一次看到都會失望。',
+        ],
+        tips:['📸 河南岸 (Queen\'s Walk) 可以同時拍到塔橋和倫敦塔','11 月倫敦約 16:30 就天黑，點燈後的塔橋更漂亮'] },
+      { zh:'倫敦塔', en:'Tower of London', img:'e/ec/Tower_of_London_from_the_Shard_%288515883950%29.jpg',
+        lat:51.5081, lon:-0.0759, q:'Tower of London',
+        desc:'1066 年征服者威廉所建的城堡，當過王宮、監獄、刑場，現在存放英國皇室珠寶。世界遺產。', tags:['外觀','世界遺產'],
+        story:[
+          { img:'2/2c/Tower_of_London_viewed_from_the_River_Thames.jpg', cap:'從泰晤士河上看倫敦塔' },
+          '中央的白塔是最古老的部分。這裡收藏的皇冠珠寶包括鑲有世界最大切割鑽石「非洲之星」的權杖，到現在加冕典禮仍會使用。',
+          { img:'6/6e/Yeoman_Warder.jpg', cap:'倫敦塔守衛「Beefeater」' },
+          '傳說只要塔裡的烏鴉離開，英國王室就會滅亡，所以至今塔內一直養著至少 6 隻烏鴉，還有專人照顧。',
+        ] },
+      { zh:'泰晤士河遊船', en:'River Thames Cruise', img:'e/e5/%27Silver_Bonito%27_London_Eye_River_Cruise_passing_HMS_Belfast_River_Thames_London_England.jpg',
+        lat:51.5030, lon:-0.1196, q:'Westminster Pier London',
+        desc:'搭船穿越倫敦市中心，從河上看今天走過的地標。', tags:['★搭乘遊船'],
+        story:[
+          '沿途會經過倫敦眼、聖保羅大教堂、碎片塔 (The Shard)、二戰巡洋艦貝爾法斯特號，最後從塔橋下方穿過，是一次看完倫敦天際線最輕鬆的方式。',
+          { img:'e/ee/St_Paul%27s_Cathedral%2C_City_of_London_and_Blackfriars_Bridge_from_the_Thames._London.jpg', cap:'從河上看聖保羅大教堂與金融城' },
+        ],
+        tips:['船外風很大，甲板上記得穿外套','若遇漲潮或水位不佳停駛，每人退 £9'] },
+      { zh:'Burger & Lobster', en:'晚餐・火焰烤龍蝦', img:null, emoji:'🦞',
+        lat:51.5124, lon:-0.1366, q:'Burger & Lobster London',
+        desc:'倫敦人氣餐廳，招牌是從加拿大空運來的活龍蝦，炭火烤得香氣十足。今晚每人半隻烤龍蝦＋漢堡套餐。', tags:['晚餐'],
+        tips:['分店以領隊安排為準','英國餐廳帳單常已含 12.5% 服務費，不用另外給小費'] },
+    ],
+    notes:['泰晤士河遊船若遇漲潮或水位不佳停駛，每人退 £9 船票，改為倫敦自由時光。'] },
+
+  { date:'2026-11-02', country:'is', title:'倫敦 ✈ 冰島・藍色溫泉湖', subtitle:'飛往世界最北的首都，泡湯後入住塞爾福斯', aurora:'追尋極光第一晚',
+    wx:{ name:'塞爾福斯', lat:63.9333, lon:-21.0 }, hotel:'selfoss', flight:'FI471',
+    meals:{ b:'飯店內或西式餐盒', l:'配合航班，敬請自理', d:'北歐小龍蝦風味餐' },
+    places:[
+      { zh:'凱夫拉維克國際機場', en:'Keflavík International Airport', img:'b/b3/SSJ100_Keflavik_runways_%285160518757%29.jpg',
+        lat:63.9850, lon:-22.6056, q:'Keflavik International Airport',
+        desc:'搭冰島航空 FI471 飛行約 3 小時抵達冰島。雷克雅未克是世界緯度最高、人口也最少的首都之一。', tags:['抵達'],
+        tips:['冰島機場免稅店的酒比市區便宜很多，冰島酒類稅極高','冰島幾乎全面刷卡，不太需要換克朗現金'] },
+      { zh:'藍色溫泉湖', en:'Blue Lagoon', img:'5/5d/The_Blue_Lagoon_-_Flickr_-_big-ashb.jpg',
+        lat:63.8804, lon:-22.4495, q:'Blue Lagoon Iceland',
+        desc:'冰島最有名的戶外地熱溫泉，乳藍色的湖水約 37–40°C，被黑色熔岩地景包圍。', tags:['★泡湯','記得帶泳裝'],
+        story:[
+          '藍湖的水來自旁邊地熱發電廠，從地底 2,000 公尺抽上來的海水富含矽、藻類與礦物質，所以呈現夢幻的乳藍色。湖邊有免費的白色矽泥面膜可以敷。',
+          { img:'5/57/Sunrise_at_Blue_Lagoon_Iceland_2026-02-10_10-48-20_1.jpg', cap:'冬季早晨的藍湖，水氣瀰漫' },
+          '冬天下水前外面只有幾度，一泡進去就暖起來。在零度的空氣裡泡溫泉、看天色變化，是冰島最療癒的體驗之一。',
+        ],
+        tips:['冰島規定下水前要在淋浴間「脫光」洗澡，入境隨俗喔','矽泥會讓頭髮乾澀打結：盡量不要弄濕頭髮，或先抹大量潤髮乳','銀飾、首飾先拿下來，礦物質會讓它變黑','手機記得裝防水袋'] },
+      { zh:'塞爾福斯', en:'Selfoss', img:'8/86/Selfoss_0722.jpg',
+        lat:63.9333, lon:-21.0, q:'Selfoss Iceland',
+        desc:'冰島南部最大的小鎮，位在冰島最大河流 Ölfusá 河畔，是南岸旅程的起點。今晚開始追極光！', tags:['住宿','極光'],
+        story:[
+          { img:'8/85/The_Northern_Lights_Iceland_Travel_Photography_%28209663839%29.jpeg', cap:'冰島的北極光' },
+          '晚上走到飯店附近燈光少的地方，往北方天空看。肉眼看到的極光常常是淡淡的灰白色，用手機夜間模式拍才會顯出綠色，所以不要太快放棄！',
+        ],
+        tips:['晚餐的小龍蝦（langoustine）是冰島南部名產'] },
+    ],
+    notes:['<b>請自備泳裝！</b>藍湖若因天候或火山活動關閉，會找其他溫泉替代；無替代則每人退 €30。','冰島航空只能托運 1 件 23kg 行李，手提 10kg。','小龍蝦視季節捕撈量，不足時以其他大西洋海鮮替代。'] },
+
+  { date:'2026-11-03', country:'is', title:'冰島南岸：瀑布與黑沙灘', subtitle:'塞里雅蘭瀑布・史可加瀑布・黑沙灘・赫本', aurora:'追尋極光第二晚',
+    wx:{ name:'維克（南岸）', lat:63.4186, lon:-19.0060 }, hotel:'jokull',
+    meals:{ b:'飯店內自助式', l:'歐洲主廚推薦風味餐', d:'溫馨小鎮 冰島羊肉湯佐北極紅點鮭' },
+    places:[
+      { zh:'塞里雅蘭瀑布', en:'Seljalandsfoss', img:'3/33/Idyllic_landscape_with_a_waterfall_%28Unsplash%29.jpg',
+        lat:63.6156, lon:-19.9886, q:'Seljalandsfoss',
+        desc:'高約 60 公尺從懸崖垂直落下，冰島最美的瀑布之一，又稱「牧羊瀑布」，就在一號環島公路旁。', tags:['拍照點'],
+        story:[
+          '這座瀑布最特別的是後方有一個凹進去的岩洞，夏天可以沿步道繞到瀑布「背面」，從水簾後往外看。',
+          { img:'6/69/Seljalandsfoss%2C_Su%C3%B0urland%2C_Islandia%2C_2014-08-16%2C_DD_201-203_HDR.JPG', cap:'從瀑布後方往外看的景色' },
+          '冬天步道常因結冰封閉，從正面欣賞就很壯觀。往北走約 10 分鐘還有一座藏在峽谷裡的「隱藏瀑布」Gljúfrabúi，時間夠的話可以去探險。',
+          { img:'c/c4/Seljalandsfoss_winter.jpg', cap:'冬季的塞里雅蘭瀑布' },
+        ],
+        tips:['靠近瀑布水花很大，穿防水外套、相機鏡頭準備擦拭布','地面濕滑結冰，可帶簡易冰爪'] },
+      { zh:'史可加瀑布', en:'Skógafoss', img:'8/8c/2008-05-24_35_Sk%C3%B3gafoss.jpg',
+        lat:63.5321, lon:-19.5114, q:'Skogafoss',
+        desc:'寬 25 公尺、高 60 公尺的水牆，晴天時水霧中常出現彩虹，所以有「彩虹瀑布」之稱。', tags:['拍照點','地滑小心'],
+        story:[
+          { img:'9/9e/Skogafoss_with_Rainbow_%2819731920224%29.jpg', cap:'水霧中的彩虹' },
+          '傳說維京人 Þrasi 把一箱寶藏藏在瀑布後的洞穴裡。後人曾抓住寶箱的把手想拉出來，結果只拉斷把手——據說這個把手現在還放在附近的史可加博物館。',
+          '瀑布右側有約 500 階的步道可以爬到頂端，從上面俯瞰平原與遠方海岸線，視野非常開闊。',
+          { img:'a/a0/Sk%C3%B3gafoss_Waterfall%2C_Iceland%2C_20240720_1411_3075.jpg', cap:'可以走到瀑布前方近距離感受水勢' },
+        ],
+        tips:['📸 站在瀑布前方遠一點，用人當比例尺才拍得出瀑布有多大','爬上頂端來回約 20–30 分鐘，看集合時間決定'] },
+      { zh:'黑沙灘', en:'Reynisfjara Black Sand Beach', img:'7/74/Reynisfjara_Beach_Looking_West_Towards_Dyrh%C3%B3laey.jpg',
+        lat:63.4035, lon:-19.0474, q:'Reynisfjara Beach',
+        desc:'火山玄武岩被海浪磨成黑沙，曾被美國《Islands》雜誌評為世界十大美麗沙灘之一。', tags:['拍照點','⚠️浪大危險'],
+        story:[
+          '沙灘旁的峭壁是整齊排列的六角形玄武岩柱，像巨大的管風琴，是熔岩快速冷卻收縮形成的。這裡也是《權力遊戲》的取景地。',
+          { img:'a/a7/Rock_columns_at_Reynisfjara_Beach.jpg', cap:'六角形玄武岩柱' },
+          '海上那幾根尖尖的岩柱叫 Reynisdrangar。冰島傳說它們原本是想把船拖上岸的巨魔，結果天亮被陽光照到，就變成了石頭。',
+        ],
+        tips:['<b>這裡是冰島最危險的海灘之一！</b>常有突然衝很遠的「瘋狗浪」，已經發生多起遊客被捲走的事故','永遠不要背對海浪拍照，離水邊至少 30 公尺，聽從警示燈號'] },
+      { zh:'赫本', en:'Höfn', img:'5/5d/Hofn_-_harbour_and_mountains.jpg',
+        lat:64.2539, lon:-15.2082, q:'Höfn Iceland',
+        desc:'冰島東南部的港口小鎮，被稱為「冰島龍蝦之都」，可以遠眺瓦特納冰原。今晚夜宿此區。', tags:['住宿','極光'],
+        story:[
+          { img:'5/53/Enjoining_The_Northern_Lights_Hofn_Iceland_Travel_Photography_%28247807533%29.jpeg', cap:'赫本的極光夜' },
+          '赫本周圍光害很少，是南岸看極光的好地點。今天車程很長（南岸到東南部約 4–5 小時），晚上記得留點體力出門看天空。',
+        ] },
+    ],
+    notes:['<b>黑沙灘浪非常大！</b>務必保持距離，並一直面向海浪。','瀑布附近地面濕滑，靠近觀看請留意腳步。','今天拉車時間長，可準備零食、暈車藥。'] },
+
+  { date:'2026-11-04', country:'is', title:'藍冰洞健行・冰河湖', subtitle:'斯卡夫塔菲爾・藍冰洞・傑古沙龍冰河湖', aurora:'追尋極光第三晚',
+    wx:{ name:'傑古沙龍冰河湖', lat:64.0703, lon:-16.2117 }, hotel:'stracta',
+    meals:{ b:'飯店內自助式', l:'北歐主廚風味餐', d:'飯店內主廚推薦（可能為自助式）' },
+    places:[
+      { zh:'斯卡夫塔菲爾', en:'Skaftafell', img:'f/f3/Skaftafell_Aerial_2023.jpg',
+        lat:64.0160, lon:-16.9720, q:'Skaftafell Visitor Centre',
+        desc:'瓦特納冰川國家公園的一部分。瓦特納冰原是冰島最大的冰原，也是歐洲體積最大的冰帽之一。', tags:['國家公園'],
+        story:[
+          '這一帶可以近距離看到從冰原流下來的「冰舌」，灰藍色的冰河夾著火山灰，非常震撼。',
+          { img:'c/ca/Ice_Tongue_of_Skaftafellsj%C3%B6kull_Glacier_-_2013.08_-_panoramio.jpg', cap:'斯卡夫塔菲爾冰河的冰舌' },
+          '園區內還有著名的「黑瀑布」Svartifoss，被黑色玄武岩柱包圍，步行來回約 1.5 小時，行程不一定會去，有自由時間可以問領隊。',
+          { img:'9/94/038_Svartifoss_waterfall_%28Iceland%29_Photo_by_Giles_Laurent.jpg', cap:'黑瀑布 Svartifoss' },
+        ] },
+      { zh:'藍冰洞健行', en:'Blue Ice Cave Tour', img:'a/a5/Ice_Cave_Blue_Roof_-_Iceland.jpg',
+        lat:64.0480, lon:-16.1790, q:'Vatnajökull ice cave tour Jökulsárlón',
+        desc:'跟著專業嚮導搭冰河接駁車，深入冰河內部健行，近距離看晶藍色的冰壁。', tags:['★冰洞健行','防水外套','防水登山鞋'],
+        story:[
+          '冰洞是夏天冰河融水在冰層裡沖出來的通道，入冬結凍後才能安全進入，所以每年的形狀都不一樣，只有約 11 月到 3 月開放。',
+          { img:'8/82/Ice_cave_at_Brei%C3%B0amerkurj%C3%B6kull_glacier%2C_Iceland%2C_20240719_1549_2723.jpg', cap:'冰洞內部的藍色冰壁' },
+          '為什麼是藍色？冰河的冰被壓得非常緊實、幾乎沒有氣泡，會吸收紅光、只讓藍光穿透，於是呈現像寶石一樣的深藍色。',
+          { img:'2/2c/Ice_cave_at_Brei%C3%B0amerkurj%C3%B6kull_glacier%2C_Iceland%2C_20240719_1549_2726.jpg', cap:'光線穿過千年冰層' },
+        ],
+        tips:['嚮導會提供冰爪、安全帽，請穿防水保暖外套＋防水登山鞋（包覆腳踝尤佳）','穿機能性洋蔥式穿搭，不要太厚重，走起來會流汗','手套、毛帽必備，手機在低溫下很耗電，帶行動電源'] },
+      { zh:'傑古沙龍冰河湖', en:'Jökulsárlón Glacier Lagoon', img:'2/2c/J%C3%B6kuls%C3%A1rl%C3%B3n_lagoon_in_southeastern_Iceland.jpg',
+        lat:64.0784, lon:-16.2306, q:'Jokulsarlon Glacier Lagoon',
+        desc:'冰島最著名的冰河湖，深約 250 公尺，是冰島最深的湖。千年浮冰從冰河斷裂後漂在湖面上。', tags:['拍照點'],
+        story:[
+          '冰河湖從 1930 年代才開始出現，因為冰河持續後退，面積到現在已經擴大好幾倍。浮冰會慢慢漂向大海，有時候會整塊翻轉，露出底部晶瑩剔透的藍色。',
+          { img:'7/71/034_Freshly_rotated_icebergs_at_J%C3%B6kuls%C3%A1rl%C3%B3n_%28Iceland%29_Photo_by_Giles_Laurent.jpg', cap:'剛翻轉的藍色浮冰' },
+          '湖裡常有海豹在浮冰間游泳，仔細找找看！這裡也是 007《誰與爭鋒》、《古墓奇兵》、《蝙蝠俠：開戰時刻》的取景地。',
+          { img:'f/f8/A_Seal_at_the_Glacial_Lagoon.jpg', cap:'冰河湖的海豹' },
+        ],
+        tips:['📸 用低角度把浮冰放在前景，背景帶到冰河，畫面最有層次'] },
+      { zh:'鑽石沙灘', en:'Diamond Beach', img:'5/51/Glacier_in_Diamond_Beach_%28J%C3%B6kuls%C3%A1rl%C3%B3n%29_Iceland.jpg',
+        lat:64.0442, lon:-16.1778, q:'Diamond Beach Iceland',
+        desc:'冰河湖的浮冰被沖出海後又被浪打回黑沙灘上，像散落一地的鑽石。若藍冰洞取消會加贈此景點。', tags:['可能加贈'],
+        story:[
+          { img:'0/00/Delicate_Ice_On_Black_Sand.jpg', cap:'黑沙上的透明冰塊' },
+          '鑽石沙灘就在冰河湖出海口對面，過個馬路就到。冰塊的大小形狀每天都不一樣，在晨光或夕陽下會閃閃發亮。',
+          { img:'3/3c/Aurora_Borealis_over_J%C3%B6kuls%C3%A1rl%C3%B3n_ice_beach_%2816283783717%29.jpg', cap:'運氣好的話，冰沙灘上的極光' },
+        ],
+        tips:['這裡一樣有大浪，別爬到海邊的大冰塊上'] },
+      { zh:'赫拉', en:'Hella', img:'4/4e/Hella_2024.jpg',
+        lat:63.8348, lon:-20.4049, q:'Hella Iceland',
+        desc:'今晚住宿 Stracta Hotel，飯店有戶外熱水池，可以邊泡邊等極光。', tags:['住宿','極光'],
+        tips:['飯店設施依現場為準，帶泳裝備用'] },
+    ],
+    notes:['<b>冰洞裝備：</b>請自備防水保暖外套、防水登山鞋（包覆腳踝尤佳），穿機能性衣物避免太厚重。','天候不佳關閉時每人退 €40，並多出冰河湖自由時間、加贈鑽石沙灘。','有特殊身體狀況、氣喘、年長、孕婦、兒童（8 歲以下需提供身高）請自行評估是否參加。'] },
+
+  { date:'2026-11-05', country:'is', title:'金環之旅・雷克雅未克', subtitle:'辛格韋德利・黃金瀑布・間歇泉・哈爾格林姆教堂', aurora:'追尋極光第四晚',
+    wx:{ name:'雷克雅未克', lat:64.1466, lon:-21.9426 }, hotel:'grand',
+    meals:{ b:'飯店內自助式', l:'歐洲主廚推薦風味餐', d:'中式七菜一湯' },
+    places:[
+      { zh:'辛格韋德利國家公園', en:'Þingvellir National Park', img:'8/83/%C3%9Eingvellir_from_the_information_centre.JPG',
+        lat:64.2559, lon:-21.1299, q:'Thingvellir National Park',
+        desc:'冰島第一個國家公園，西元 930 年在這裡成立了世界最古老的議會之一「阿爾庭」。世界遺產。', tags:['世界遺產'],
+        story:[
+          '這裡是北美板塊和歐亞板塊的交界，兩個板塊每年還在以約 2 公分的速度分開，地面上到處是大裂縫。你可以走在兩個大陸之間的峽谷步道上。',
+          { img:'a/a3/Ca%C3%B1%C3%B3n_Silfra%2C_Parque_Nacional_de_%C3%9Eingvellir%2C_Su%C3%B0urland%2C_Islandia%2C_2014-08-16%2C_DD_055.JPG', cap:'清澈見底的 Silfra 裂縫' },
+          '裂縫中的 Silfra 泉水是冰河融水經過熔岩層過濾數十年流出來的，能見度超過 100 公尺，是世界知名的潛水地點，可以「同時摸到兩個大陸」。',
+        ],
+        tips:['📸 從遊客中心旁的觀景台往下看，裂谷與湖泊全景最壯觀'] },
+      { zh:'黃金瀑布', en:'Gullfoss', img:'1/18/Gullfoss_from_the_Air_%28cropped%29.jpg',
+        lat:64.3271, lon:-20.1199, q:'Gullfoss',
+        desc:'分成上下兩層、總落差 32 公尺的巨大瀑布，河水轉彎衝進峽谷，氣勢磅礴。', tags:['拍照點'],
+        story:[
+          { img:'0/0b/Gullfoss_Rainbow.jpg', cap:'晴天時的黃金瀑布彩虹' },
+          '20 世紀初，外國投資者想在這裡蓋水力發電廠。地主的女兒 Sigríður Tómasdóttir 強烈反對，傳說她甚至揚言要跳進瀑布抗議。瀑布最後保留下來，她也被視為冰島第一位環保人士，瀑布旁有她的紀念碑。',
+          { img:'2/2d/Gullfoss_Waterfall_in_Winter.jpg', cap:'冬季冰封的黃金瀑布' },
+        ],
+        tips:['下層步道靠近瀑布水花多、冬天常結冰，走上層觀景台比較安全'] },
+      { zh:'蓋席爾間歇泉區', en:'Geysir / Strokkur', img:'2/2a/Strokkur_Geysir_%2814135319580%29_%28cropped%29.jpg',
+        lat:64.3104, lon:-20.3024, q:'Strokkur Geysir',
+        desc:'英文「Geyser 間歇泉」這個字就是來自這裡的大間歇泉 Geysir。', tags:['等它噴發'],
+        story:[
+          '老前輩 Geysir 現在已經很少噴發，主角換成旁邊的 Strokkur：每 5–10 分鐘就噴一次，水柱可達 15–20 公尺，偶爾更高。',
+          { img:'a/a8/Strokkur_bubble_%2820155679696%29.jpg', cap:'噴發前一秒，水面鼓起藍色水泡' },
+          '噴發前水面會先鼓起一個藍色的大水泡，看到它就要準備按快門了！',
+        ],
+        tips:['📸 手機開「連拍」或錄影，比較容易抓到瞬間','站在上風處，不然會被熱水霧淋濕','不要越過繩索，泉水接近 100°C'] },
+      { zh:'哈爾格林姆教堂', en:'Hallgrímskirkja', img:'8/8b/Hallgrimskirkja_mai_2026.jpg',
+        lat:64.1417, lon:-21.9266, q:'Hallgrimskirkja',
+        desc:'高 74.5 公尺，冰島最高的教堂，外型靈感來自冰島的柱狀玄武岩，是雷克雅未克天際線的焦點。', tags:['地標'],
+        story:[
+          '教堂以 17 世紀詩人 Hallgrímur Pétursson 命名，建築師 Guðjón Samúelsson 設計，從 1945 年動工到 1986 年才完成，蓋了 41 年。',
+          { img:'7/74/Hallgrimskirkja_and_Leif_Eriksson.jpg', cap:'教堂前的萊夫・艾瑞克森雕像' },
+          '教堂前的雕像是維京探險家萊夫・艾瑞克森，他比哥倫布早約 500 年抵達北美洲。這座雕像是 1930 年美國送給冰島、紀念阿爾庭議會成立一千週年的禮物。',
+          { img:'a/a2/Inside_Hallgr%C3%ADmskirkja_HDR.jpg', cap:'簡約明亮的教堂內部與管風琴' },
+          '教堂內部是極簡的白色空間，有一座約 5,000 根音管的大型管風琴。付費搭電梯上塔頂，可以俯瞰整片彩色屋頂的城市。',
+        ],
+        tips:['📸 從教堂正前方的 Skólavörðustígur 彩虹步道往上拍最經典','塔頂觀景台需另外購票，開放時間依現場'] },
+      { zh:'太陽航海者', en:'Sun Voyager (Sólfar)', img:'7/79/Aurora_over_the_Sun_Voyager%2C_Central_Reykjavik_%2837291306216%29.jpg',
+        lat:64.1476, lon:-21.9223, q:'Sun Voyager Reykjavik',
+        desc:'海岸邊的不鏽鋼維京船造型雕塑，藝術家 Jón Gunnar Árnason 的作品，1990 年為慶祝雷克雅未克建城 200 年揭幕。', tags:['拍照點'],
+        story:[
+          { img:'1/1d/1990_zum_200-j%C3%A4hrigen_Jubil%C3%A4um_von_Reykjavik_wurde_die_Skulptur_Solfar_%28Sonnenfahrt%29_enth%C3%BCllt._01.jpg', cap:'太陽航海者與海灣對面的 Esja 山' },
+          '很多人以為它是維京船，但藝術家說它其實是一艘「夢之船」，獻給太陽，象徵對未知土地的嚮往、希望、進步與自由。',
+        ],
+        tips:['📸 11 月約 16:30 日落，夕陽時分的剪影最美','沿著海岸步道走到 Harpa 音樂廳只要 10 分鐘，玻璃帷幕非常好拍'] },
+    ],
+    notes:['間歇泉為自然景觀，可能因天候封路無法進入，會改去其他景點。','今晚是冰島最後一晚，明天清晨的班機，行李先整理好。'] },
+
+  { date:'2026-11-06', country:'uk', title:'冰島 ✈ 倫敦・Bicester 購物村', subtitle:'清晨飛回英國，下午購物，晚上住牛津',
+    wx:{ name:'牛津', lat:51.7520, lon:-1.2577 }, hotel:'oxford', flight:'FI470',
+    meals:{ b:'飯店內或西式餐盒', l:'配合航班，敬請自理', d:'發餐費每人 £15，Outlet 內自由點餐' },
+    places:[
+      { zh:'倫敦希斯洛機場', en:'London Heathrow Airport', img:'0/0d/London_-_Heathrow_%28LHR_-_EGLL%29_AN1572653.jpg',
+        lat:51.4700, lon:-0.4543, q:'London Heathrow Airport',
+        desc:'搭冰島航空 FI470 清晨起飛，10:55 回到倫敦，專車前往購物村。', tags:['抵達'],
+        tips:['冰島退稅記得在凱夫拉維克機場出境前辦好'] },
+      { zh:'比斯特購物村', en:'Bicester Village', img:'5/5d/Bicester_Village_-_geograph.org.uk_-_1828514.jpg',
+        lat:51.8917, lon:-1.1558, q:'Bicester Village',
+        desc:'位於牛津郡的精品購物村，160 家左右的品牌店，過季商品常見 3–6 折。', tags:['購物','晚餐自理 £15'],
+        story:[
+          '購物村是一條鄉村小鎮風格的步行街，英國品牌 Burberry、Mulberry、Paul Smith、Vivienne Westwood、Barbour、Ted Baker 都有，國際精品 GUCCI、Prada、LONGCHAMP 等也齊全。',
+          { img:'8/8f/Bicester_Village_-_geograph.org.uk_-_5232492.jpg', cap:'鄉村小鎮風格的購物街' },
+          '熱門店（Burberry、GUCCI 等）常要排隊入店，可以先拿號碼牌再去逛別家。買太多提不動的話，購物村有寄物服務。',
+        ],
+        tips:['⚠️ 英國從 2021 年起取消一般旅客購物退稅，標價就是最後價格','先列好想買的品牌清單，時間很快就過去了','晚餐每人發 £15，在購物村內自由點餐'] },
+    ],
+    notes:['FI470 07:40 起飛，當天很早出門，前一晚先整理好行李。','冰島航空托運限 1 件 23kg，冰島買的東西注意重量。'] },
+
+  { date:'2026-11-07', country:'uk', title:'牛津大學城 ✈ 返程', subtitle:'基督教堂學院・萬靈學院・瑞德克利夫拱頂・波德里安圖書館',
+    wx:{ name:'牛津', lat:51.7520, lon:-1.2577 }, flight:'CI082',
+    meals:{ b:'飯店內自助式', l:'英式炸魚薯條風味餐', d:'機上' },
+    places:[
+      { zh:'基督教堂學院', en:'Christ Church, Oxford', img:'b/b8/Tom_Quad%2C_Christ_Church%2C_Oxford.jpg',
+        lat:51.7500, lon:-1.2558, q:'Christ Church Oxford',
+        desc:'牛津最大、建築最壯觀的學院，1546 年由亨利八世創立，出過十多位英國首相，也是《哈利波特》取景地。', tags:['★參觀'],
+        story:[
+          '學院正門上方的「湯姆塔」由設計聖保羅大教堂的建築師 Christopher Wren 設計，塔裡的大鐘每晚 21:05 會敲 101 下，紀念學院最早的 101 位學生。',
+          { img:'7/73/Christ_Church%2C_Oxford%2C_The_Grand_Staircase.jpg', cap:'哈利波特第一集取景的大階梯' },
+          '電影《哈利波特：神秘的魔法石》中，麥教授在樓梯頂端迎接新生的那一幕，就是在這座扇形拱頂下的大階梯拍攝的。',
+          { img:'0/0c/Christ_Church_Great_Hall.jpg', cap:'霍格華茲大廳的原型——基督教堂大廳' },
+          '學院的大餐廳 (Great Hall) 就是電影中霍格華茲大廳的設計原型。另外《愛麗絲夢遊仙境》的作者路易斯・卡羅就是這裡的數學老師，愛麗絲的原型是學院院長的女兒。',
+        ],
+        tips:['大廳在學生用餐時間會暫停開放，參觀順序依領隊安排'] },
+      { zh:'萬靈學院', en:'All Souls College', img:'9/95/UK-2014-Oxford-All_Souls_College_03.jpg',
+        lat:51.7533, lon:-1.2527, q:'All Souls College Oxford',
+        desc:'1438 年創立，牛津最特別的學院：沒有大學部學生，只有研究員，入選考試被稱為「全世界最難的考試」。', tags:['外觀'],
+        story:[
+          { img:'8/8d/Oxford_-_Radcliffe_Square_-_View_ENE_on_All_Souls_College_1438.jpg', cap:'從瑞德克利夫廣場看萬靈學院的雙塔' },
+          '萬靈學院的哥德式雙塔就在瑞德克利夫廣場旁，是牛津天際線「夢幻尖塔之城」最具代表性的畫面之一。',
+        ] },
+      { zh:'瑞德克利夫拱頂', en:'Radcliffe Camera', img:'2/2b/Radcliffe_Camera%2C_Oxford_-_Oct_2006.jpg',
+        lat:51.7534, lon:-1.2540, q:'Radcliffe Camera',
+        desc:'1737–1748 年興建，英國第一座圓形圖書館，現在是牛津學生的閱覽室。', tags:['拍照點'],
+        story:[
+          '「Camera」在拉丁文是「房間」的意思，不是相機。這座帕拉底歐式圓頂建築位在廣場正中央，四周被萬靈學院、聖母大學教堂、波德里安圖書館包圍。',
+          { img:'6/65/Oxford_-_Radcliffe_Square_-_University_Church_of_St_Mary_the_Virgin%2C_Brasenose_College%2C_Radcliffe_Camera_1737-48_by_James_Gibbs%2C_Bodleian_Library_%26_All_Souls_College_03.jpg', cap:'瑞德克利夫廣場全景' },
+        ],
+        tips:['📸 從 Catte Street 往廣場拍，可以同時拍到圓頂和萬靈學院尖塔'] },
+      { zh:'波德里安圖書館', en:'Bodleian Library', img:'5/5a/Bibliotheca_Bodleiana.jpg',
+        lat:51.7539, lon:-1.2544, q:'Bodleian Library',
+        desc:'1602 年開館，歐洲最古老的圖書館之一，英國每出版一本書都要送一本到這裡收藏。', tags:['外觀'],
+        story:[
+          '圖書館內的「神學院」(Divinity School) 有華麗的扇形石雕天花板，在《哈利波特》裡變身為霍格華茲的醫護室。',
+          { img:'a/a9/Divinity_School_Interior_1%2C_Bodleian_Library%2C_Oxford%2C_UK_-_Diliff.jpg', cap:'神學院——霍格華茲醫護室' },
+          '樓上的「韓福瑞公爵圖書館」則是電影裡霍格華茲圖書館的取景地。據說連查理一世都曾被拒絕借書，因為這裡的書不外借。',
+          { img:'b/b1/Duke_Humfrey%27s_Library_Interior_5%2C_Bodleian_Library%2C_Oxford%2C_UK_-_Diliff.jpg', cap:'韓福瑞公爵圖書館' },
+        ] },
+      { zh:'倫敦希斯洛機場', en:'London Heathrow Airport', img:'0/0d/London_-_Heathrow_%28LHR_-_EGLL%29_AN1572653.jpg',
+        lat:51.4700, lon:-0.4543, q:'London Heathrow Airport',
+        desc:'傍晚前往機場，搭中華航空 CI082 21:15 返台。', tags:['返程'],
+        tips:['中華航空可托運 2 件 × 23kg，回程戰利品可以分兩箱'] },
+    ],
+    notes:['回程行李記得秤重，華航每件 23kg 上限。'] },
+
+  { date:'2026-11-08', country:'tw', title:'抵達桃園', subtitle:'帶著滿滿回憶回家',
+    wx:{ name:'桃園', lat:25.0797, lon:121.2342 },
+    meals:{ b:'機上', l:'—', d:'—' },
+    places:[
+      { zh:'桃園國際機場', en:'Taoyuan International Airport', img:'7/72/Exterior_of_Terminal_1%2C_Taoyuan_Airport_20141230.jpg',
+        lat:25.0797, lon:121.2342, q:'Taoyuan International Airport Terminal 2',
+        desc:'18:25 抵達桃園，結束英國＋冰島之旅。', tags:['抵達'],
+        tips:['回台後時差要調回來，前兩天早點睡 😴'] },
+    ],
+    notes:[] },
+];
+
+const TRIP_START = '2026-10-31', TRIP_END = '2026-11-08';
+
+/* ---------------- date helpers ---------------- */
+const WK = ['日','一','二','三','四','五','六'];
+const md = iso => { const [y,m,d] = iso.split('-').map(Number); return `${m}/${d}`; };
+const wk = iso => WK[new Date(iso + 'T12:00:00').getDay()];
+// The traveller's "today" depends on where they are; use the day's local zone.
+const tzOf = c => c === 'uk' ? 'Europe/London' : c === 'is' ? 'Atlantic/Reykjavik' : 'Asia/Taipei';
+const isoIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+function todayIndex() {
+  for (let i = 0; i < DAYS.length; i++) if (isoIn(tzOf(DAYS[i].country)) === DAYS[i].date) return i;
+  return -1;
+}
+
+/* ---------------- countdown ---------------- */
+function renderCountdown() {
+  const now = isoIn('Asia/Taipei');
+  const diff = Math.round((new Date(TRIP_START) - new Date(now)) / 864e5);
+  const ti = todayIndex();
+  let html;
+  if (ti >= 0) html = `🌌 旅程第 <b>${ti + 1}</b> 天`;
+  else if (diff > 0) html = `距離出發還有 <b>${diff}</b> 天`;
+  else if (now > TRIP_END) html = `旅程結束，謝謝一起出發 ✨`;
+  else html = `今天出發！`;
+  $('#countdown').innerHTML = html;
+}
+
+/* ---------------- weather ---------------- */
+const WMO = {0:['☀️','晴'],1:['🌤️','大致晴'],2:['⛅','多雲'],3:['☁️','陰'],45:['🌫️','霧'],48:['🌫️','霧凇'],
+  51:['🌦️','毛毛雨'],53:['🌦️','毛毛雨'],55:['🌧️','毛毛雨'],56:['🌧️','凍毛毛雨'],57:['🌧️','凍毛毛雨'],
+  61:['🌧️','小雨'],63:['🌧️','雨'],65:['🌧️','大雨'],66:['🌧️','凍雨'],67:['🌧️','凍雨'],
+  71:['🌨️','小雪'],73:['🌨️','雪'],75:['❄️','大雪'],77:['🌨️','霰'],80:['🌦️','陣雨'],81:['🌧️','陣雨'],82:['⛈️','強陣雨'],
+  85:['🌨️','陣雪'],86:['❄️','強陣雪'],95:['⛈️','雷雨'],96:['⛈️','雷雨冰雹'],99:['⛈️','雷雨冰雹']};
+const wmo = c => WMO[c] || ['🌡️','—'];
+const wxCache = {};
+function fetchWx(lat, lon) {
+  const k = `${lat},${lon}`;
+  if (!wxCache[k]) {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+      + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
+      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
+      // Open-Meteo applies one fixed UTC offset to the whole response, so "auto" would carry
+      // London's summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
+      + `&hourly=cloud_cover&timezone=${lon > 100 ? 'Asia%2FTaipei' : 'GMT'}&forecast_days=16&wind_speed_unit=ms`;
+    wxCache[k] = fetch(u).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  return wxCache[k];
+}
+const hhmm = s => s ? s.slice(11, 16) : '';
+function nightCloud(data, date) {
+  // average cloud cover 21:00–24:00 local on that date
+  const h = data.hourly; if (!h) return null;
+  const vals = [];
+  h.time.forEach((t, i) => { if (t.startsWith(date) && +t.slice(11, 13) >= 21) vals.push(h.cloud_cover[i]); });
+  return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+}
+async function renderDayWx(day, el) {
+  try {
+    const d = await fetchWx(day.wx.lat, day.wx.lon);
+    const i = d.daily.time.indexOf(day.date);
+    let html;
+    if (i >= 0) {
+      const [ic, tx] = wmo(d.daily.weather_code[i]);
+      html = `<div class="weather"><div class="ic">${ic}</div><div>
+        <div class="t">${Math.round(d.daily.temperature_2m_min[i])}° / ${Math.round(d.daily.temperature_2m_max[i])}°C</div>
+        <div class="d">${esc(day.wx.name)}・${md(day.date)} 預報・${tx}</div></div></div>
+        <div class="wx-extra">
+          <span class="pill">☔ 降雨 ${d.daily.precipitation_probability_max[i] ?? '–'}%</span>
+          <span class="pill">💨 風 ${Math.round(d.daily.wind_speed_10m_max[i])} m/s</span>
+          <span class="pill">🌅 ${hhmm(d.daily.sunrise[i])}</span>
+          <span class="pill">🌇 ${hhmm(d.daily.sunset[i])}</span>`;
+      if (day.aurora) {
+        const cc = nightCloud(d, day.date);
+        if (cc != null) {
+          const cls = cc <= 30 ? 'good' : cc >= 70 ? 'bad' : '';
+          const lvl = cc <= 30 ? '極光條件佳' : cc >= 70 ? '雲多，機會較低' : '普通';
+          html += `<span class="pill ${cls}">🌌 晚間雲量 ${cc}%・${lvl}</span>`;
+        }
+      }
+      html += `</div>`;
+    } else {
+      const c = d.current, [ic, tx] = wmo(c.weather_code);
+      html = `<div class="weather"><div class="ic">${ic}</div><div>
+        <div class="t">${Math.round(c.temperature_2m)}°C</div>
+        <div class="d">${esc(day.wx.name)}・現在 ${tx}・體感 ${Math.round(c.apparent_temperature)}°<br>
+        ${md(day.date)} 的預報約在 16 天內開放</div></div></div>`;
+    }
+    el.innerHTML = html;
+  } catch {
+    el.innerHTML = `<div class="small muted">天氣暫時無法讀取（可能沒有網路）</div>`;
+  }
+}
+
+const WX_CITIES = [
+  { name:'倫敦', sub:'London', lat:51.5072, lon:-0.1276 },
+  { name:'塞爾福斯', sub:'Selfoss', lat:63.9333, lon:-21.0 },
+  { name:'維克（南岸）', sub:'Vík', lat:63.4186, lon:-19.006 },
+  { name:'傑古沙龍冰河湖', sub:'Jökulsárlón', lat:64.0703, lon:-16.2117 },
+  { name:'赫本', sub:'Höfn', lat:64.2539, lon:-15.2082 },
+  { name:'雷克雅未克', sub:'Reykjavík', lat:64.1466, lon:-21.9426 },
+  { name:'牛津', sub:'Oxford', lat:51.752, lon:-1.2577 },
+];
+async function renderWxList() {
+  const rows = await Promise.all(WX_CITIES.map(async c => {
+    try {
+      const d = await fetchWx(c.lat, c.lon);
+      const [ic, tx] = wmo(d.current.weather_code);
+      return `<div class="row"><div class="ic">${ic}</div>
+        <div class="nm">${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°</small></div>
+        <div class="tt"><b>${Math.round(d.current.temperature_2m)}°</b><small>${Math.round(d.daily.temperature_2m_min[0])}° / ${Math.round(d.daily.temperature_2m_max[0])}°</small></div></div>`;
+    } catch {
+      return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取</small></div></div>`;
+    }
+  }));
+  $('#wxList').innerHTML = rows.join('');
+}
+
+/* ---------------- day view ---------------- */
+let current = 0, dayMap = null;
+const MK_COLOR = { uk:'#c8102e', is:'#02529c', tw:'#555' };
+
+function placeCard(p, n) {
+  const img = p.img
+    ? `<div class="img" style="background-image:url('${W(p.img)}')" data-full="${W(p.img, 1280)}"><span class="num">${n}</span></div>`
+    : `<div class="img"><div class="noimg">${p.emoji || '📍'}</div><span class="num">${n}</span></div>`;
+  const tags = (p.tags || []).map(t => `<span class="tag ${t.startsWith('★') ? 'star' : t.startsWith('⚠️') ? 'warn' : ''}">${esc(t)}</span>`).join('');
+  const story = (p.story || []).map(b => typeof b === 'string'
+    ? `<p>${esc(b)}</p>`
+    : `<figure><img loading="lazy" src="${W(b.img)}" alt="${esc(b.cap)}" data-full="${W(b.img, 1280)}"><figcaption>${esc(b.cap)}</figcaption></figure>`).join('');
+  const tips = (p.tips || []).map(t => `<li>${t}</li>`).join('');
+  return `<article class="card place">${img}<div class="pad">
+    <h3>${esc(p.zh)}</h3><div class="en">${esc(p.en)}</div>
+    ${tags ? `<div class="tags">${tags}</div>` : ''}
+    <p class="lead">${esc(p.desc)}</p>
+    ${story ? `<div class="story">${story}</div>` : ''}
+    ${tips ? `<ul class="tips">${tips}</ul>` : ''}
+    <div class="btns">
+      <a class="btn" href="${gmap(p.q)}" target="_blank" rel="noopener">📍 Google 地圖</a>
+      <a class="btn primary" href="${gnav(p.lat, p.lon)}" target="_blank" rel="noopener">🧭 導航</a>
+    </div></div></article>`;
+}
+
+function flightCard(f) {
+  const arrParts = f.arr.split(' ');
+  const arrTime = arrParts.pop(), arrDate = arrParts[0];
+  return `<div class="card flight">
+    <div class="top"><span><span class="no">${f.no}</span>・${f.airline}</span><span>${md(f.date)}（${wk(f.date)}）</span></div>
+    <div class="route">
+      <div><div class="code">${f.from}</div><div class="time">${f.dep}</div><div class="city">${f.fromCity}</div></div>
+      <div class="mid"><div class="line"></div>${f.dur}</div>
+      <div class="r"><div class="code">${f.to}</div><div class="time">${arrTime}${arrDate ? `<small class="muted" style="font-size:12px"> ${arrDate}</small>` : ''}</div><div class="city">${f.toCity}</div></div>
+    </div>
+    <div class="perf"><a href="https://www.flightradar24.com/data/flights/${f.no.toLowerCase()}" target="_blank" rel="noopener">查航班動態 ↗</a>・時間皆為當地時間</div>
+  </div>`;
+}
+
+function hotelCard(key, compact) {
+  const h = HOTELS[key];
+  return `<article class="card hotel">
+    ${compact ? '' : `<iframe loading="lazy" src="${gembed(h.name + ', ' + h.addr)}" title="${esc(h.name)} 地圖"></iframe>`}
+    <div class="pad">
+      <div class="hdr"><div><h3>${esc(h.name)}</h3><div class="small muted">${esc(h.zh)}・${esc(h.city)}</div></div>
+        <span class="nights">${h.nights.join('、')}</span></div>
+      <div class="kv"><span>地址</span><span>${esc(h.addr)}</span><span>電話</span><span>${esc(h.telShow)}</span></div>
+      <div class="btns">
+        <a class="btn" href="tel:${h.tel}">📞 撥打</a>
+        <a class="btn" href="${gmap(h.name + ' ' + h.addr)}" target="_blank" rel="noopener">📍 地圖</a>
+        <a class="btn primary" href="${gnav(h.lat, h.lon)}" target="_blank" rel="noopener">🧭 導航</a>
+      </div></div></article>`;
+}
+
+function renderChips() {
+  const ti = todayIndex();
+  $('#chips').innerHTML = DAYS.map((d, i) => `<button class="chip ${i === current ? 'on' : ''}" data-i="${i}">
+      <small>D${i + 1}・${wk(d.date)}</small><b>${md(d.date)}</b>${i === ti ? '<span class="today">今天</span>' : ''}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => selectDay(+b.dataset.i, true));
+  const on = $('#chips .chip.on');
+  if (on) on.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' });
+}
+
+function selectDay(i, scroll) {
+  current = i;
+  store.set('day', i);
+  renderChips();
+  renderDay();
+  if (scroll) window.scrollTo({ top: $('.chips').offsetTop, behavior:'smooth' });
+}
+
+function renderDay() {
+  const d = DAYS[current];
+  const flag = { uk:['uk','🇬🇧 英國'], is:['is','🇮🇸 冰島'], tw:['tw','🇹🇼 台灣'] }[d.country];
+  const pts = d.places.map(p => [p.lat, p.lon]);
+  const hotel = d.hotel && HOTELS[d.hotel];
+  const routePts = d.places.filter(p => p.lat).map(p => `${p.lat},${p.lon}`);
+  if (hotel) routePts.push(`${hotel.lat},${hotel.lon}`);
+  const dirUrl = routePts.length > 1
+    ? `https://www.google.com/maps/dir/${routePts.join('/')}`
+    : gmap(d.places[0].q);
+  const flight = d.flight && FLIGHTS.find(f => f.no === d.flight);
+
+  $('#day').innerHTML = `
+    <div class="day-head">
+      <div class="meta"><span class="flag ${flag[0]}">${flag[1]}</span>DAY ${current + 1}・${md(d.date)}（${wk(d.date)}）</div>
+      <h2>${esc(d.title)}</h2>
+      <div class="small muted">${esc(d.subtitle)}</div>
+      ${d.aurora ? `<span class="aurora-tag">🌌 ${esc(d.aurora)}</span>` : ''}
+    </div>
+    <div class="card pad" id="dayWx"><div class="small muted">讀取天氣中…</div></div>
+    <div class="card">
+      <div class="map" id="dayMap"></div>
+      <div class="map-actions">
+        <a class="btn" href="${dirUrl}" target="_blank" rel="noopener">🗺️ 在 Google Maps 開啟今日路線</a>
+      </div>
+    </div>
+    ${flight ? flightCard(flight) : ''}
+    ${d.places.map((p, i) => placeCard(p, i + 1)).join('')}
+    <div class="card pad">
+      <h3>🍽️ 今日餐食</h3>
+      <dl class="meals" style="margin:10px 0 0">
+        <dt>早餐</dt><dd>${esc(d.meals.b)}</dd><dt>午餐</dt><dd>${esc(d.meals.l)}</dd><dt>晚餐</dt><dd>${esc(d.meals.d)}</dd>
+      </dl>
+    </div>
+    ${hotel ? `<h3 style="margin:20px 0 0">🏨 今晚住宿</h3>${hotelCard(d.hotel, true)}` : ''}
+    ${d.notes.length ? `<div class="card pad"><h3>⚠️ 貼心提醒</h3>${d.notes.map(n => `<div class="note">${n}</div>`).join('')}</div>` : ''}
+    <div class="btns" style="margin:16px 0">
+      ${current > 0 ? `<button class="btn" id="prevDay">← 前一天</button>` : ''}
+      ${current < DAYS.length - 1 ? `<button class="btn" id="nextDay">後一天 →</button>` : ''}
+    </div>`;
+
+  const p = $('#prevDay'), n = $('#nextDay');
+  if (p) p.onclick = () => selectDay(current - 1, true);
+  if (n) n.onclick = () => selectDay(current + 1, true);
+
+  renderDayWx(d, $('#dayWx'));
+  drawMap(d, hotel);
+}
+
+function drawMap(d, hotel) {
+  if (dayMap) { dayMap.remove(); dayMap = null; }
+  if (!window.L) { $('#dayMap').innerHTML = '<div class="pad small muted">地圖載入失敗</div>'; return; }
+  dayMap = L.map('dayMap', { scrollWheelZoom:false, attributionControl:true, zoomControl:false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18, attribution:'© OpenStreetMap' }).addTo(dayMap);
+  const color = MK_COLOR[d.country];
+  const pts = [];
+  // skip far-away airports (e.g. Taoyuan on a London day) so the map stays zoomed on the action
+  d.places.forEach((p, i) => {
+    const icon = L.divIcon({ className:'', html:`<div class="mk" style="background:${color}">${i + 1}</div>`, iconSize:[26,26], iconAnchor:[13,13] });
+    L.marker([p.lat, p.lon], { icon }).addTo(dayMap).bindPopup(`<b>${esc(p.zh)}</b><br>${esc(p.en)}`);
+    pts.push([p.lat, p.lon]);
+  });
+  if (hotel) {
+    const icon = L.divIcon({ className:'', html:`<div class="mk" style="background:#0f9d8a">🏨</div>`, iconSize:[26,26], iconAnchor:[13,13] });
+    L.marker([hotel.lat, hotel.lon], { icon }).addTo(dayMap).bindPopup(`<b>${esc(hotel.name)}</b>`);
+    pts.push([hotel.lat, hotel.lon]);
+  }
+  // fit to the cluster nearest the day's destination, ignoring the >1500km outlier (TPE)
+  const ref = pts[pts.length - 1];
+  const near = pts.filter(q => Math.abs(q[0] - ref[0]) < 15 && Math.abs(q[1] - ref[1]) < 30);
+  L.polyline(near, { color, weight:3, opacity:.5, dashArray:'6 6' }).addTo(dayMap);
+  if (near.length > 1) dayMap.fitBounds(near, { padding:[28, 28] });
+  else dayMap.setView(near[0], 11);
+}
+
+/* ---------------- flights & hotels tabs ---------------- */
+function renderFlights() { $('#flights').innerHTML = FLIGHTS.map(flightCard).join(''); }
+function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => hotelCard(k, false)).join(''); }
+
+/* ---------------- clocks ---------------- */
+const CLOCKS = [
+  { name:'🇹🇼 台北', tz:'Asia/Taipei' },
+  { name:'🇬🇧 倫敦', tz:'Europe/London' },
+  { name:'🇮🇸 雷克雅未克', tz:'Atlantic/Reykjavik' },
+];
+function tzOffsetMin(tz, at = new Date()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone:tz, hourCycle:'h23',
+    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).formatToParts(at).map(x => [x.type, x.value]));
+  return Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - at.getTime()) / 6e4);
+}
+function renderClocks() {
+  const now = new Date(), base = tzOffsetMin('Asia/Taipei', now);
+  $('#clocks').innerHTML = CLOCKS.map(c => {
+    const t = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(now);
+    const dt = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, month:'numeric', day:'numeric', weekday:'short' }).format(now);
+    const diff = (tzOffsetMin(c.tz, now) - base) / 60;
+    const label = diff === 0 ? '基準時間' : `比台灣${diff < 0 ? '慢' : '快'} ${Math.abs(diff)} 小時`;
+    return `<div class="clock"><div><div class="name">${c.name}</div><div class="diff">${label}</div></div>
+      <div><div class="time">${t}</div><div class="date">${dt}</div></div></div>`;
+  }).join('');
+}
+
+/* ---------------- currency ---------------- */
+// fallback only used when offline and nothing cached; TWD per 1 unit
+let fx = store.get('fx', { GBP: 43.6, ISK: 0.269, TWD: 1, at: null, fallback: true });
+const FX_KEYS = ['GBP','ISK','TWD'];
+const fmt = (v, cur) => {
+  if (!isFinite(v)) return '';
+  const digits = cur === 'ISK' ? 0 : cur === 'TWD' ? 0 : 2;
+  return v.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 0 });
+};
+const parse = s => parseFloat(String(s).replace(/,/g, ''));
+function convertFrom(src) {
+  const v = parse($('#fx-' + src).value);
+  FX_KEYS.forEach(k => { if (k !== src) $('#fx-' + k).value = isFinite(v) ? fmt(v * fx[src] / fx[k], k) : ''; });
+  store.set('fxLast', { src, v: $('#fx-' + src).value });
+}
+function fxInfo() {
+  const r1 = `1 GBP ≈ ${fx.GBP.toFixed(2)} TWD・1,000 ISK ≈ ${(fx.ISK * 1000).toFixed(0)} TWD・1 GBP ≈ ${(fx.GBP / fx.ISK).toFixed(0)} ISK`;
+  $('#fxInfo').innerHTML = fx.fallback
+    ? `${r1}<br>⚠️ 目前為離線估計匯率，連上網路後會自動更新`
+    : `${r1}<br>更新時間：${new Date(fx.at).toLocaleString('zh-TW')}（實際刷卡匯率以銀行為準）`;
+}
+async function loadFx() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/TWD');
+    const d = await r.json();
+    if (d.result !== 'success') throw 0;
+    fx = { GBP: 1 / d.rates.GBP, ISK: 1 / d.rates.ISK, TWD: 1, at: d.time_last_update_utc, fallback: false };
+    store.set('fx', fx);
+  } catch {}
+  fxInfo();
+  const last = store.get('fxLast', null);
+  if (last && last.v) { $('#fx-' + last.src).value = last.v; convertFrom(last.src); }
+}
+function initFx() {
+  FX_KEYS.forEach(k => $('#fx-' + k).addEventListener('input', () => convertFrom(k)));
+  const quick = [['GBP',10],['GBP',50],['GBP',100],['ISK',1000],['ISK',5000],['ISK',10000]];
+  $('#fxQuick').innerHTML = quick.map(([c, v]) => `<button data-c="${c}" data-v="${v}">${c === 'GBP' ? '£' : ''}${v.toLocaleString()}${c === 'ISK' ? ' kr' : ''}</button>`).join('');
+  $('#fxQuick').querySelectorAll('button').forEach(b => b.onclick = () => {
+    $('#fx-' + b.dataset.c).value = (+b.dataset.v).toLocaleString('en-US'); convertFrom(b.dataset.c);
+  });
+  fxInfo();
+  loadFx();
+}
+
+/* ---------------- checklist ---------------- */
+const CHECK = ['護照（效期 6 個月以上）','泳裝（藍湖）','防水保暖外套','防水登山鞋（包覆腳踝）','毛帽、手套、圍巾','晶片感應信用卡',
+  '萬用轉接頭（英規 G＋歐規 C）','行動電源','個人藥品','頸枕、眼罩、口罩','行李秤（冰島航空限 23kg）','腳架（拍極光）'];
+function renderChecklist() {
+  const done = store.get('check', {});
+  $('#checklist').innerHTML = CHECK.map((t, i) => `<label class="check ${done[i] ? 'done' : ''}">
+    <input type="checkbox" data-i="${i}" ${done[i] ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('');
+  $('#checklist').querySelectorAll('input').forEach(c => c.onchange = () => {
+    const s = store.get('check', {}); s[c.dataset.i] = c.checked; store.set('check', s);
+    c.parentElement.classList.toggle('done', c.checked);
+  });
+}
+
+/* ---------------- tabs & theme ---------------- */
+function showView(v) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  store.set('view', v);
+  if (v === 'days' && dayMap) setTimeout(() => dayMap.invalidateSize(), 50);
+  if (v === 'tools') renderWxList();
+  window.scrollTo({ top: v === 'days' ? 0 : $('.hero').offsetHeight - 8 });
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => showView(b.dataset.v));
+
+const themeOrder = ['auto','light','dark'];
+function applyTheme(t) {
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+}
+let theme = store.get('theme', 'auto'); applyTheme(theme);
+$('#themeBtn').onclick = () => { theme = themeOrder[(themeOrder.indexOf(theme) + 1) % 3]; store.set('theme', theme); applyTheme(theme); };
+
+/* ---------------- lightbox ---------------- */
+const lb = $('#lightbox');
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-full]');
+  if (!t) return;
+  lb.querySelector('img').src = t.dataset.full;
+  lb.querySelector('.cap').textContent = t.alt || t.closest('.place')?.querySelector('h3')?.textContent || '';
+  lb.classList.add('on');
+});
+lb.onclick = () => lb.classList.remove('on');
+
+/* ---------------- init ---------------- */
+const ti = todayIndex();
+current = ti >= 0 ? ti : Math.min(store.get('day', 0), DAYS.length - 1);
+renderCountdown();
+renderChips();
+renderDay();
+renderFlights();
+renderHotels();
+renderClocks(); setInterval(renderClocks, 15000);
+initFx();
+renderChecklist();
+const v0 = store.get('view', 'days');
+if (v0 !== 'days') showView(v0);
+</script>
+</body>
+</html>
