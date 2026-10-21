@@ -1097,9 +1097,11 @@ function renderDay() {
   drawMap(d, hotel);
 }
 
-// Google Maps API key (Maps JavaScript API). Restrict it to https://feveral.github.io/*
-// in Google Cloud Console. When empty, the day map falls back to Leaflet below.
-const GMAPS_KEY = '';
+// Google Maps API key (Maps JavaScript API). Never committed: the Pages workflow swaps the
+// placeholder for the GMAPS_KEY repo secret at deploy time. The key is restricted to
+// https://feveral.github.io/travel-info/* and capped at 1000 map loads/day in GCP project
+// travel-info-maps-2610. Without a key (e.g. local preview) the day map falls back to Leaflet.
+const GMAPS_KEY = '__GMAPS_KEY__'.startsWith('__') ? '' : '__GMAPS_KEY__';
 
 let dayMap = null;
 function drawMap(d, hotel) {
@@ -1128,26 +1130,39 @@ function loadGoogle() {
   });
   return gmapsReady;
 }
+// One google.maps.Map per page view: every Map construction is a billable map load, so the
+// map element is created once, moved into each day's container, and only the pins change.
+let gmap1 = null, gmapEl = null, gmapPins = [], gmapInfo = null;
 async function drawGoogle(near, popup) {
   await loadGoogle();
-  const el = $('#dayMap');
-  if (!el) return;
+  const holder = $('#dayMap');
+  if (!holder) return;
   const g = google.maps;
-  const map = new g.Map(el, { disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative', clickableIcons: false,
-    styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-             { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }] });
-  const info = new g.InfoWindow();
+  if (!gmap1) {
+    gmapEl = document.createElement('div');
+    gmapEl.style.cssText = 'width:100%;height:100%';
+    holder.appendChild(gmapEl);
+    gmap1 = new g.Map(gmapEl, { disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative', clickableIcons: false,
+      styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+               { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }] });
+    gmapInfo = new g.InfoWindow();
+  } else {
+    holder.appendChild(gmapEl);
+  }
+  gmapPins.forEach(m => m.setMap(null));
+  gmapInfo.close();
   const bounds = new g.LatLngBounds();
-  near.forEach(s => {
+  gmapPins = near.map(s => {
     const pos = { lat: s.lat, lng: s.lon };
-    const m = new g.Marker({ position: pos, map, title: s.zh,
+    const m = new g.Marker({ position: pos, map: gmap1, title: s.zh,
       label: { text: s.n, color: '#fff', fontWeight: '700', fontSize: s.hotel ? '15px' : '13px' },
       icon: { path: g.SymbolPath.CIRCLE, scale: 14, fillColor: s.hotel ? '#0f9d8a' : '#e8590c', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 } });
-    m.addListener('click', () => { info.setContent(popup(s)); info.open({ map, anchor: m }); });
+    m.addListener('click', () => { gmapInfo.setContent(popup(s)); gmapInfo.open({ map: gmap1, anchor: m }); });
     bounds.extend(pos);
+    return m;
   });
-  if (near.length > 1) map.fitBounds(bounds, 36);
-  else { map.setCenter(bounds.getCenter()); map.setZoom(11); }
+  if (near.length > 1) gmap1.fitBounds(bounds, 36);
+  else { gmap1.setCenter(bounds.getCenter()); gmap1.setZoom(11); }
 }
 
 // keyless fallback: label-free basemap, so every visible label is our own Chinese pin/legend
