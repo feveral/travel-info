@@ -241,15 +241,26 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
     <div class="card pad">
       <h3>行李規定</h3>
       <table class="tbl" style="margin-top:8px">
-        <tr><th>中華航空<br><small>長程・經濟艙</small></th><td>托運 <b>2 件 × 23kg</b><br>手提 1 件 7kg ＋ 隨身小包 1 個</td></tr>
-        <tr><th>冰島航空<br><small>中段航班</small></th><td>托運 <b>1 件 × 23kg</b>（長寬高合計 ≤ 158cm）<br>手提 1 件 10kg（≤ 55×40×20cm）＋ 隨身軟包 1 個（≤ 40×30×15cm）</td></tr>
+        <tr><th>中華航空<br><small>台北⇄倫敦</small></th><td>托運 <b>2 件 × 23kg</b><br>手提 1 件 7kg（登機箱或有拉鍊手提包）＋ 隨身小包 1 個</td></tr>
+        <tr><th>冰島航空<br><small>倫敦⇄冰島</small></th><td>托運 <b>只有 1 件 × 23kg</b>（長寬高合計 ≤ 158cm）<br>手提 1 件 <b>7kg</b> ＋ 隨身小包 1 個</td></tr>
       </table>
-      <div class="note"><b>注意：</b>冰島航空只能托運 1 件！中華航空可托運 2 件，但中段航班超重或超件數需現場自費（領隊協助）。</div>
+      <div class="note"><b>請以冰島航空的額度打包：</b>每人 1 件大行李＋1 件 7kg 手提。超重或超件數需現場自費（領隊協助）。</div>
     </div>
     <div class="card pad small">
-      <b>選位：</b>中華航空團體票開票後至起飛前 72 小時，可上華航官網付費選位（需向業務索取機票號碼）。
+      <h3>登機安檢</h3>
+      <ul class="list" style="margin-top:6px">
+        <li><b>行動電源</b>不得超過 100Wh（約 27,000mAh），只能隨身帶、不能托運。</li>
+        <li>隨身液體、膠狀、霜狀、噴霧每瓶 ≤ 100ml，裝進可重複密封的透明夾鏈袋。</li>
+        <li>超過 100ml 的液體、刀具、指甲剪、環保餐具的叉子等尖銳物品放托運。</li>
+        <li>長途飛行帶 USB 充電線、行動電源、口罩；可帶空水壺，過安檢後再裝水。</li>
+        <li>慢性用藥放隨身行李。</li>
+      </ul>
+    </div>
+    <div class="card pad small">
+      <b>座位：</b>團體座位由航空公司統一安排，沒有付費選位的話會依英文姓名排序，同行者可能無法坐在一起。
+      華航開票後至起飛前 72 小時可上官網付費選位（向業務索取機票號碼）。
       <a href="https://www.china-airlines.com/" target="_blank" rel="noopener">華航官網 ↗</a><br>
-      <b>特殊餐：</b>需於出發前 72 小時（工作天）告知業務人員。
+      <b>特殊餐・一張大床：</b>素食、不吃牛羊雞豬龍蝦等，請出發前儘早通知報名業務。
     </div>
   </div>
 </section>
@@ -273,6 +284,7 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
     <div class="card">
       <div class="fx-row"><label><b>🇬🇧 GBP</b><small>英鎊</small></label><input inputmode="decimal" id="fx-GBP" autocomplete="off"></div>
       <div class="fx-row"><label><b>🇮🇸 ISK</b><small>冰島克朗</small></label><input inputmode="decimal" id="fx-ISK" autocomplete="off"></div>
+      <div class="fx-row"><label><b>🇪🇺 EUR</b><small>歐元</small></label><input inputmode="decimal" id="fx-EUR" autocomplete="off"></div>
       <div class="fx-row"><label><b>🇹🇼 TWD</b><small>新台幣</small></label><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div>
       <div class="quick" id="fxQuick"></div>
       <div class="pad small muted" style="padding-top:0" id="fxInfo">讀取匯率中…</div>
@@ -287,28 +299,80 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
 <!-- ============ 須知 ============ -->
 <section class="view" id="v-info">
   <div class="wrap">
-    <h2>行前清單</h2>
-    <div class="card" id="checklist"></div>
+    <h2>領隊與集合</h2>
+    <div class="card pad">
+      <div class="hdr" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div><h3>黃佳琳（小琳）</h3><div class="small muted">領隊・手機 0913-573-015</div></div>
+      </div>
+      <div class="btns">
+        <a class="btn primary" href="tel:+886913573015">📞 打給領隊</a>
+        <a class="btn" href="https://www.travel.com.tw/TOU/TOU0020/ENN0900013/EWW103109CI26A" target="_blank" rel="noopener">📄 官方行程頁</a>
+      </div>
+      <table class="tbl" style="margin-top:12px">
+        <tr><th>集合</th><td><b>10/31（六）06:25</b><br>桃園機場<b>第一航廈</b> 中華航空團體櫃台附近</td></tr>
+        <tr><th>報到領取</th><td>導覽耳機、行李綁帶、姓名吊牌、<b>歐洲網卡 1 張</b>、英規＋歐規插頭各 1 個</td></tr>
+        <tr><th>必帶</th><td><b>有效護照</b>（外籍人士帶居留證等身分文件正本）。健保卡、身分證不用帶</td></tr>
+      </table>
+      <div class="small muted" style="margin-top:8px">在國外撥打：+886 913 573 015</div>
+    </div>
+
+
+    <div id="checklistSec">
+      <h2>行前清單</h2>
+      <div class="card" id="checklist"></div>
+    </div>
+
+    <div id="checklistHome"></div>
+    <h2>現金與費用</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>建議現金</th><td>每人 <b>£200–300 英鎊＋€200–300 歐元</b>，在台灣先換好（冰島可用歐元）</td></tr>
+        <tr><th>信用卡</th><td>至少帶 <b>2 張 Visa／Master</b>，最好有感應功能</td></tr>
+        <tr><th>小費</th><td>領隊＋導遊＋司機：🇮🇸 冰島 5 天 × €12 ＝ <b>€60</b>、🇬🇧 英國 4 天 × £12 ＝ <b>£48</b><br>想付同一種幣別：<b>£100</b> 或 <b>€120</b>（現金）</td></tr>
+        <tr><th>公共廁所</th><td>約 £1–2 或等值克朗，部分只收感應卡</td></tr>
+        <tr><th>參考匯率</th><td>£1 ≈ 43 台幣・€1 ≈ 36 台幣・100 克朗 ≈ 26 台幣（「工具」頁有即時匯率）</td></tr>
+      </table>
+    </div>
 
     <h2>實用資訊</h2>
     <div class="card pad">
       <table class="tbl">
         <tr><th>時差</th><td>英國、冰島都比台灣 <b>慢 8 小時</b>（英國 10/25 起已改回冬令時間）</td></tr>
-        <tr><th>電壓插座</th><td>🇬🇧 英國 230V・<b>英規三角扁型（G）</b><br>🇮🇸 冰島 230V・<b>歐規雙腳圓型（C/F）</b><br>請帶萬用轉接頭</td></tr>
-        <tr><th>貨幣</th><td>英鎊 GBP、冰島克朗 ISK。兩地幾乎都可刷卡，建議帶<b>晶片感應信用卡</b>（部分收費廁所只收感應卡）</td></tr>
+        <tr><th>電壓插座</th><td>230V。🇬🇧 英國 <b>英規三角扁型（G）</b>、🇮🇸 冰島 <b>歐規雙圓孔（C/F）</b><br>機場會發各 1 個，充電裝置多的話自備萬用插頭或多孔 USB 充電器</td></tr>
+        <tr><th>網路</th><td>報到時會發歐洲網卡 1 張</td></tr>
         <tr><th>國碼</th><td>英國 +44・冰島 +354・台灣 +886<br>打回台灣：+886 ＋ 區碼去 0 ＋ 號碼</td></tr>
         <tr><th>緊急電話</th><td>英國 <a href="tel:999">999</a>・冰島 <a href="tel:112">112</a></td></tr>
       </table>
+    </div>
+
+    <h2>飯店與用水</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>歐洲飯店響應環保<b>不提供盥洗用品</b>：請自備牙刷、牙膏、洗髮精、潤髮乳、拖鞋、刮鬍刀、保濕乳液、購物袋。</li>
+        <li>飯店房內全面禁菸，罰款需自行負擔。</li>
+        <li><b>冷水</b>：飯店自來水可直接生飲。冰島熱水來自地熱，有淡淡硫磺味是正常的。</li>
+        <li><b>熱水</b>：中餐廳可免費裝熱水，部分飯店或西餐廳可能要付費，記得帶保溫瓶。</li>
+      </ul>
+    </div>
+
+    <h2>安全與保險</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>歐洲扒手很多，護照、錢財請放<b>貼身小包</b>。</li>
+        <li>護照、信用卡、行程拍照存手機，並留一份給台灣親友。</li>
+        <li>建議加保旅遊平安險、旅遊不便險、海外突發疾病險。</li>
+        <li>常備藥：腸胃藥、感冒藥、止痛藥、止咳化痰、暈車藥；慢性用藥放隨身行李。</li>
+      </ul>
     </div>
 
     <h2>退稅</h2>
     <div class="card pad small">
       <ul class="list">
         <li>購物時一定要在店內<b>當場索取退稅單</b>，事後無法補辦。</li>
-        <li>一般食品、菸酒不能退稅。可退稅金額門檻可問領隊或店家。</li>
+        <li>🇮🇸 冰島：同一家店消費 <b>ISK 12,000（約 3,250 台幣）以上</b>可退稅；保健品、超市食品、菸酒不能退。</li>
         <li>非歐盟國家（英國、冰島都是）要在<b>離開該國海關時</b>辦理。</li>
         <li>機場退稅可選領現金或退回信用卡。</li>
-        <li>⚠️ 英國自 2021 年起已取消一般旅客購物退稅，Bicester Village 購物請先向店家確認。</li>
+        <li>🇬🇧 <b>英國沒有退稅</b>（2021 年起取消），Bicester Village 標價就是最後價格。</li>
       </ul>
     </div>
 
@@ -332,11 +396,9 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
     <h2>在地生活</h2>
     <div class="card pad small">
       <table class="tbl">
-        <tr><th>小費</th><td>🇬🇧 餐廳帳單常已含 12.5% 服務費，沒含的話給 10% 左右<br>🇮🇸 冰島不需要給小費</td></tr>
-        <tr><th>喝水</th><td>兩地自來水都可生飲。冰島的熱水來自地熱，有淡淡硫磺味是正常的</td></tr>
-        <tr><th>穿著</th><td>倫敦約 5–12°C、常下雨；冰島約 −3–5°C、風很大。洋蔥式穿搭＋防風防水外套</td></tr>
+        <tr><th>餐廳小費</th><td>🇬🇧 帳單常已含 12.5% 服務費，沒含的話給 10% 左右；🇮🇸 冰島餐廳不需要小費<br>（領隊、導遊、司機小費見上方「現金與費用」）</td></tr>
+        <tr><th>穿著</th><td>英國平均約 5–10°C、常下雨；冰島約 −3–5°C、風很大。以保暖長袖為主，洋蔥式穿搭＋防風防水外套，帶雨具</td></tr>
         <tr><th>日照</th><td>11 月初倫敦約 16:30 天黑；冰島白天只有約 8 小時</td></tr>
-        <tr><th>網路</th><td>英國與冰島可以用同一張歐洲 eSIM／漫遊，出發前確認方案涵蓋冰島</td></tr>
       </table>
     </div>
 
@@ -357,6 +419,7 @@ nav.tabs button.on{color:var(--accent);font-weight:700}
         <li>飲食不過量，不吃保育類野生動物。</li>
       </ul>
     </div>
+    <div id="checklistEnd"></div>
     <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・匯率：ExchangeRate-API</div>
   </div>
 </section>
@@ -423,9 +486,9 @@ const DAYS = [
     meals:{ b:'—', l:'機上', d:'機上' },
     places:[
       { zh:'桃園國際機場', en:'Taoyuan International Airport', img:'7/72/Exterior_of_Terminal_1%2C_Taoyuan_Airport_20141230.jpg',
-        lat:25.0797, lon:121.2342, q:'Taoyuan International Airport Terminal 2',
-        desc:'一早集合於桃園機場，搭乘中華航空 CI081 直飛倫敦，飛行約 15.5 小時。', tags:['集合'],
-        tips:['華航在第二航廈，集合時間以領隊通知為準','機上很乾，帶保濕噴霧、護唇膏；可穿壓力襪'] },
+        lat:25.0797, lon:121.2342, q:'Taoyuan International Airport Terminal 1',
+        desc:'早上 06:25 在第一航廈集合，搭乘中華航空 CI081 直飛倫敦，飛行約 15.5 小時。', tags:['06:25 集合','第一航廈'],
+        tips:['<b>06:25 集合</b>：桃園機場第一航廈 中華航空團體櫃台附近','報到時領取導覽耳機、行李綁帶、姓名吊牌、歐洲網卡、英規＋歐規插頭','機上很乾，帶口罩、保濕噴霧；可帶空水壺過安檢後裝水'] },
       { zh:'倫敦希斯洛機場', en:'London Heathrow Airport', img:'0/0d/London_-_Heathrow_%28LHR_-_EGLL%29_AN1572653.jpg',
         lat:51.4700, lon:-0.4543, q:'London Heathrow Airport',
         desc:'時差的關係，同一天傍晚就抵達倫敦。今天不安排遊覽車，由領隊帶大家搭電車到飯店。不用在機上過夜，好好睡一覺。', tags:['搭電車'],
@@ -529,7 +592,7 @@ const DAYS = [
           { img:'5/57/Sunrise_at_Blue_Lagoon_Iceland_2026-02-10_10-48-20_1.jpg', cap:'冬季早晨的藍湖，水氣瀰漫' },
           '冬天下水前外面只有幾度，一泡進去就暖起來。在零度的空氣裡泡溫泉、看天色變化，是冰島最療癒的體驗之一。',
         ],
-        tips:['冰島規定下水前要在淋浴間「脫光」洗澡，入境隨俗喔','矽泥會讓頭髮乾澀打結：盡量不要弄濕頭髮，或先抹大量潤髮乳','銀飾、首飾先拿下來，礦物質會讓它變黑','手機記得裝防水袋'] },
+        tips:['<b>必帶泳衣／比基尼</b>（強制規定）；礦物質可能讓泳衣變色，別穿白色或珍貴的款式。怕冷可套 T 恤、短褲下水','<b>裸身淋浴</b>：下水前一定要在淋浴間脫光，用沐浴乳把身體和頭髮洗乾淨，這是冰島嚴格的衛生規定','<b>頭髮保養</b>：矽和礦物質會讓頭髮又乾又硬，下水前抹大量潤髮乳、把頭髮綁高，不要泡到水','Comfort 套票通常附毛巾；浴袍要自備或租借（約 ISK 1,500）','從置物櫃到池邊有段露天走道，冬天很冷，建議帶拖鞋','銀飾、首飾先拿下來，手機裝防水袋'] },
       { zh:'塞爾福斯', en:'Selfoss', img:'8/86/Selfoss_0722.jpg',
         lat:63.9333, lon:-21.0, q:'Selfoss Iceland',
         desc:'冰島南部最大的小鎮，位在冰島最大河流 Ölfusá 河畔，是南岸旅程的起點。今晚開始追極光！', tags:['住宿','極光'],
@@ -539,7 +602,7 @@ const DAYS = [
         ],
         tips:['晚餐的小龍蝦（langoustine）是冰島南部名產'] },
     ],
-    notes:['<b>請自備泳裝！</b>藍湖若因天候或火山活動關閉，會找其他溫泉替代；無替代則每人退 €30。','冰島航空只能托運 1 件 23kg 行李，手提 10kg。','小龍蝦視季節捕撈量，不足時以其他大西洋海鮮替代。'] },
+    notes:['<b>請自備泳裝！</b>藍湖若因天候或火山活動關閉，會找其他溫泉替代；無替代則每人退 €30。','冰島航空只能托運 1 件 23kg 行李，手提 7kg。','小龍蝦視季節捕撈量，不足時以其他大西洋海鮮替代。'] },
 
   { date:'2026-11-03', country:'is', title:'冰島南岸：瀑布與黑沙灘', subtitle:'塞里雅蘭瀑布・史可加瀑布・黑沙灘・赫本', aurora:'追尋極光第二晚',
     wx:{ name:'維克（南岸）', lat:63.4186, lon:-19.0060 }, hotel:'jokull',
@@ -606,7 +669,7 @@ const DAYS = [
           '為什麼是藍色？冰河的冰被壓得非常緊實、幾乎沒有氣泡，會吸收紅光、只讓藍光穿透，於是呈現像寶石一樣的深藍色。',
           { img:'2/2c/Ice_cave_at_Brei%C3%B0amerkurj%C3%B6kull_glacier%2C_Iceland%2C_20240719_1549_2726.jpg', cap:'光線穿過千年冰層' },
         ],
-        tips:['嚮導會提供冰爪、安全帽，請穿防水保暖外套＋防水登山鞋（包覆腳踝尤佳）','穿機能性洋蔥式穿搭，不要太厚重，走起來會流汗','手套、毛帽必備，手機在低溫下很耗電，帶行動電源'] },
+        tips:['<b>出發前先上廁所！</b>集合點通常是唯一有廁所的地方，搭超級吉普車上冰川後好幾小時都沒有洗手間','<b>上衣洋蔥式</b>：排汗發熱衣（不要純棉，流汗變冷會失溫）＋刷毛／羽絨中層＋100% 防風防水外套','<b>下身</b>：發熱褲＋防風防水雪褲或登山褲；厚羊毛襪','<b>鞋子最關鍵</b>：高筒、防水、硬底登山鞋，要能綁冰爪，球鞋布鞋不能參加','<b>毛帽不能有毛球</b>（要戴安全帽）；防水防滑手套，內層加觸控薄手套方便拍照','防風圍脖／面罩、太陽眼鏡（冰原反光容易雪盲）','<b>雙肩防雨背包</b>，雙手要空出來保持平衡','保溫瓶溫水＋巧克力、堅果等點心；沿途沒有商店','低溫很耗電，行動電源放靠近身體的內袋；多帶衛生紙','冰層每天變化、可能有裂隙，絕對不要自行脫隊'] },
       { zh:'傑古沙龍冰河湖', en:'Jökulsárlón Glacier Lagoon', img:'2/2c/J%C3%B6kuls%C3%A1rl%C3%B3n_lagoon_in_southeastern_Iceland.jpg',
         lat:64.0784, lon:-16.2306, q:'Jokulsarlon Glacier Lagoon',
         desc:'冰島最著名的冰河湖，深約 250 公尺，是冰島最深的湖。千年浮冰從冰河斷裂後漂在湖面上。', tags:['拍照點'],
@@ -824,6 +887,10 @@ function fetchWx(lat, lon) {
   return wxCache[k];
 }
 const hhmm = s => s ? s.slice(11, 16) : '';
+// ≥ 10.8 m/s is Beaufort 6 ("strong breeze"); on Iceland's open roads that already feels harsh
+const windPill = ms => ms >= 10.8
+  ? `<span class="pill bad">💨 大風 ${Math.round(ms)} m/s</span>`
+  : `<span class="pill">💨 風 ${Math.round(ms)} m/s</span>`;
 function nightCloud(data, date) {
   // average cloud cover 21:00–24:00 local on that date
   const h = data.hourly; if (!h) return null;
@@ -843,7 +910,7 @@ async function renderDayWx(day, el) {
         <div class="d">${esc(day.wx.name)}・${md(day.date)} 預報・${tx}</div></div></div>
         <div class="wx-extra">
           <span class="pill">☔ 降雨 ${d.daily.precipitation_probability_max[i] ?? '–'}%</span>
-          <span class="pill">💨 風 ${Math.round(d.daily.wind_speed_10m_max[i])} m/s</span>
+          ${windPill(d.daily.wind_speed_10m_max[i])}
           <span class="pill">🌅 日出 ${hhmm(d.daily.sunrise[i])}</span>
           <span class="pill">🌇 日落 ${hhmm(d.daily.sunset[i])}</span>`;
       if (day.aurora) {
@@ -1131,8 +1198,9 @@ function renderClocks() {
 
 /* ---------------- currency ---------------- */
 // fallback only used when offline and nothing cached; TWD per 1 unit
-let fx = store.get('fx', { GBP: 43.6, ISK: 0.269, TWD: 1, at: null, fallback: true });
-const FX_KEYS = ['GBP','ISK','TWD'];
+let fx = store.get('fx', null);
+if (!fx || !fx.EUR) fx = { GBP: 43.6, ISK: 0.269, EUR: 37.2, TWD: 1, at: null, fallback: true };
+const FX_KEYS = ['GBP','ISK','EUR','TWD'];
 const fmt = (v, cur) => {
   if (!isFinite(v)) return '';
   const digits = cur === 'ISK' ? 0 : cur === 'TWD' ? 0 : 2;
@@ -1145,7 +1213,7 @@ function convertFrom(src) {
   store.set('fxLast', { src, v: $('#fx-' + src).value });
 }
 function fxInfo() {
-  const r1 = `1 GBP ≈ ${fx.GBP.toFixed(2)} TWD・1,000 ISK ≈ ${(fx.ISK * 1000).toFixed(0)} TWD・1 GBP ≈ ${(fx.GBP / fx.ISK).toFixed(0)} ISK`;
+  const r1 = `£1 ≈ ${fx.GBP.toFixed(2)} 台幣・€1 ≈ ${fx.EUR.toFixed(2)} 台幣・100 kr ≈ ${(fx.ISK * 100).toFixed(1)} 台幣・€1 ≈ ${(fx.EUR / fx.ISK).toFixed(0)} kr`;
   $('#fxInfo').innerHTML = fx.fallback
     ? `${r1}<br>⚠️ 目前為離線估計匯率，連上網路後會自動更新`
     : `${r1}<br>更新時間：${new Date(fx.at).toLocaleString('zh-TW')}（實際刷卡匯率以銀行為準）`;
@@ -1155,7 +1223,7 @@ async function loadFx() {
     const r = await fetch('https://open.er-api.com/v6/latest/TWD');
     const d = await r.json();
     if (d.result !== 'success') throw 0;
-    fx = { GBP: 1 / d.rates.GBP, ISK: 1 / d.rates.ISK, TWD: 1, at: d.time_last_update_utc, fallback: false };
+    fx = { GBP: 1 / d.rates.GBP, ISK: 1 / d.rates.ISK, EUR: 1 / d.rates.EUR, TWD: 1, at: d.time_last_update_utc, fallback: false };
     store.set('fx', fx);
   } catch {}
   fxInfo();
@@ -1164,8 +1232,8 @@ async function loadFx() {
 }
 function initFx() {
   FX_KEYS.forEach(k => $('#fx-' + k).addEventListener('input', () => convertFrom(k)));
-  const quick = [['GBP',10],['GBP',50],['GBP',100],['ISK',1000],['ISK',5000],['ISK',10000]];
-  $('#fxQuick').innerHTML = quick.map(([c, v]) => `<button data-c="${c}" data-v="${v}">${c === 'GBP' ? '£' : ''}${v.toLocaleString()}${c === 'ISK' ? ' kr' : ''}</button>`).join('');
+  const quick = [['GBP',10],['GBP',50],['GBP',100],['ISK',1000],['ISK',5000],['ISK',12000],['EUR',12],['EUR',60]];
+  $('#fxQuick').innerHTML = quick.map(([c, v]) => `<button data-c="${c}" data-v="${v}">${c === 'GBP' ? '£' : c === 'EUR' ? '€' : ''}${v.toLocaleString()}${c === 'ISK' ? ' kr' : ''}</button>`).join('');
   $('#fxQuick').querySelectorAll('button').forEach(b => b.onclick = () => {
     $('#fx-' + b.dataset.c).value = (+b.dataset.v).toLocaleString('en-US'); convertFrom(b.dataset.c);
   });
@@ -1174,8 +1242,19 @@ function initFx() {
 }
 
 /* ---------------- checklist ---------------- */
-const CHECK = ['護照（效期 6 個月以上）','泳裝（藍湖）','防水保暖外套','防水登山鞋（包覆腳踝）','毛帽、手套、圍巾','晶片感應信用卡',
-  '萬用轉接頭（英規 G＋歐規 C）','行動電源','個人藥品','頸枕、眼罩、口罩','行李秤（冰島航空限 23kg）','腳架（拍極光）'];
+const CHECK = [
+  '有效護照（外籍人士帶身分文件正本）','護照、信用卡、行程拍照備份','現金 £200–300＋€200–300','Visa／Master 信用卡至少 2 張',
+  '小費 £48＋€60（或 £100／€120）','保暖長袖、發熱衣褲（不要純棉）','防風防水外套＋雨具','防水高筒登山鞋（包覆腳踝）','厚羊毛襪',
+  '無毛球毛帽（要戴安全帽）','防水手套＋觸控薄手套','防風圍脖／面罩','太陽眼鏡（冰原反光）','雙肩防雨背包',
+  '泳衣（不要白色或珍貴款）','拖鞋（藍湖、飯店）','牙刷、牙膏、洗髮精、潤髮乳','刮鬍刀、保濕乳液','購物袋',
+  '保溫瓶／空水壺','巧克力、堅果等高熱量點心','行動電源（≤ 100Wh，隨身帶）','USB 充電線、多孔充電器',
+  '透明夾鏈袋（液體 ≤ 100ml）','常備藥＋慢性用藥（隨身）','口罩、眼罩、頸枕','衛生紙、濕紙巾','腳架（拍極光）'];
+// before departure the packing list leads the info tab; once we've left it moves to the bottom
+const DEPART_AT = Date.parse('2026-10-31T06:25:00+08:00');
+function placeChecklist() {
+  const sec = $('#checklistSec'), departed = now().getTime() >= DEPART_AT;
+  (departed ? $('#checklistEnd') : $('#checklistHome')).before(sec);
+}
 function renderChecklist() {
   const done = store.get('check', {});
   $('#checklist').innerHTML = CHECK.map((t, i) => `<label class="check ${done[i] ? 'done' : ''}">
@@ -1227,10 +1306,12 @@ renderHotels();
 renderClocks(); setInterval(renderClocks, 15000);
 initFx();
 renderChecklist();
+placeChecklist();
 
 // Keep "today" current while the page stays open (midnight passes, phone wakes up, new time zone).
 let lastToday = ti;
 function checkToday() {
+  placeChecklist();
   const t = todayIndex();
   if (t === lastToday) return;
   renderCountdown();
