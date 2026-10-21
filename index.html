@@ -201,10 +201,14 @@ html{touch-action:manipulation}
 
 .list{margin:0;padding-left:20px}
 .list li{margin:4px 0}
-.check{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:15px;cursor:pointer}
-.check:first-child{border-top:0}
-.check input{width:20px;height:20px;accent-color:var(--accent)}
-.check.done span{text-decoration:line-through;color:var(--muted)}
+.check{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:15px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+.check .ct{display:flex;flex-direction:column;min-width:0}
+.check .why{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:1px}
+.check .opt{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.check.done .t{text-decoration:line-through;color:var(--muted)}
+.check-group{font-weight:700;font-size:14px;padding:12px 16px 6px;background:var(--surface-2);border-top:1px solid var(--line)}
+.check-sum{padding:10px 16px;font-size:13px;color:var(--accent);font-weight:700}
 table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 table.tbl th,table.tbl td{text-align:left;padding:8px 0;border-top:1px solid var(--line);vertical-align:top}
 table.tbl th{color:var(--muted);font-weight:500;width:92px}
@@ -234,7 +238,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   .chips .row{padding:8px 8px}
   .flight{padding:14px 12px}
   .perf{margin:12px -12px 0;padding:10px 12px 0}
-  .fx-row,.clock,.wx-list .row,.check{padding-left:12px;padding-right:12px}
+  .fx-row,.clock,.wx-list .row,.check,.check-group,.check-sum{padding-left:12px;padding-right:12px}
   .quick{padding:0 12px 12px}
   .hero .wrap{padding-left:16px;padding-right:16px}
 }
@@ -1309,26 +1313,69 @@ function initFx() {
 }
 
 /* ---------------- checklist ---------------- */
+// Packing list, grouped by occasion. `why` says when the item is needed; `opt` marks nice-to-haves.
+// Ticks are stored per item id so editing the list doesn't shuffle them.
 const CHECK = [
-  '有效護照（外籍人士帶身分文件正本）','護照、信用卡、行程拍照備份','現金 £200–300＋€200–300','Visa／Master 信用卡至少 2 張',
-  '小費 £48＋€60（或 £100／€120）','保暖長袖、發熱衣褲（不要純棉）','防風防水外套＋雨具','防水高筒登山鞋（包覆腳踝）','厚羊毛襪',
-  '無毛球毛帽（要戴安全帽）','防水手套＋觸控薄手套','防風圍脖／面罩','太陽眼鏡（冰原反光）','雙肩防雨背包',
-  '泳衣（不要白色或珍貴款）','拖鞋（藍湖、飯店）','牙刷、牙膏、洗髮精、潤髮乳','刮鬍刀、保濕乳液','購物袋',
-  '保溫瓶／空水壺','巧克力、堅果等高熱量點心','行動電源（≤ 100Wh，隨身帶）','USB 充電線、多孔充電器',
-  '透明夾鏈袋（液體 ≤ 100ml）','常備藥＋慢性用藥（隨身）','口罩、眼罩、頸枕','衛生紙、濕紙巾','腳架（拍極光）'];
-// before departure the packing list leads the info tab; once we've left it moves to the bottom
-const DEPART_AT = Date.parse('2026-10-31T06:25:00+08:00');
-function placeChecklist() {
-  const sec = $('#checklistSec'), departed = now().getTime() >= DEPART_AT;
-  (departed ? $('#checklistEnd') : $('#checklistHome')).before(sec);
-}
+  { group:'🛂 證件與錢', items:[
+    { id:'passport', t:'有效護照', why:'出入境必備（外籍人士另帶居留證等身分文件正本）' },
+    { id:'copies', t:'護照、信用卡、行程拍照備份', why:'存手機並留一份給台灣親友，遺失時補辦用' },
+    { id:'cash', t:'現金 £200–300 英鎊＋€200–300 歐元', why:'在台灣先換好；小費、零星花費用（冰島可用歐元）' },
+    { id:'cards', t:'Visa／Master 信用卡至少 2 張', why:'兩地幾乎都能刷卡；部分收費廁所只收感應卡' },
+    { id:'tips', t:'小費 £48＋€60（或 £100／€120）', why:'給領隊、導遊、司機，可先分裝好' },
+  ]},
+  { group:'🧥 衣物（全程）', items:[
+    { id:'thermal', t:'保暖長袖、發熱衣褲', why:'冰島約 −3～5°C、英國約 5～10°C。不要純棉，流汗後會變冷' },
+    { id:'shell', t:'防風防水外套＋雨具', why:'冰島風很大、英國常下雨；冰洞健行也需要' },
+    { id:'boots', t:'防水高筒登山鞋', why:'冰洞健行必備（要綁冰爪、包覆腳踝，球鞋不能參加）；瀑布步道濕滑也好走' },
+    { id:'socks', t:'厚羊毛襪', why:'保暖，健行時也比較不會磨腳' },
+    { id:'hat', t:'毛帽（不能有毛球）', why:'冰洞健行要戴安全帽，有毛球的毛帽會戴不上' },
+    { id:'gloves', t:'防水手套＋觸控薄手套', why:'冰洞、看極光時保暖；薄手套戴著也能滑手機拍照' },
+    { id:'buff', t:'防風圍脖／面罩', why:'冰原與海邊風大，保護臉不凍傷', opt:true },
+    { id:'sunglasses', t:'太陽眼鏡', why:'冰原反光很刺眼，避免雪盲', opt:true },
+  ]},
+  { group:'♨️ 藍色溫泉湖（11/2）', items:[
+    { id:'swim', t:'泳衣／比基尼', why:'藍湖規定一定要穿；礦物質可能讓泳衣變色，別帶白色或珍貴款' },
+    { id:'slippers', t:'拖鞋', why:'藍湖置物櫃到池邊有段很冷的露天走道；歐洲飯店也不提供' },
+    { id:'conditioner', t:'潤髮乳', why:'下水前抹在頭髮上，避免矽泥讓頭髮乾硬' },
+  ]},
+  { group:'🧊 藍冰洞健行（11/4）', items:[
+    { id:'backpack', t:'雙肩防雨背包', why:'健行時雙手要空出來平衡，不能用側背包或手提包' },
+    { id:'snacks', t:'巧克力、堅果等點心＋保溫瓶', why:'冰川上沒有商店、也沒有廁所，體力消耗大' },
+    { id:'tissue', t:'衛生紙', why:'天冷容易流鼻水' },
+  ]},
+  { group:'✈️ 搭飛機', items:[
+    { id:'powerbank', t:'行動電源（≤ 100Wh，約 27,000mAh）', why:'只能放隨身行李、不能托運；低溫下手機很耗電' },
+    { id:'cables', t:'USB 充電線、多孔充電器', why:'機場會發英規＋歐規插頭各 1 個，裝置多的話一個插座充多台' },
+    { id:'bottle', t:'空水壺', why:'過安檢後再裝水，機艙很乾' },
+    { id:'mask', t:'口罩、眼罩、頸枕', why:'長途飛行 13–15 小時保護喉嚨、好睡', opt:true },
+    { id:'ziplock', t:'透明夾鏈袋', why:'只有「隨身行李」帶乳液、牙膏等液體才需要：每瓶 ≤ 100ml，全部裝進一個夾鏈袋過安檢', opt:true },
+  ]},
+  { group:'🧴 盥洗與日常', items:[
+    { id:'toiletries', t:'牙刷、牙膏、洗髮精、沐浴乳', why:'歐洲飯店響應環保，不提供盥洗用品' },
+    { id:'razor', t:'刮鬍刀、保濕乳液', why:'飯店不提供；冰島非常乾燥' },
+    { id:'bag', t:'購物袋', why:'歐洲超市、商店塑膠袋要另外付費' },
+    { id:'meds', t:'常備藥＋慢性用藥', why:'腸胃、感冒、止痛、止咳、暈車藥；慢性用藥放隨身行李' },
+  ]},
+  { group:'🌌 拍極光', items:[
+    { id:'tripod', t:'手機小腳架', why:'拍極光要長曝光 3–10 秒，手持會糊', opt:true },
+  ]},
+];
 function renderChecklist() {
-  const done = store.get('check', {});
-  $('#checklist').innerHTML = CHECK.map((t, i) => `<label class="check ${done[i] ? 'done' : ''}">
-    <input type="checkbox" data-i="${i}" ${done[i] ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('');
+  const done = store.get('check2', {});
+  const total = CHECK.reduce((n, g) => n + g.items.length, 0);
+  const count = () => Object.values(store.get('check2', {})).filter(Boolean).length;
+  $('#checklist').innerHTML = `<div class="check-sum" id="checkSum"></div>` + CHECK.map(g => `
+    <div class="check-group">${esc(g.group)}</div>
+    ${g.items.map(it => `<label class="check ${done[it.id] ? 'done' : ''}">
+      <input type="checkbox" data-id="${it.id}" ${done[it.id] ? 'checked' : ''}>
+      <span class="ct"><span class="t">${esc(it.t)}${it.opt ? '<em class="opt">可選</em>' : ''}</span>
+      <small class="why">${esc(it.why)}</small></span></label>`).join('')}`).join('');
+  const sum = () => { $('#checkSum').textContent = `已準備 ${count()} / ${total} 項`; };
+  sum();
   $('#checklist').querySelectorAll('input').forEach(c => c.onchange = () => {
-    const s = store.get('check', {}); s[c.dataset.i] = c.checked; store.set('check', s);
-    c.parentElement.classList.toggle('done', c.checked);
+    const st = store.get('check2', {}); st[c.dataset.id] = c.checked; store.set('check2', st);
+    c.closest('.check').classList.toggle('done', c.checked);
+    sum();
   });
 }
 
