@@ -772,21 +772,32 @@ const md = iso => { const [y,m,d] = iso.split('-').map(Number); return `${m}/${d
 const wk = iso => WK[new Date(iso + 'T12:00:00').getDay()];
 // The traveller's "today" depends on where they are; use the day's local zone.
 const tzOf = c => c === 'uk' ? 'Europe/London' : c === 'is' ? 'Atlantic/Reykjavik' : 'Asia/Taipei';
-const isoIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+// ?now=2026-11-03T20:00:00Z simulates another moment (for checking the "today" logic)
+const NOW_OFFSET = (() => {
+  const q = new URLSearchParams(location.search).get('now');
+  const t = q ? Date.parse(q) : NaN;
+  return isNaN(t) ? 0 : t - Date.now();
+})();
+const now = () => new Date(Date.now() + NOW_OFFSET);
+const isoIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(now());
+// Day 1 is judged on London time: the flight leaves Taipei on the morning of 10/31 and
+// lands the same evening, so London's 10/31 covers the whole day without leaving a gap.
+const dayTz = i => i === 0 ? 'Europe/London' : tzOf(DAYS[i].country);
 function todayIndex() {
-  for (let i = 0; i < DAYS.length; i++) if (isoIn(tzOf(DAYS[i].country)) === DAYS[i].date) return i;
+  for (let i = 0; i < DAYS.length; i++) if (isoIn(dayTz(i)) === DAYS[i].date) return i;
   return -1;
 }
 
 /* ---------------- countdown ---------------- */
 function renderCountdown() {
-  const now = isoIn('Asia/Taipei');
-  const diff = Math.round((new Date(TRIP_START) - new Date(now)) / 864e5);
+  const tw = isoIn('Asia/Taipei');
+  const diff = Math.round((new Date(TRIP_START) - new Date(tw)) / 864e5);
   const ti = todayIndex();
+  const place = { uk:'英國', is:'冰島', tw: ti === 0 ? '出發' : '返台' };
   let html;
-  if (ti >= 0) html = `🌌 旅程第 <b>${ti + 1}</b> 天`;
+  if (ti >= 0) html = `🌌 旅程第 <b>${ti + 1}</b> / ${DAYS.length} 天・${place[DAYS[ti].country]}`;
   else if (diff > 0) html = `距離出發還有 <b>${diff}</b> 天`;
-  else if (now > TRIP_END) html = `旅程結束，謝謝一起出發 ✨`;
+  else if (tw > TRIP_END) html = `旅程結束，謝謝一起出發 ✨`;
   else html = `今天出發！`;
   $('#countdown').innerHTML = html;
 }
@@ -1019,17 +1030,61 @@ function renderDay() {
   drawMap(d, hotel);
 }
 
-// Leaflet on a label-free basemap: every visible label is our own Traditional Chinese
-// pin/legend, so nothing switches with the phone's system language.
+// Google Maps API key (Maps JavaScript API). Restrict it to https://feveral.github.io/*
+// in Google Cloud Console. When empty, the day map falls back to Leaflet below.
+const GMAPS_KEY = '';
+
 let dayMap = null;
 function drawMap(d, hotel) {
-  if (dayMap) { dayMap.remove(); dayMap = null; }
+  if (dayMap && dayMap.remove) dayMap.remove();
+  dayMap = null;
   const stops = d.places.map((p, i) => ({ n: String(i + 1), zh: p.zh, q: p.q, lat: p.lat, lon: p.lon }));
   if (hotel) stops.push({ n: '🏨', zh: hotel.zh, q: `${hotel.name} ${hotel.addr}`, lat: hotel.lat, lon: hotel.lon, hotel: true });
   // keep the cluster around tonight's stay; drop far-away airports (e.g. Taoyuan on a London day)
   const ref = stops[stops.length - 1];
   const near = stops.filter(s => Math.abs(s.lat - ref.lat) < 15 && Math.abs(s.lon - ref.lon) < 30);
   $('#mapLegend').innerHTML = near.map(s => `<span><b class="${s.hotel ? 'h' : ''}">${s.n}</b>${esc(s.zh)}</span>`).join('');
+  const popup = s => `<b>${esc(s.zh)}</b><br><a href="${gmap(s.q)}" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>`;
+  if (GMAPS_KEY) drawGoogle(near, popup).catch(() => drawLeaflet(near, popup));
+  else drawLeaflet(near, popup);
+}
+
+// language=zh-TW pins Google's own map labels to Traditional Chinese regardless of system language
+let gmapsReady = null;
+function loadGoogle() {
+  if (!gmapsReady) gmapsReady = new Promise((ok, fail) => {
+    window.__gmapsCb = ok;
+    const sc = document.createElement('script');
+    sc.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&language=zh-TW&region=TW&callback=__gmapsCb`;
+    sc.onerror = fail;
+    document.head.appendChild(sc);
+  });
+  return gmapsReady;
+}
+async function drawGoogle(near, popup) {
+  await loadGoogle();
+  const el = $('#dayMap');
+  if (!el) return;
+  const g = google.maps;
+  const map = new g.Map(el, { disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative', clickableIcons: false,
+    styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+             { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }] });
+  const info = new g.InfoWindow();
+  const bounds = new g.LatLngBounds();
+  near.forEach(s => {
+    const pos = { lat: s.lat, lng: s.lon };
+    const m = new g.Marker({ position: pos, map, title: s.zh,
+      label: { text: s.n, color: '#fff', fontWeight: '700', fontSize: s.hotel ? '15px' : '13px' },
+      icon: { path: g.SymbolPath.CIRCLE, scale: 14, fillColor: s.hotel ? '#0f9d8a' : '#e8590c', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 } });
+    m.addListener('click', () => { info.setContent(popup(s)); info.open({ map, anchor: m }); });
+    bounds.extend(pos);
+  });
+  if (near.length > 1) map.fitBounds(bounds, 36);
+  else { map.setCenter(bounds.getCenter()); map.setZoom(11); }
+}
+
+// keyless fallback: label-free basemap, so every visible label is our own Chinese pin/legend
+function drawLeaflet(near, popup) {
   if (!window.L) { $('#dayMap').innerHTML = '<div class="pad small muted">地圖載入失敗</div>'; return; }
   dayMap = L.map('dayMap', { scrollWheelZoom: false, zoomControl: false, attributionControl: true });
   const dark = document.documentElement.dataset.theme === 'dark'
@@ -1041,8 +1096,7 @@ function drawMap(d, hotel) {
   near.forEach(s => {
     const icon = L.divIcon({ className: '', iconSize: [30, 30], iconAnchor: [15, 15],
       html: `<div class="pin ${s.hotel ? 'h' : ''}">${s.n}</div>` });
-    L.marker([s.lat, s.lon], { icon }).addTo(dayMap)
-      .bindPopup(`<b>${esc(s.zh)}</b><br><a href="${gmap(s.q)}" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>`);
+    L.marker([s.lat, s.lon], { icon }).addTo(dayMap).bindPopup(popup(s));
   });
   if (near.length > 1) dayMap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
   else dayMap.setView([near[0].lat, near[0].lon], 11);
@@ -1064,11 +1118,11 @@ function tzOffsetMin(tz, at = new Date()) {
   return Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - at.getTime()) / 6e4);
 }
 function renderClocks() {
-  const now = new Date(), base = tzOffsetMin('Asia/Taipei', now);
+  const at = now(), base = tzOffsetMin('Asia/Taipei', at);
   $('#clocks').innerHTML = CLOCKS.map(c => {
-    const t = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(now);
-    const dt = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, month:'numeric', day:'numeric', weekday:'short' }).format(now);
-    const diff = (tzOffsetMin(c.tz, now) - base) / 60;
+    const t = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(at);
+    const dt = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, month:'numeric', day:'numeric', weekday:'short' }).format(at);
+    const diff = (tzOffsetMin(c.tz, at) - base) / 60;
     const label = diff === 0 ? '基準時間' : `比台灣${diff < 0 ? '慢' : '快'} ${Math.abs(diff)} 小時`;
     return `<div class="clock"><div><div class="name">${c.name}</div><div class="diff">${label}</div></div>
       <div><div class="time">${t}</div><div class="date">${dt}</div></div></div>`;
@@ -1136,8 +1190,7 @@ function renderChecklist() {
 function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  store.set('view', v);
-  if (v === 'days' && dayMap) setTimeout(() => dayMap.invalidateSize(), 50);
+  if (v === 'days' && dayMap && dayMap.invalidateSize) setTimeout(() => dayMap.invalidateSize(), 50);
   if (v === 'tools') renderWxList();
   window.scrollTo({ top: v === 'days' ? 0 : $('.hero').offsetHeight - 8 });
 }
@@ -1174,8 +1227,20 @@ renderHotels();
 renderClocks(); setInterval(renderClocks, 15000);
 initFx();
 renderChecklist();
-const v0 = store.get('view', 'days');
-if (v0 !== 'days') showView(v0);
+
+// Keep "today" current while the page stays open (midnight passes, phone wakes up, new time zone).
+let lastToday = ti;
+function checkToday() {
+  const t = todayIndex();
+  if (t === lastToday) return;
+  renderCountdown();
+  // follow the new day only if the viewer was looking at the old "today" (or none yet)
+  if (t >= 0 && (lastToday < 0 || current === lastToday)) selectDay(t, false);
+  else renderChips();
+  lastToday = t;
+}
+setInterval(checkToday, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkToday(); });
 </script>
 </body>
 </html>
