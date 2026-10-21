@@ -844,13 +844,13 @@ async function renderDayWx(day, el) {
         <div class="wx-extra">
           <span class="pill">☔ 降雨 ${d.daily.precipitation_probability_max[i] ?? '–'}%</span>
           <span class="pill">💨 風 ${Math.round(d.daily.wind_speed_10m_max[i])} m/s</span>
-          <span class="pill">🌅 ${hhmm(d.daily.sunrise[i])}</span>
-          <span class="pill">🌇 ${hhmm(d.daily.sunset[i])}</span>`;
+          <span class="pill">🌅 日出 ${hhmm(d.daily.sunrise[i])}</span>
+          <span class="pill">🌇 日落 ${hhmm(d.daily.sunset[i])}</span>`;
       if (day.aurora) {
         const cc = nightCloud(d, day.date);
         if (cc != null) {
           const cls = cc <= 30 ? 'good' : cc >= 70 ? 'bad' : '';
-          const lvl = cc <= 30 ? '極光條件佳' : cc >= 70 ? '雲多，機會較低' : '普通';
+          const lvl = cc <= 30 ? '極光條件佳' : cc >= 70 ? '雲多，極光機會較低' : '極光機會普通';
           html += `<span class="pill ${cls}">🌌 晚間雲量 ${cc}%・${lvl}</span>`;
         }
       }
