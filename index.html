@@ -206,6 +206,20 @@ nav.tabs button .i{font-size:22px;line-height:1}
 nav.tabs button.on{color:var(--accent);font-weight:700}
 .view{display:none}
 .view.on{display:block}
+/* phones: tighter gutters so cards show more content */
+@media (max-width: 480px){
+  .wrap{padding:0 8px}
+  .pad{padding:12px}
+  .card{border-radius:14px;margin:10px 0}
+  .story figure{margin:12px -12px 0}
+  .story figcaption{padding:6px 12px 0}
+  .chips .row{padding:8px 8px}
+  .flight{padding:14px 12px}
+  .perf{margin:12px -12px 0;padding:10px 12px 0}
+  .fx-row,.clock,.wx-list .row,.check{padding-left:12px;padding-right:12px}
+  .quick{padding:0 12px 12px}
+  .hero .wrap{padding-left:16px;padding-right:16px}
+}
 .footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
 .theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
