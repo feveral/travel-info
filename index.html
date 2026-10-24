@@ -257,7 +257,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 .footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
 .theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
-.leaflet-container{font:inherit;background:#e8edf2}
+.leaflet-container{isolation:isolate;font:inherit;background:#e8edf2}
 .pin{width:30px;height:30px;border-radius:50%;background:#e8590c;color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;
   border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .pin.h{background:#0f9d8a;font-size:15px}
@@ -265,11 +265,41 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 .legend:empty{display:none}
 .legend b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e8590c;color:#fff;font-size:11px;margin-right:4px}
 .legend b.h{background:#0f9d8a}
+.search-btn{right:60px}
+.search-fab{position:fixed;right:14px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);z-index:40;width:46px;height:46px;
+  border-radius:50%;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);font-size:19px;cursor:pointer;
+  opacity:0;transform:scale(.8);pointer-events:none;transition:opacity .2s,transform .2s}
+.search-fab.on{opacity:1;transform:none;pointer-events:auto}
+.search{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column}
+.search[hidden]{display:none}
+.sbar{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.sin{flex:1;display:flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:12px;padding:0 10px}
+.sin input{flex:1;min-width:0;border:0;background:none;color:var(--text);font:inherit;font-size:16px;padding:10px 0;outline:none}
+.sin input::-webkit-search-cancel-button{display:none}
+.sclear{border:0;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px}
+.scancel{border:0;background:none;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;padding:6px 4px}
+.sres{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 12px calc(24px + env(safe-area-inset-bottom))}
+.sres .meta{font-size:13px;color:var(--muted);margin:6px 4px 8px}
+.sres .sugg{display:flex;flex-wrap:wrap;gap:8px;margin:4px}
+.sres .sugg button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}
+.sr{display:block;width:100%;text-align:left;border:0;background:var(--surface);color:var(--text);font:inherit;border-radius:12px;
+  padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);cursor:pointer}
+.sr .st{font-weight:700;font-size:15px}
+.sr .ss{display:block;font-size:12px;color:var(--muted)}
+.sr .sb{display:block;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sr mark{background:#ffe08a;color:#121826;border-radius:3px;padding:0 1px}
+.sk{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:2px;
+  background:var(--accent-soft);color:var(--accent)}
+.sk.k1{background:#fde8dc;color:#c2410c}.sk.k2{background:#e4ecfb;color:#1d4ed8}.sk.k3{background:#efe8fd;color:#6d28d9}.sk.k4{background:var(--warn-soft);color:var(--warn)}
+.hit{animation:hit 1.8s ease}
+@keyframes hit{0%,45%{background:var(--accent-soft)}}
 </style>
 </head>
 <body>
 
 <header class="hero">
+  <button class="theme-toggle search-btn" id="searchBtn" aria-label="搜尋">🔍</button>
   <button class="theme-toggle" id="themeBtn" aria-label="切換深淺色">◐</button>
   <div class="wrap">
     <div class="eyebrow">2026.10.31 – 11.08 · 9 天 7 夜</div>
@@ -489,6 +519,15 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 </div></nav>
 
 <div class="lightbox" id="lightbox"><div class="bg"></div><div class="stage"><img alt=""></div><div class="top"><span class="count"></span><button class="x" aria-label="關閉">✕</button></div><div class="cap"><div class="txt"></div><div class="hint">雙指縮放・雙擊放大・上下滑關閉・左右滑看下一張</div></div></div>
+
+<button class="search-fab" id="searchFab" aria-label="搜尋">🔍</button>
+<div class="search" id="search" role="dialog" aria-label="搜尋" hidden>
+  <div class="sbar">
+    <div class="sin"><span aria-hidden="true">🔍</span><input type="search" id="sq" placeholder="搜尋景點、航班、飯店、須知…" enterkeyhint="search" autocomplete="off"><button class="sclear" id="sclear" aria-label="清除" hidden>✕</button></div>
+    <button class="scancel" id="sx">取消</button>
+  </div>
+  <div class="sres" id="sres"></div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -1417,6 +1456,151 @@ function renderChecklist() {
     saveFold();
   });
 }
+
+/* ---------------- search ---------------- */
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/ð/g, 'd').replace(/þ/g, 'th').replace(/æ/g, 'ae').replace(/ø/g, 'o');
+const plain = s => String(s).replace(/<[^>]+>/g, '');
+const KINDS = { 行程:'k0', 景點:'k1', 航班:'k2', 住宿:'k3', 須知:'k4', 清單:'k0' };
+let searchIdx = null;
+
+function buildSearchIndex() {
+  const out = [];
+  const add = (kind, title, sub, body, go) => out.push({ kind, title, sub, body, go, nt: norm(title), nb: norm(sub + '　' + body) });
+  const nth = (sel, i) => () => document.querySelectorAll(sel)[i];
+
+  DAYS.forEach((d, i) => {
+    const day = `DAY ${i + 1}・${md(d.date)}（${wk(d.date)}）`;
+    add('行程', d.title, `${day}・${d.subtitle}`,
+      [d.aurora, `早餐 ${d.meals.b}`, `午餐 ${d.meals.l}`, `晚餐 ${d.meals.d}`, ...d.notes.map(plain)].filter(Boolean).join('　'),
+      () => goDay(i, () => $('#day .day-head')));
+    d.places.forEach((p, j) => add('景點', p.zh, `${day}・${p.en}`,
+      [p.desc, ...(p.tags || []), ...(p.story || []).map(b => typeof b === 'string' ? b : b.cap), ...(p.tips || []).map(plain)].join('　'),
+      () => goDay(i, nth('#day article.place', j))));
+  });
+  FLIGHTS.forEach((f, k) => add('航班', `${f.no} ${f.fromCity} → ${f.toCity}`,
+    `${md(f.date)}（${wk(f.date)}）${f.dep} – ${f.arr}・${f.airline}`, `${f.from} ${f.to} ${f.dur}`,
+    () => goTo('flights', nth('#flights .card.flight', k))));
+  Object.keys(HOTELS).forEach((key, k) => {
+    const h = HOTELS[key];
+    const days = DAYS.map((d, i) => d.hotel === key ? `DAY ${i + 1}` : '').filter(Boolean).join('、');
+    add('住宿', h.name, `${h.zh}・${h.city}・${h.nights.join('、')} 入住`, `${h.addr}　電話 ${h.telShow}　${days}　${h.country === 'uk' ? '英國' : '冰島'}飯店`,
+      () => goTo('hotels', nth('#hotels .card.hotel', k)));
+  });
+
+  // static notes in the 須知 / 航班 tabs: one entry per table row, list item or note
+  [['info', '須知'], ['flights', '航班']].forEach(([view, kind]) => {
+    $(`#v-${view} .wrap`).querySelectorAll(':scope > .card').forEach(card => {
+      let h2 = card.previousElementSibling;
+      while (h2 && h2.tagName !== 'H2') h2 = h2.previousElementSibling;
+      const sec = h2 ? h2.textContent : '';
+      const units = card.querySelectorAll('tr, li, .note');
+      const heading = el => {
+        const hs = [...card.querySelectorAll('h3')].filter(h => h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+        return hs.length ? hs[hs.length - 1].textContent : sec;
+      };
+      if (card.querySelector('a[href^="tel:+886"]')) add(kind, '領隊 ' + card.querySelector('h3').textContent, sec, card.querySelector('.hdr').textContent, () => goTo(view, () => card));
+      units.forEach(el => {
+        const th = el.tagName === 'TR' && el.querySelector('th');
+        const title = th ? `${heading(el)}・${th.textContent}` : heading(el);
+        const body = th ? el.querySelector('td').textContent : el.textContent;
+        add(kind, title, '', body, () => goTo(view, () => el));
+      });
+      if (!units.length) add(kind, sec || card.textContent.slice(0, 12), '', card.textContent, () => goTo(view, () => card));
+    });
+  });
+
+  CHECK.forEach(g => g.items.forEach(it => add('清單', it.t, `行前清單・${g.group}`, it.why, () => goTo('info', () => {
+    const inp = $(`#checklist input[data-id="${it.id}"]`);
+    if (!inp) return null;
+    inp.closest('details').open = true;
+    return inp.closest('.check');
+  }))));
+  return out;
+}
+
+function goTo(view, getEl) {
+  closeSearch();
+  showView(view);
+  const el = getEl && getEl();
+  if (!el) return;
+  const off = view === 'days' ? $('.chips').offsetHeight + 8 : 12;
+  window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - off });
+  document.querySelectorAll('.hit').forEach(e => e.classList.remove('hit'));
+  void el.offsetWidth; el.classList.add('hit');
+  el.addEventListener('animationend', () => el.classList.remove('hit'), { once: true });
+}
+function goDay(i, getEl) {
+  closeSearch();
+  showView('days');
+  if (current !== i) selectDay(i, false);
+  goTo('days', getEl);
+}
+
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function mark(text, terms) {
+  let h = esc(text);
+  terms.forEach(t => { h = h.replace(new RegExp(`(${reEsc(esc(t))})`, 'gi'), '\u0001$1\u0002'); });
+  return h.replace(/\u0001/g, '<mark>').replace(/\u0002/g, '</mark>');
+}
+function snippet(r, terms) {
+  const n = norm(r.body), t = terms.find(t => n.includes(t));
+  if (!t) return r.body;
+  const at = n.indexOf(t), start = Math.max(0, at - 24);
+  return (start ? '…' : '') + r.body.slice(start, start + 80);
+}
+
+const SUGG = ['極光', '藍冰洞', '溫泉', '行李', '退稅', '小費', '插座', '電話', '龍蝦', '集合', '下午茶', '冰爪'];
+function renderSearch() {
+  const q = $('#sq').value.trim();
+  $('#sclear').hidden = !q;
+  if (!q) {
+    $('#sres').innerHTML = `<div class="meta">可以搜尋行程、景點、航班、飯店、須知和行前清單</div>
+      <div class="sugg">${SUGG.map(w => `<button data-w="${w}">${w}</button>`).join('')}</div>`;
+    $('#sres').querySelectorAll('[data-w]').forEach(b => b.onclick = () => { $('#sq').value = b.dataset.w; renderSearch(); });
+    return;
+  }
+  const terms = norm(q).split(/\s+/).filter(Boolean);
+  const hits = searchIdx.map(r => {
+    let s = 0;
+    for (const t of terms) {
+      if (r.nt.includes(t)) s += r.nt.startsWith(t) ? 3 : 2;
+      else if (r.nb.includes(t)) s += 1;
+      else return null;
+    }
+    return { r, s };
+  }).filter(Boolean).sort((a, b) => b.s - a.s);
+  if (!hits.length) { $('#sres').innerHTML = `<div class="meta">找不到「${esc(q)}」，換個關鍵字試試</div>`; return; }
+  $('#sres').innerHTML = `<div class="meta">找到 ${hits.length} 筆</div>` + hits.map(({ r }, n) => `<button class="sr" data-n="${n}">
+      <span class="sk ${KINDS[r.kind]}">${r.kind}</span><span class="st">${mark(r.title, terms)}</span>
+      ${r.sub ? `<span class="ss">${mark(r.sub, terms)}</span>` : ''}
+      ${r.body ? `<span class="sb">${mark(snippet(r, terms), terms)}</span>` : ''}</button>`).join('');
+  $('#sres').querySelectorAll('.sr').forEach(b => b.onclick = () => { $('#sq').blur(); hits[+b.dataset.n].r.go(); });
+}
+
+function openSearch() {
+  if (!searchIdx) searchIdx = buildSearchIndex();
+  $('#search').hidden = false;
+  document.body.style.overflow = 'hidden';
+  renderSearch();
+  $('#sq').focus();
+}
+function closeSearch() {
+  if ($('#search').hidden) return;
+  $('#search').hidden = true;
+  document.body.style.overflow = '';
+}
+$('#searchBtn').onclick = openSearch;
+$('#searchFab').onclick = openSearch;
+$('#sx').onclick = closeSearch;
+$('#sclear').onclick = () => { $('#sq').value = ''; renderSearch(); $('#sq').focus(); };
+$('#sq').addEventListener('input', renderSearch);
+$('#sq').addEventListener('keydown', e => { if (e.key === 'Enter') $('#sq').blur(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSearch();
+  else if (e.key === '/' && $('#search').hidden && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
+});
+addEventListener('scroll', () => $('#searchFab').classList.toggle('on', scrollY > $('.hero').offsetHeight), { passive: true });
 
 /* ---------------- tabs & theme ---------------- */
 function showView(v) {
