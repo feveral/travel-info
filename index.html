@@ -166,11 +166,14 @@ html{touch-action:manipulation}
 .hotel .hdr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .hotel .nights{font-size:12px;background:var(--surface-2);border-radius:8px;padding:2px 8px;white-space:nowrap;color:var(--muted)}
 .hotel iframe{display:block;width:100%;height:180px;border:0;background:var(--surface-2)}
-.hpics{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 16px 0;scrollbar-width:none}
+.hpics{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;padding:12px 16px 0;scrollbar-width:none}
 .hpics::-webkit-scrollbar{display:none}
 .hpics:empty{display:none}
-.hpics img,.hpics .sk{flex:0 0 70%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--surface-2);scroll-snap-align:start;cursor:zoom-in}
-.hpics img:only-child{flex-basis:100%}
+.hpics .ph,.hpics .sk{flex:0 0 70%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--surface-2);scroll-snap-align:start;position:relative}
+.hpics .ph:only-child{flex-basis:100%}
+.hpics img{display:block;width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.hpics .by{position:absolute;left:6px;bottom:6px;max-width:calc(100% - 12px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:11px;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:1px 6px;text-decoration:none}
 .kv{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;font-size:14px;margin-top:8px}
 .kv span:nth-child(odd){color:var(--muted)}
 
@@ -1109,16 +1112,34 @@ function hotelCard(key, compact) {
       </div></div></article>`;
 }
 
-// Hotel photos come from Wikimedia Commons at runtime: files mentioning the hotel's keyword
-// geotagged near it, then any "hotel" photo right next to it. h.imgs (Commons paths, as for
-// places) pins specific photos instead.
+// Hotel photos: the hotel's Google Maps photos (Places API, same key as the day map), else
+// Wikimedia Commons files mentioning the hotel's keyword geotagged near it, then any "hotel"
+// photo right next to it. h.imgs (Commons paths, as for places) pins specific photos instead.
+// Each Google photo shown is a billable Place Photo request, so only a few are loaded, lazily;
+// Google's terms forbid storing them, so unlike Commons results they are not cached.
 const hotelPics = {};
+async function googleHotelPics(h) {
+  await loadGoogle();
+  const { Place } = await google.maps.importLibrary('places');
+  const { places } = await Place.searchByText({ textQuery: `${h.name}, ${h.addr}`, fields: ['photos'],
+    locationBias: { lat: h.lat, lng: h.lon }, maxResultCount: 1 });
+  return (places[0]?.photos || []).slice(0, 4).map(ph => {
+    const a = ph.authorAttributions?.[0];
+    return { src: ph.getURI({ maxWidth: 640 }), full: ph.getURI({ maxWidth: 1600 }), by: a?.displayName, byUri: a?.uri };
+  });
+}
 function loadHotelPics(key) {
   const h = HOTELS[key];
   if (h.imgs) return Promise.resolve(h.imgs.map(p => ({ src: W(p, 640), full: W(p, 1280) })));
   if (hotelPics[key]) return hotelPics[key];
+  return hotelPics[key] = (GMAPS_KEY ? googleHotelPics(h) : Promise.resolve([]))
+    .catch(() => [])
+    .then(pics => pics.length ? pics : commonsHotelPics(key));
+}
+function commonsHotelPics(key) {
+  const h = HOTELS[key];
   const cached = store.get('hpics:' + key, null);
-  if (cached) return hotelPics[key] = Promise.resolve(cached);
+  if (cached) return Promise.resolve(cached);
   const search = q => fetch('https://commons.wikimedia.org/w/api.php?' + new URLSearchParams({
       origin: '*', format: 'json', action: 'query', generator: 'search', gsrnamespace: 6, gsrlimit: 8,
       gsrsearch: q, prop: 'imageinfo', iiprop: 'url|mime', iiurlwidth: 640 }))
@@ -1126,7 +1147,7 @@ function loadHotelPics(key) {
     .then(j => Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index)
       .map(p => p.imageinfo?.[0]).filter(i => i && /jpeg|png/.test(i.mime))
       .map(i => ({ src: i.thumburl, full: i.thumburl.replace(/\/640px-/, '/1280px-') })));
-  return hotelPics[key] = (async () => {
+  return (async () => {
     const near = r => `nearcoord:${r},${h.lat},${h.lon}`;
     const seen = new Set(), out = [];
     for (const q of [`${h.kw} ${near('600m')}`, `hotel ${near('250m')}`]) {
@@ -1136,14 +1157,15 @@ function loadHotelPics(key) {
     const pics = out.slice(0, 6);
     if (pics.length) store.set('hpics:' + key, pics);
     return pics;
-  })().catch(() => { delete hotelPics[key]; return []; });
+  })().catch(() => []);
 }
 function fillHotelPics(root = document) {
   root.querySelectorAll('.hpics[data-h]:not([data-done])').forEach(el => {
     el.dataset.done = 1;
     const h = HOTELS[el.dataset.h];
     loadHotelPics(el.dataset.h).then(pics => {
-      el.innerHTML = pics.map(p => `<img loading="lazy" src="${esc(p.src)}" alt="${esc(h.name)}" data-full="${esc(p.full)}">`).join('');
+      el.innerHTML = pics.map(p => `<div class="ph"><img loading="lazy" src="${esc(p.src)}" alt="${esc(h.name + (p.by ? `・照片：${p.by}` : ''))}" data-full="${esc(p.full)}">${
+        p.by ? `<a class="by" href="${esc(p.byUri || '#')}" target="_blank" rel="noopener">📷 ${esc(p.by)}</a>` : ''}</div>`).join('');
     });
   });
 }
