@@ -973,7 +973,7 @@ function fetchWx(lat, lon) {
   if (!wxCache[k]) {
     const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
       + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
-      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
+      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
       // Open-Meteo applies one fixed UTC offset to the whole response, so "auto" would carry
       // London's summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
       + `&hourly=cloud_cover&timezone=${lon > 100 ? 'Asia%2FTaipei' : 'GMT'}&forecast_days=16&wind_speed_unit=ms`;
@@ -1002,7 +1002,8 @@ async function renderDayWx(day, el) {
       const [ic, tx] = wmo(d.daily.weather_code[i]);
       html = `<div class="weather"><div class="ic">${ic}</div><div>
         <div class="t">${Math.round(d.daily.temperature_2m_min[i])}° / ${Math.round(d.daily.temperature_2m_max[i])}°C</div>
-        <div class="d">${esc(day.wx.name)}・${md(day.date)} 預報・${tx}</div></div></div>
+        <div class="d">${esc(day.wx.name)}・${md(day.date)} 預報・${tx}<br>
+        體感 ${Math.round(d.daily.apparent_temperature_min[i])}° / ${Math.round(d.daily.apparent_temperature_max[i])}°（含風寒）</div></div></div>
         <div class="wx-extra">
           <span class="pill">☔ 降雨 ${d.daily.precipitation_probability_max[i] ?? '–'}%</span>
           ${windPill(d.daily.wind_speed_10m_max[i])}
