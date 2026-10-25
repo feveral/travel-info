@@ -166,6 +166,11 @@ html{touch-action:manipulation}
 .hotel .hdr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .hotel .nights{font-size:12px;background:var(--surface-2);border-radius:8px;padding:2px 8px;white-space:nowrap;color:var(--muted)}
 .hotel iframe{display:block;width:100%;height:180px;border:0;background:var(--surface-2)}
+.hpics{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 16px 0;scrollbar-width:none}
+.hpics::-webkit-scrollbar{display:none}
+.hpics:empty{display:none}
+.hpics img,.hpics .sk{flex:0 0 70%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:var(--surface-2);scroll-snap-align:start;cursor:zoom-in}
+.hpics img:only-child{flex-basis:100%}
 .kv{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;font-size:14px;margin-top:8px}
 .kv span:nth-child(odd){color:var(--muted)}
 
@@ -537,7 +542,6 @@ const W = (path, w = 960) => {
   return `https://upload.wikimedia.org/wikipedia/commons/thumb/${path}/${w}px-${name}`;
 };
 const gmap = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
-const gnav = (lat, lon) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
 const gembed = q => `https://maps.google.com/maps?hl=zh-TW&q=${encodeURIComponent(q)}&z=14&output=embed`;
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -550,22 +554,22 @@ const store = {
 const HOTELS = {
   hilton: { name:'Hilton London Kensington', zh:'倫敦肯辛頓希爾頓', city:'倫敦', country:'uk',
     tel:'+442076033355', telShow:'+44 20 7603 3355', addr:'179-199 Holland Park Avenue, London W11 4UL',
-    lat:51.5066, lon:-0.2128, nights:['10/31','11/1'] },
+    lat:51.5066, lon:-0.2128, nights:['10/31','11/1'], kw:'Hilton' },
   selfoss: { name:'Selfoss Hotel', zh:'塞爾福斯飯店', city:'塞爾福斯', country:'is',
     tel:'+3544802500', telShow:'+354 480 2500', addr:'Eyravegur 2, 800 Selfoss, Iceland',
-    lat:63.9376, lon:-21.0012, nights:['11/2'] },
+    lat:63.9376, lon:-21.0012, nights:['11/2'], kw:'Selfoss' },
   jokull: { name:'Hotel Jökull', zh:'約庫爾飯店', city:'赫本 Höfn', country:'is',
     tel:'+3544781400', telShow:'+354 478 1400', addr:'Nesjum, 781 Höfn, Iceland',
-    lat:64.3009, lon:-15.2730, nights:['11/3'] },
+    lat:64.3009, lon:-15.2730, nights:['11/3'], kw:'Jökull' },
   stracta: { name:'Stracta Hotel', zh:'史特拉克塔飯店', city:'赫拉 Hella', country:'is',
     tel:'+3545318010', telShow:'+354 531 8010', addr:'Rangárflatir 4, 850 Hella, Iceland',
-    lat:63.8348, lon:-20.4049, nights:['11/4'] },
+    lat:63.8348, lon:-20.4049, nights:['11/4'], kw:'Stracta' },
   grand: { name:'Grand Hotel Reykjavík', zh:'雷克雅未克大飯店', city:'雷克雅未克', country:'is',
     tel:'+3545148000', telShow:'+354 514 8000', addr:'Sigtún 28, 105 Reykjavík, Iceland',
-    lat:64.1426, lon:-21.8786, nights:['11/5'] },
+    lat:64.1426, lon:-21.8786, nights:['11/5'], kw:'Grand Hotel' },
   oxford: { name:'Holiday Inn Oxford', zh:'牛津假日酒店', city:'牛津', country:'uk',
     tel:'+448719429086', telShow:'+44 871 942 9086', addr:'Peartree Roundabout, Oxford OX2 8JD',
-    lat:51.7853, lon:-1.2857, nights:['11/6'] },
+    lat:51.7853, lon:-1.2857, nights:['11/6'], kw:'Holiday Inn' },
 };
 
 const FLIGHTS = [
@@ -1095,15 +1099,53 @@ function hotelCard(key, compact) {
   const h = HOTELS[key];
   return `<article class="card hotel">
     ${compact ? '' : `<iframe loading="lazy" src="${gembed(h.name + ', ' + h.addr)}" title="${esc(h.name)} 地圖"></iframe>`}
+    <div class="hpics" data-h="${key}"><div class="sk"></div><div class="sk"></div></div>
     <div class="pad">
       <div class="hdr"><div><h3>${esc(h.name)}</h3><div class="small muted">${esc(h.zh)}・${esc(h.city)}</div></div>
         <span class="nights">${h.nights.join('、')}</span></div>
       <div class="kv"><span>地址</span><span>${esc(h.addr)}</span><span>電話</span><span>${esc(h.telShow)}</span></div>
       <div class="btns">
-        <a class="btn" href="tel:${h.tel}">📞 撥打</a>
         <a class="btn" href="${gmap(h.name + ' ' + h.addr)}" target="_blank" rel="noopener">📍 地圖</a>
-        <a class="btn primary" href="${gnav(h.lat, h.lon)}" target="_blank" rel="noopener">🧭 導航</a>
       </div></div></article>`;
+}
+
+// Hotel photos come from Wikimedia Commons at runtime: files mentioning the hotel's keyword
+// geotagged near it, then any "hotel" photo right next to it. h.imgs (Commons paths, as for
+// places) pins specific photos instead.
+const hotelPics = {};
+function loadHotelPics(key) {
+  const h = HOTELS[key];
+  if (h.imgs) return Promise.resolve(h.imgs.map(p => ({ src: W(p, 640), full: W(p, 1280) })));
+  if (hotelPics[key]) return hotelPics[key];
+  const cached = store.get('hpics:' + key, null);
+  if (cached) return hotelPics[key] = Promise.resolve(cached);
+  const search = q => fetch('https://commons.wikimedia.org/w/api.php?' + new URLSearchParams({
+      origin: '*', format: 'json', action: 'query', generator: 'search', gsrnamespace: 6, gsrlimit: 8,
+      gsrsearch: q, prop: 'imageinfo', iiprop: 'url|mime', iiurlwidth: 640 }))
+    .then(r => r.json())
+    .then(j => Object.values(j.query?.pages || {}).sort((a, b) => a.index - b.index)
+      .map(p => p.imageinfo?.[0]).filter(i => i && /jpeg|png/.test(i.mime))
+      .map(i => ({ src: i.thumburl, full: i.thumburl.replace(/\/640px-/, '/1280px-') })));
+  return hotelPics[key] = (async () => {
+    const near = r => `nearcoord:${r},${h.lat},${h.lon}`;
+    const seen = new Set(), out = [];
+    for (const q of [`${h.kw} ${near('600m')}`, `hotel ${near('250m')}`]) {
+      for (const p of await search(q)) if (!seen.has(p.src)) { seen.add(p.src); out.push(p); }
+      if (out.length >= 4) break;
+    }
+    const pics = out.slice(0, 6);
+    if (pics.length) store.set('hpics:' + key, pics);
+    return pics;
+  })().catch(() => { delete hotelPics[key]; return []; });
+}
+function fillHotelPics(root = document) {
+  root.querySelectorAll('.hpics[data-h]:not([data-done])').forEach(el => {
+    el.dataset.done = 1;
+    const h = HOTELS[el.dataset.h];
+    loadHotelPics(el.dataset.h).then(pics => {
+      el.innerHTML = pics.map(p => `<img loading="lazy" src="${esc(p.src)}" alt="${esc(h.name)}" data-full="${esc(p.full)}">`).join('');
+    });
+  });
 }
 
 function renderChips() {
@@ -1188,6 +1230,7 @@ function renderDay() {
   if (n) n.onclick = () => selectDay(current + 1, true);
 
   renderDayWx(d, $('#dayWx'));
+  fillHotelPics();
   drawMap(d, hotel);
 }
 
@@ -1295,7 +1338,7 @@ function drawLeaflet(near, popup) {
 
 /* ---------------- flights & hotels tabs ---------------- */
 function renderFlights() { $('#flights').innerHTML = FLIGHTS.map(flightCard).join(''); }
-function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => hotelCard(k, false)).join(''); }
+function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => hotelCard(k, false)).join(''); fillHotelPics($('#hotels')); }
 
 /* ---------------- clocks ---------------- */
 const CLOCKS = [
@@ -1622,7 +1665,7 @@ $('#themeBtn').onclick = () => { theme = themeOrder[(themeOrder.indexOf(theme) +
 
 /* ---------------- lightbox ---------------- */
 // Photo viewer: pinch / double-tap zoom, drag to pan, swipe down/up to close,
-// swipe left/right through the other photos of the same place.
+// swipe left/right through the other photos of the same place or hotel.
 const lb = $('#lightbox'), lbStage = lb.querySelector('.stage'), lbImg = lbStage.querySelector('img');
 let lbList = [], lbIdx = 0, z = { s: 1, x: 0, y: 0 }, lbBase = null;
 const ptrs = new Map();
@@ -1632,12 +1675,12 @@ function lbShow(i) {
   lbIdx = (i + lbList.length) % lbList.length;
   const t = lbList[lbIdx];
   lbImg.src = t.dataset.full;
-  lb.querySelector('.txt').textContent = t.alt || t.closest('.place')?.querySelector('h3')?.textContent || '';
+  lb.querySelector('.txt').textContent = t.alt || t.closest('.place, .hotel')?.querySelector('h3')?.textContent || '';
   lb.querySelector('.count').textContent = lbList.length > 1 ? `${lbIdx + 1} / ${lbList.length}` : '';
   zReset(false);
 }
 function lbOpen(t) {
-  const scope = t.closest('.place') || document;
+  const scope = t.closest('.place, .hotel') || document;
   lbList = [...scope.querySelectorAll('[data-full]')];
   lb.classList.add('on');
   document.body.style.overflow = 'hidden';
