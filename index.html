@@ -968,18 +968,26 @@ const WMO = {0:['☀️','晴'],1:['🌤️','大致晴'],2:['⛅','多雲'],3:[
   85:['🌨️','陣雪'],86:['❄️','強陣雪'],95:['⛈️','雷雨'],96:['⛈️','雷雨冰雹'],99:['⛈️','雷雨冰雹']};
 const wmo = c => WMO[c] || ['🌡️','—'];
 const wxCache = {};
+const WX_TTL = 30 * 60 * 1000;
 function fetchWx(lat, lon) {
-  const k = `${lat},${lon}`;
-  if (!wxCache[k]) {
+  const k = `${lat},${lon}`, c = wxCache[k];
+  // reuse a request in flight or a fresh result; a failed request is dropped below so it's retried
+  if (c && Date.now() - c.at < WX_TTL) return c.p;
+  {
     const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
       + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
       + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
       // Open-Meteo applies one fixed UTC offset to the whole response, so "auto" would carry
       // London's summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
       + `&hourly=cloud_cover&timezone=${lon > 100 ? 'Asia%2FTaipei' : 'GMT'}&forecast_days=16&wind_speed_unit=ms`;
-    wxCache[k] = fetch(u).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const get = () => fetch(u, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    // one quick retry covers a flaky mobile connection or a momentary API hiccup
+    const p = get().catch(() => new Promise(res => setTimeout(res, 1500)).then(get));
+    const entry = wxCache[k] = { at: Date.now(), p };
+    p.catch(() => { if (wxCache[k] === entry) delete wxCache[k]; });
   }
-  return wxCache[k];
+  return wxCache[k].p;
 }
 const hhmm = s => s ? s.slice(11, 16) : '';
 // ≥ 10.8 m/s is Beaufort 6 ("strong breeze"); on Iceland's open roads that already feels harsh
@@ -1760,6 +1768,12 @@ renderHotels();
 renderClocks(); setInterval(renderClocks, 15000);
 initFx();
 renderChecklist();
+// before departure the packing list leads the info tab; once we've left it moves to the bottom
+const DEPART_AT = Date.parse('2026-10-31T06:25:00+08:00');
+function placeChecklist() {
+  const sec = $('#checklistSec'), departed = now().getTime() >= DEPART_AT;
+  (departed ? $('#checklistEnd') : $('#checklistHome')).before(sec);
+}
 placeChecklist();
 
 // Keep "today" current while the page stays open (midnight passes, phone wakes up, new time zone).
@@ -1775,7 +1789,13 @@ function checkToday() {
   lastToday = t;
 }
 setInterval(checkToday, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkToday(); });
+// refresh weather when the phone wakes up or the connection comes back (failed fetches aren't cached)
+function refreshWx() {
+  renderDayWx(DAYS[current], $('#dayWx'));
+  if ($('#wxList').offsetParent) renderWxList();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkToday(); refreshWx(); } });
+window.addEventListener('online', refreshWx);
 </script>
 </body>
 </html>
