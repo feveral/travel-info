@@ -967,32 +967,74 @@ const WMO = {0:['☀️','晴'],1:['🌤️','大致晴'],2:['⛅','多雲'],3:[
   71:['🌨️','小雪'],73:['🌨️','雪'],75:['❄️','大雪'],77:['🌨️','霰'],80:['🌦️','陣雨'],81:['🌧️','陣雨'],82:['⛈️','強陣雨'],
   85:['🌨️','陣雪'],86:['❄️','強陣雪'],95:['⛈️','雷雨'],96:['⛈️','雷雨冰雹'],99:['⛈️','雷雨冰雹']};
 const wmo = c => WMO[c] || ['🌡️','—'];
-const wxCache = {};
-const WX_TTL = 30 * 60 * 1000;
-function fetchWx(lat, lon) {
-  const k = `${lat},${lon}`, c = wxCache[k];
-  // reuse a request in flight or a fresh result; a failed request is dropped below so it's retried
-  if (c && Date.now() - c.at < WX_TTL) return c.p;
-  {
-    const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
-      + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
-      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
-      // Open-Meteo applies one fixed UTC offset to the whole response, so "auto" would carry
-      // London's summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
-      + `&hourly=cloud_cover&timezone=${lon > 100 ? 'Asia%2FTaipei' : 'GMT'}&forecast_days=16&wind_speed_unit=ms`;
-    const get = () => fetch(u, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined })
-      .then(async r => {
-        // Open-Meteo explains bad requests as {"error":true,"reason":"..."}; keep it for the message
-        if (!r.ok) { let why = ''; try { why = (await r.json()).reason || ''; } catch {} throw new Error(`HTTP ${r.status}${why ? '：' + why : ''}`); }
-        return r.json();
-      });
-    // one quick retry covers a flaky mobile connection or a momentary API hiccup
-    const p = get().catch(() => new Promise(res => setTimeout(res, 1500)).then(get));
-    const entry = wxCache[k] = { at: Date.now(), p };
-    p.catch(() => { if (wxCache[k] === entry) delete wxCache[k]; });
-  }
-  return wxCache[k].p;
+/* All trip locations go into ONE Open-Meteo request (it accepts comma-separated coordinates),
+   so a busy API sees 1 call instead of ~9. 503 "overloaded" / 429 are retried with backoff, and
+   the last good response is kept on the phone so a failure shows saved data instead of nothing. */
+const WX_TTL = 30 * 60 * 1000, WX_STORE = 'wx-v1';
+const wxKey = (lat, lon) => `${+lat},${+lon}`;
+let wxReq = null;   // { at, p } – the batch in flight or the latest fresh one
+let wxSaved = store.get(WX_STORE, null);   // { at, data: { key: response } }
+function wxPoints() {
+  const m = new Map();
+  [...DAYS.map(d => d.wx), ...WX_CITIES].forEach(w => w && m.set(wxKey(w.lat, w.lon), w));
+  return [...m.values()];
 }
+async function wxGet(u) {
+  const r = await fetch(u, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
+  if (!r.ok) {
+    // Open-Meteo explains failures as {"error":true,"reason":"..."}
+    let why = ''; try { why = (await r.json()).reason || ''; } catch {}
+    const e = new Error(`HTTP ${r.status}${why ? '：' + why : ''}`); e.status = r.status; throw e;
+  }
+  return r.json();
+}
+async function wxLoadAll() {
+  const pts = wxPoints();
+  // Open-Meteo applies one fixed UTC offset per location, so "auto" would carry London's
+  // summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${pts.map(w => w.lat).join(',')}&longitude=${pts.map(w => w.lon).join(',')}`
+    + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max`
+    + `&hourly=cloud_cover&timezone=${encodeURIComponent(pts.map(w => w.lon > 100 ? 'Asia/Taipei' : 'GMT').join(','))}`
+    + `&forecast_days=16&wind_speed_unit=ms`;
+  let err;
+  for (const wait of [0, 2000, 5000, 10000]) {
+    if (wait) await new Promise(res => setTimeout(res, wait));
+    try {
+      const j = await wxGet(u), arr = Array.isArray(j) ? j : [j], data = {};
+      pts.forEach((w, i) => { if (arr[i]) data[wxKey(w.lat, w.lon)] = arr[i]; });
+      wxSaved = { at: Date.now(), data };
+      store.set(WX_STORE, wxSaved);
+      return data;
+    } catch (e) {
+      err = e;
+      if (e.status && e.status < 500 && e.status !== 429) break;   // a bad request won't fix itself
+    }
+  }
+  throw err;
+}
+// resolves to the location's response; when the API fails it falls back to the saved copy,
+// marked with .stale = time it was fetched
+function fetchWx(lat, lon) {
+  if (!wxReq || Date.now() - wxReq.at >= WX_TTL) {
+    const entry = wxReq = { at: Date.now(), p: wxLoadAll() };
+    entry.p.catch(() => { if (wxReq === entry) wxReq = null; });   // don't cache failures
+  }
+  const k = wxKey(lat, lon);
+  return wxReq.p.then(data => {
+    if (!data[k]) throw new Error('沒有這個地點的資料');
+    return data[k];
+  }, e => {
+    const old = wxSaved && wxSaved.data && wxSaved.data[k];
+    if (!old) throw e;
+    return Object.assign({}, old, { stale: wxSaved.at, staleWhy: e });
+  });
+}
+const wxStaleNote = d => {
+  if (!d.stale) return '';
+  const t = new Date(d.stale), why = d.staleWhy && d.staleWhy.status === 503 ? '天氣服務忙線' : '暫時無法更新';
+  return `<div class="small muted" style="margin-top:6px">⚠️ ${why}，顯示 ${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')} 的資料</div>`;
+};
 const hhmm = s => s ? s.slice(11, 16) : '';
 // ≥ 10.8 m/s is Beaufort 6 ("strong breeze"); on Iceland's open roads that already feels harsh
 const windPill = ms => ms >= 10.8
@@ -1029,13 +1071,13 @@ async function renderDayWx(day, el) {
           html += `<span class="pill ${cls}">🌌 晚間雲量 ${cc}%・${lvl}</span>`;
         }
       }
-      html += `</div>`;
+      html += `</div>${wxStaleNote(d)}`;
     } else {
       const c = d.current, [ic, tx] = wmo(c.weather_code);
       html = `<div class="weather"><div class="ic">${ic}</div><div>
         <div class="t">${Math.round(c.temperature_2m)}°C</div>
         <div class="d">${esc(day.wx.name)}・現在 ${tx}・體感 ${Math.round(c.apparent_temperature)}°<br>
-        ${md(day.date)} 的預報約在 16 天內開放</div></div></div>`;
+        ${md(day.date)} 的預報約在 16 天內開放</div></div></div>${wxStaleNote(d)}`;
     }
     el.innerHTML = html;
   } catch (e) {
@@ -1053,18 +1095,20 @@ const WX_CITIES = [
   { c:'uk', name:'牛津', sub:'Oxford', lat:51.752, lon:-1.2577 },
 ];
 async function renderWxList() {
+  let stale = null;
   const rows = await Promise.all(WX_CITIES.map(async c => {
     try {
       const d = await fetchWx(c.lat, c.lon);
+      if (d.stale) stale = d;
       const [ic, tx] = wmo(d.current.weather_code);
       return `<div class="row"><div class="ic">${ic}</div>
-        <div class="nm"><span class="ctry ${c.c}">${c.c === 'uk' ? '🇬🇧 英國' : '🇮🇸 冰島'}</span>${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°</small></div>
+        <div class="nm"><span class="ctry ${c.c}">${c.c === 'uk' ? '🇬🇧 英國' : '🇮🇸 冰島'}</span>${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°${d.stale ? '・舊資料' : ''}</small></div>
         <div class="tt"><b>${Math.round(d.current.temperature_2m)}°</b><small>${Math.round(d.daily.temperature_2m_min[0])}° / ${Math.round(d.daily.temperature_2m_max[0])}°</small></div></div>`;
     } catch (e) {
       return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取（${wxErr(e)}）</small></div></div>`;
     }
   }));
-  $('#wxList').innerHTML = rows.join('');
+  $('#wxList').innerHTML = rows.join('') + (stale ? `<div class="pad">${wxStaleNote(stale)}</div>` : '');
 }
 
 /* ---------------- day view ---------------- */
