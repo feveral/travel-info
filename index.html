@@ -981,7 +981,11 @@ function fetchWx(lat, lon) {
       // London's summer time past the 10/25 changeover. UK & Iceland are both GMT during the trip.
       + `&hourly=cloud_cover&timezone=${lon > 100 ? 'Asia%2FTaipei' : 'GMT'}&forecast_days=16&wind_speed_unit=ms`;
     const get = () => fetch(u, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      .then(async r => {
+        // Open-Meteo explains bad requests as {"error":true,"reason":"..."}; keep it for the message
+        if (!r.ok) { let why = ''; try { why = (await r.json()).reason || ''; } catch {} throw new Error(`HTTP ${r.status}${why ? '：' + why : ''}`); }
+        return r.json();
+      });
     // one quick retry covers a flaky mobile connection or a momentary API hiccup
     const p = get().catch(() => new Promise(res => setTimeout(res, 1500)).then(get));
     const entry = wxCache[k] = { at: Date.now(), p };
@@ -1001,6 +1005,7 @@ function nightCloud(data, date) {
   h.time.forEach((t, i) => { if (t.startsWith(date) && +t.slice(11, 13) >= 21) vals.push(h.cloud_cover[i]); });
   return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
 }
+const wxErr = e => esc(e && e.name === 'TimeoutError' ? '連線逾時' : (e && e.message) || String(e));
 async function renderDayWx(day, el) {
   try {
     const d = await fetchWx(day.wx.lat, day.wx.lon);
@@ -1033,8 +1038,8 @@ async function renderDayWx(day, el) {
         ${md(day.date)} 的預報約在 16 天內開放</div></div></div>`;
     }
     el.innerHTML = html;
-  } catch {
-    el.innerHTML = `<div class="small muted">天氣暫時無法讀取（可能沒有網路）</div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="small muted">天氣暫時無法讀取（${wxErr(e)}）</div>`;
   }
 }
 
@@ -1055,8 +1060,8 @@ async function renderWxList() {
       return `<div class="row"><div class="ic">${ic}</div>
         <div class="nm"><span class="ctry ${c.c}">${c.c === 'uk' ? '🇬🇧 英國' : '🇮🇸 冰島'}</span>${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°</small></div>
         <div class="tt"><b>${Math.round(d.current.temperature_2m)}°</b><small>${Math.round(d.daily.temperature_2m_min[0])}° / ${Math.round(d.daily.temperature_2m_max[0])}°</small></div></div>`;
-    } catch {
-      return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取</small></div></div>`;
+    } catch (e) {
+      return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取（${wxErr(e)}）</small></div></div>`;
     }
   }));
   $('#wxList').innerHTML = rows.join('');
