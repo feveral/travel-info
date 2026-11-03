@@ -99,6 +99,12 @@ h3{font-size:18px;margin:0}
   padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 .mapbox.full .map{flex:1;height:auto}
 .mapbox.full .legend{padding:10px 16px 14px}
+.loc-msg{padding:8px 12px 0;font-size:13px;color:var(--muted)}
+.loc-msg:empty{display:none}
+.mapbox.full .loc-msg{padding:0 16px 14px}
+.map-locate{display:none}
+.mapbox.full .map-locate{display:block;position:absolute;left:12px;top:calc(12px + env(safe-area-inset-top));z-index:1000;
+  border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 .mapbox.full .map-close{display:block;position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:1000;
   border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 
@@ -1340,9 +1346,12 @@ function renderDay() {
       <div class="mapbox" id="mapBox">
         <div class="map" id="dayMap"></div>
         <button class="map-close" id="mapClose" aria-label="關閉全螢幕地圖">✕ 關閉</button>
+        <button class="map-locate" id="mapLocate2">📍 我的位置</button>
         <div class="legend" id="mapLegend"></div>
+        <div class="loc-msg" id="locMsg"></div>
       </div>
       <div class="map-actions">
+        <button class="btn" id="mapLocate">📍 顯示現在位置</button>
         <button class="btn" id="mapFull">⛶ 全螢幕地圖</button>
       </div>
     </div>
@@ -1363,6 +1372,7 @@ function renderDay() {
 
   $('#mapFull').onclick = () => setMapFull(true);
   $('#mapClose').onclick = () => setMapFull(false);
+  $('#mapLocate').onclick = $('#mapLocate2').onclick = locateMe;
   const p = $('#prevDay'), n = $('#nextDay');
   if (p) p.onclick = () => selectDay(current - 1, true);
   if (n) n.onclick = () => selectDay(current + 1, true);
@@ -1386,7 +1396,10 @@ function setMapFull(on) {
   setTimeout(refitMap, 120);
 }
 function drawMap(d, hotel) {
-  if (dayMap && dayMap.remove) dayMap.remove();
+  if (dayMap && dayMap.remove) {
+    myMarks = myMarks.filter(m => m.setMap);   // Leaflet dots go away with their map
+    dayMap.remove();
+  }
   dayMap = null;
   const stops = d.places.map((p, i) => ({ n: String(i + 1), zh: p.zh, q: p.q, lat: p.lat, lon: p.lon }));
   if (hotel) stops.push({ n: '🏨', zh: hotel.zh, q: `${hotel.name} ${hotel.addr}`, lat: hotel.lat, lon: hotel.lon, hotel: true });
@@ -1395,8 +1408,56 @@ function drawMap(d, hotel) {
   const near = stops.filter(s => Math.abs(s.lat - ref.lat) < 15 && Math.abs(s.lon - ref.lon) < 30);
   $('#mapLegend').innerHTML = near.map(s => `<span><b class="${s.hotel ? 'h' : ''}">${s.n}</b>${esc(s.zh)}</span>`).join('');
   const popup = s => `<b>${esc(s.zh)}</b><br><a href="${gmap(s.q)}" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>`;
-  if (GMAPS_KEY) drawGoogle(near, popup).catch(() => drawLeaflet(near, popup));
-  else drawLeaflet(near, popup);
+  if (GMAPS_KEY) drawGoogle(near, popup).catch(() => drawLeaflet(near, popup)).then(showMe);
+  else { drawLeaflet(near, popup); showMe(); }
+  if (myPos) setLocMsg();
+}
+
+/* ---------------- my location ----------------
+   Only starts when the button is tapped: the first time, the phone asks for permission.
+   After that the position keeps updating while the page is open, and each day's map shows it. */
+let myPos = null, myWatch = null, myMarks = [], centerOnMe = false;
+const LOC_DENIED = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  ? '沒有定位權限。請到 iPhone「設定 → 隱私權與安全性 → 定位服務」，確認定位服務已開啟，並把 Safari 網站（或你用的瀏覽器）設為「使用 App 期間」，然後回來再按一次。'
+  : '沒有定位權限。請點網址列左邊的圖示 → 權限 → 位置 → 允許，並確認手機的定位已開啟，然後再按一次。';
+const setLocMsg = t => { const m = $('#locMsg'); if (m) m.textContent = t != null ? t : myPos ? `🔵 藍點是你現在的位置（誤差約 ${Math.round(myPos.acc)} 公尺）` : ''; };
+function locateMe() {
+  if (!('geolocation' in navigator) || !window.isSecureContext) { setLocMsg('這個瀏覽器無法定位'); return; }
+  centerOnMe = true;
+  if (myPos) showMe();
+  if (myWatch != null) return;
+  setLocMsg('定位中…第一次會跳出詢問，請按「允許」');
+  myWatch = navigator.geolocation.watchPosition(p => {
+    myPos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy };
+    setLocMsg();
+    showMe();
+  }, e => {
+    navigator.geolocation.clearWatch(myWatch);
+    myWatch = null;
+    if (myPos && e.code !== 1) return;   // keep the last known spot on a passing hiccup
+    setLocMsg(e.code === 1 ? LOC_DENIED : e.code === 3 ? '定位逾時，請到比較空曠的地方再按一次' : '暫時無法取得位置，請稍後再按一次');
+  }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
+}
+// draws the blue dot on whichever map is showing; recentres only right after a tap
+function showMe() {
+  myMarks.forEach(m => m.setMap ? m.setMap(null) : m.remove());
+  myMarks = [];
+  if (!myPos) return;
+  const { lat, lon, acc } = myPos;
+  if (gmap1 && gmapEl && gmapEl.isConnected) {
+    const g = google.maps, pos = { lat, lng: lon };
+    myMarks.push(new g.Circle({ map: gmap1, center: pos, radius: acc, clickable: false,
+      fillColor: '#1a73e8', fillOpacity: .12, strokeColor: '#1a73e8', strokeOpacity: .3, strokeWeight: 1 }));
+    myMarks.push(new g.Marker({ map: gmap1, position: pos, title: '你在這裡', zIndex: 999,
+      icon: { path: g.SymbolPath.CIRCLE, scale: 8, fillColor: '#1a73e8', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 } }));
+    if (centerOnMe) { gmap1.setCenter(pos); if (gmap1.getZoom() < 14) gmap1.setZoom(14); }
+  } else if (dayMap && dayMap.getContainer && dayMap.getContainer().isConnected) {
+    myMarks.push(L.circle([lat, lon], { radius: acc, interactive: false, color: '#1a73e8', weight: 1, opacity: .3, fillOpacity: .12 }).addTo(dayMap));
+    myMarks.push(L.circleMarker([lat, lon], { radius: 8, color: '#fff', weight: 3, fillColor: '#1a73e8', fillOpacity: 1 })
+      .addTo(dayMap).bindPopup('你在這裡'));
+    if (centerOnMe) dayMap.setView([lat, lon], Math.max(dayMap.getZoom() || 0, 14));
+  } else return;
+  centerOnMe = false;
 }
 
 // language=zh-TW pins Google's own map labels to Traditional Chinese regardless of system language
@@ -1466,6 +1527,7 @@ function drawLeaflet(near, popup) {
   });
   const lmap = dayMap;
   refitMap = () => {
+    if (lmap !== dayMap) return;   // a delayed refit can land after the day changed
     lmap.invalidateSize();
     if (near.length > 1) lmap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
     else lmap.setView([near[0].lat, near[0].lon], 11);
