@@ -1438,7 +1438,7 @@ function locateMe() {
     setLocMsg(e.code === 1 ? LOC_DENIED : e.code === 3 ? '定位逾時，請到比較空曠的地方再按一次' : '暫時無法取得位置，請稍後再按一次');
   }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
 }
-// draws the blue dot on whichever map is showing; recentres only right after a tap
+// draws the blue dot on whichever map is showing; right after a tap it pans (never zooms) to it
 function showMe() {
   myMarks.forEach(m => m.setMap ? m.setMap(null) : m.remove());
   myMarks = [];
@@ -1450,12 +1450,13 @@ function showMe() {
       fillColor: '#1a73e8', fillOpacity: .12, strokeColor: '#1a73e8', strokeOpacity: .3, strokeWeight: 1 }));
     myMarks.push(new g.Marker({ map: gmap1, position: pos, title: '你在這裡', zIndex: 999,
       icon: { path: g.SymbolPath.CIRCLE, scale: 8, fillColor: '#1a73e8', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 } }));
-    if (centerOnMe) { gmap1.setCenter(pos); if (gmap1.getZoom() < 14) gmap1.setZoom(14); }
+    // keep the zoom so the day's pins stay in view; only pan when the dot is off-screen
+    if (centerOnMe && !(gmap1.getBounds() && gmap1.getBounds().contains(pos))) gmap1.panTo(pos);
   } else if (dayMap && dayMap.getContainer && dayMap.getContainer().isConnected) {
     myMarks.push(L.circle([lat, lon], { radius: acc, interactive: false, color: '#1a73e8', weight: 1, opacity: .3, fillOpacity: .12 }).addTo(dayMap));
     myMarks.push(L.circleMarker([lat, lon], { radius: 8, color: '#fff', weight: 3, fillColor: '#1a73e8', fillOpacity: 1 })
       .addTo(dayMap).bindPopup('你在這裡'));
-    if (centerOnMe) dayMap.setView([lat, lon], Math.max(dayMap.getZoom() || 0, 14));
+    if (centerOnMe && !dayMap.getBounds().contains([lat, lon])) dayMap.panTo([lat, lon]);
   } else return;
   centerOnMe = false;
 }
