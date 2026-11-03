@@ -378,7 +378,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 
     <h2>各地天氣</h2>
     <div class="card wx-list" id="wxList"><div class="pad muted">讀取天氣中…</div></div>
-    <p class="small muted">資料來源：Open-Meteo。冰島天氣變化快，出發前再看一次；極光預報可看 <a href="https://en.vedur.is/weather/forecasts/aurora/" target="_blank" rel="noopener">冰島氣象局 ↗</a></p>
+    <p class="small muted">資料來源：Open-Meteo。冰島天氣變化快，出發前再看一次；極光預報可看 <a href="https://northseek.net/zh-hant/" target="_blank" rel="noopener">Northseek ↗</a> 或 <a href="https://en.vedur.is/weather/forecasts/aurora/" target="_blank" rel="noopener">冰島氣象局 ↗</a></p>
   </div>
 </section>
 
@@ -467,7 +467,9 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
       <ul class="list">
         <li>需要：晴朗無雲、遠離燈光、太陽活動夠強。</li>
         <li>晚上 <b>8 點到 12 點</b>出現機率較高。</li>
-        <li>行程中 11/2–11/5 共 4 晚有機會（「行程」頁可看當晚雲量）。</li>
+        <li>行程中 11/2–11/5 共 4 晚有機會。「行程」頁會顯示當晚住宿地的<b>極光指數</b>（0–100）和最佳時段。</li>
+        <li>極光指數照 <a href="https://northseek.net/zh-hant/" target="_blank" rel="noopener">Northseek</a> 的方法算：把極光活動（Kp）、雲量、天黑程度、月光合成一個分數。12 以下機會偏低，12–29 普通，30–54 不錯，55 以上理想。</li>
+        <li>Kp 是太陽活動強度。冰島在極光帶下方，Kp 2–3 就常看得到。</li>
         <li>極光是自然現象，不保證看得到 🙏</li>
       </ul>
       <h3 style="margin-top:14px">📱 用手機拍極光</h3>
@@ -506,7 +508,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
       </ul>
     </div>
     <div id="checklistEnd"></div>
-    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・匯率：ExchangeRate-API</div>
+    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・極光：NOAA SWPC（方法參考 Northseek）・匯率：ExchangeRate-API</div>
   </div>
 </section>
 
@@ -530,6 +532,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
 <script>
 /* ---------------- helpers ---------------- */
 const W = (path, w = 960) => {
@@ -673,6 +676,7 @@ const DAYS = [
 
   { date:'2026-11-02', country:'is', title:'倫敦 ✈ 冰島・藍色溫泉湖', subtitle:'飛往世界最北的首都，泡湯後入住塞爾福斯', aurora:'追尋極光第一晚',
     wx:{ name:'塞爾福斯', lat:63.9333, lon:-21.0 }, hotel:'selfoss', flight:'FI471',
+    night:{ name:'塞爾福斯', lat:63.9333, lon:-21.0, ns:'selfoss' },
     meals:{ b:'飯店內或西式餐盒', l:'配合航班，敬請自理', d:'北歐小龍蝦風味餐' },
     places:[
       { zh:'凱夫拉維克國際機場', en:'Keflavík International Airport', img:'b/b3/SSJ100_Keflavik_runways_%285160518757%29.jpg',
@@ -701,6 +705,7 @@ const DAYS = [
 
   { date:'2026-11-03', country:'is', title:'冰島南岸：瀑布與黑沙灘', subtitle:'塞里雅蘭瀑布・史可加瀑布・黑沙灘・赫本', aurora:'追尋極光第二晚',
     wx:{ name:'維克（南岸）', lat:63.4186, lon:-19.0060 }, hotel:'jokull',
+    night:{ name:'赫本', lat:64.2539, lon:-15.2082, ns:'hofn' },
     meals:{ b:'飯店內自助式', l:'歐洲主廚推薦風味餐', d:'溫馨小鎮 冰島羊肉湯佐北極紅點鮭' },
     places:[
       { zh:'塞里雅蘭瀑布', en:'Seljalandsfoss', img:'3/33/Idyllic_landscape_with_a_waterfall_%28Unsplash%29.jpg',
@@ -744,6 +749,8 @@ const DAYS = [
 
   { date:'2026-11-04', country:'is', title:'藍冰洞健行・冰河湖', subtitle:'斯卡夫塔菲爾・藍冰洞・傑古沙龍冰河湖', aurora:'追尋極光第三晚',
     wx:{ name:'傑古沙龍冰河湖', lat:64.0703, lon:-16.2117 }, hotel:'stracta',
+    // Hella has no Northseek page; Hvolsvöllur is the nearest one (13 km)
+    night:{ name:'赫拉', lat:63.8357, lon:-20.3978, ns:'hvolsvollur' },
     meals:{ b:'飯店內自助式', l:'北歐主廚風味餐', d:'飯店內主廚推薦（可能為自助式）' },
     places:[
       { zh:'斯卡夫塔菲爾', en:'Skaftafell', img:'f/f3/Skaftafell_Aerial_2023.jpg',
@@ -793,6 +800,7 @@ const DAYS = [
 
   { date:'2026-11-05', country:'is', title:'金環之旅・雷克雅未克', subtitle:'辛格韋德利・黃金瀑布・間歇泉・哈爾格林姆教堂', aurora:'追尋極光第四晚',
     wx:{ name:'雷克雅未克', lat:64.1466, lon:-21.9426 }, hotel:'grand',
+    night:{ name:'雷克雅未克', lat:64.1466, lon:-21.9426, ns:'reykjavik' },
     meals:{ b:'飯店內自助式', l:'歐洲主廚推薦風味餐', d:'中式七菜一湯' },
     places:[
       { zh:'辛格韋德利國家公園', en:'Þingvellir National Park', img:'8/83/%C3%9Eingvellir_from_the_information_centre.JPG',
@@ -976,7 +984,7 @@ let wxReq = null;   // { at, p } – the batch in flight or the latest fresh one
 let wxSaved = store.get(WX_STORE, null);   // { at, data: { key: response } }
 function wxPoints() {
   const m = new Map();
-  [...DAYS.map(d => d.wx), ...WX_CITIES].forEach(w => w && m.set(wxKey(w.lat, w.lon), w));
+  [...DAYS.map(d => d.wx), ...DAYS.map(d => d.night), ...WX_CITIES].forEach(w => w && m.set(wxKey(w.lat, w.lon), w));
   return [...m.values()];
 }
 async function wxGet(u) {
@@ -1040,12 +1048,131 @@ const hhmm = s => s ? s.slice(11, 16) : '';
 const windPill = ms => ms >= 10.8
   ? `<span class="pill bad">💨 大風 ${Math.round(ms)} m/s</span>`
   : `<span class="pill">💨 風 ${Math.round(ms)} m/s</span>`;
-function nightCloud(data, date) {
-  // average cloud cover 21:00–24:00 local on that date
-  const h = data.hourly; if (!h) return null;
-  const vals = [];
-  h.time.forEach((t, i) => { if (t.startsWith(date) && +t.slice(11, 13) >= 21) vals.push(h.cloud_cover[i]); });
-  return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+/* ---------------- aurora score ----------------
+   Same method as northseek.net (whose own data can't be read from another site):
+   score = activity(Kp) × clear sky × darkness × moonlight, worked out for every hour
+   18:00–08:00 at the night's lodging; the night's score is its best hour.
+   Kp: NOAA SWPC 3-hour forecast (~3 days ahead). Cloud: MET Norway (the source Northseek uses;
+   Open-Meteo's blend can differ wildly over Iceland), falling back to Open-Meteo. Sun/moon: SunCalc. */
+const KP_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json', KP_STORE = 'kp-v1';
+let kpReq = null, kpSaved = store.get(KP_STORE, null);   // { at, pts:[{t, kp}] }
+function fetchKp() {
+  if (!kpReq || Date.now() - kpReq.at >= WX_TTL) {
+    const entry = kpReq = { at: Date.now(), p: (async () => {
+      const r = await fetch(KP_URL, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      // objects {time_tag, kp}; older versions of the feed were arrays with a header row
+      const rows = Array.isArray(j[0]) ? j.slice(1).map(a => ({ time_tag: a[0], kp: a[1] })) : j;
+      // each value covers 3 hours from time_tag (UTC); anchor it at the middle of that block
+      const pts = rows.map(o => ({ t: Date.parse(String(o.time_tag).replace(' ', 'T').replace(/Z?$/, 'Z')) + 1.5 * 36e5, kp: +o.kp }))
+        .filter(o => !isNaN(o.t) && !isNaN(o.kp)).sort((a, b) => a.t - b.t);
+      kpSaved = { at: Date.now(), pts };
+      store.set(KP_STORE, kpSaved);
+      return pts;
+    })() };
+    entry.p.catch(() => { if (kpReq === entry) kpReq = null; });
+  }
+  return kpReq.p.catch(e => { if (kpSaved && kpSaved.pts) return kpSaved.pts; throw e; });
+}
+function kpAt(pts, t) {
+  if (!pts.length || t < pts[0].t - 1.5 * 36e5 || t > pts[pts.length - 1].t + 1.5 * 36e5) return null;
+  if (t <= pts[0].t) return pts[0].kp;
+  for (let i = 1; i < pts.length; i++) if (t <= pts[i].t) {
+    const a = pts[i - 1], b = pts[i];
+    return a.kp + (b.kp - a.kp) * (t - a.t) / (b.t - a.t);
+  }
+  return pts[pts.length - 1].kp;
+}
+// MET Norway hourly cloud for one spot -> { 'YYYY-MM-DDTHH': % }. Hourly for ~2.5 days, then
+// 6-hourly; each step's value is held until the next one.
+const METNO_STORE = 'metno-v1', metnoReq = {};
+let metnoSaved = store.get(METNO_STORE, {});
+function fetchMetnoCloud(lat, lon) {
+  const k = wxKey(lat, lon), cur = metnoReq[k];
+  if (!cur || Date.now() - cur.at >= WX_TTL) {
+    const entry = metnoReq[k] = { at: Date.now(), p: (async () => {
+      const r = await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${(+lat).toFixed(4)}&lon=${(+lon).toFixed(4)}`,
+        { signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const ts = (await r.json()).properties.timeseries, map = {};
+      ts.forEach((x, i) => {
+        const t0 = Date.parse(x.time), t1 = ts[i + 1] ? Date.parse(ts[i + 1].time) : t0 + 36e5;
+        const cc = x.data.instant.details.cloud_area_fraction;
+        if (cc != null) for (let t = t0; t < t1; t += 36e5) map[new Date(t).toISOString().slice(0, 13)] = Math.round(cc);
+      });
+      metnoSaved[k] = map; store.set(METNO_STORE, metnoSaved);
+      return map;
+    })() };
+    entry.p.catch(() => { if (metnoReq[k] === entry) delete metnoReq[k]; });
+  }
+  return metnoReq[k].p.catch(e => { if (metnoSaved[k]) return metnoSaved[k]; throw e; });
+}
+const omCloud = wx => {
+  const m = {}; if (wx.hourly) wx.hourly.time.forEach((t, i) => { m[t.slice(0, 13)] = wx.hourly.cloud_cover[i]; });
+  return m;
+};
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const NIGHT_HOURS = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7, 8];
+// Iceland is on UTC all year, so hour h of the night is plain UTC
+function auroraNight(cloud, date, night, kpPts) {
+  const base = Date.parse(date + 'T00:00:00Z'), R = 180 / Math.PI;
+  const hours = NIGHT_HOURS.map(hr => {
+    const t = base + (hr < 12 ? hr + 24 : hr) * 36e5, cc = cloud[new Date(t).toISOString().slice(0, 13)], kp = kpAt(kpPts, t);
+    if (cc == null || kp == null) return { hr, kp, cc, s: null };
+    let dark, moon = 1;
+    if (typeof SunCalc !== 'undefined') {
+      const when = new Date(t);
+      dark = clamp01((-SunCalc.getPosition(when, night.lat, night.lon).altitude * R - 6) / 6);   // 0 at −6°, 1 below −12°
+      moon = 1 - .45 * SunCalc.getMoonIllumination(when).fraction * clamp01(SunCalc.getMoonPosition(when, night.lat, night.lon).altitude * R / 20);
+    } else dark = hr >= 19 || hr <= 7 ? 1 : .45;
+    return { hr, kp, cc, s: clamp01((kp + 1) / 6) * (1 - .92 * cc / 100) * dark * moon };
+  });
+  const dk = hours.filter(x => x.cc != null && (x.hr >= 21 || x.hr === 0));
+  // cloud 21:00–01:00, from the same source as the score
+  const cc = dk.length ? Math.round(dk.reduce((a, x) => a + x.cc, 0) / dk.length) : null;
+  const ok = hours.filter(x => x.s != null);
+  if (!ok.length) return { cc, kpMissing: hours.some(x => x.cc != null) };
+  const best = Math.max(...ok.map(x => x.s));
+  let from = -1, to = -1;
+  if (best > .05) for (let i = 0; i < hours.length; i++) {
+    if (hours[i].s != null && hours[i].s >= best * .8) { if (from < 0) from = i; to = i; }
+    else if (from >= 0) break;
+  }
+  return { best, from: from >= 0 ? hours[from].hr : null, to: to >= 0 ? hours[to].hr : null,
+    kp: Math.max(...ok.map(x => x.kp)), full: ok.length === hours.length, cc };
+}
+const auroraLevel = s => s < .12 ? ['機會偏低', 'bad'] : s < .30 ? ['機會普通', ''] : s < .55 ? ['機會不錯', 'good'] : ['理想條件', 'good'];
+const kpLevel = kp => kp < 2 ? '活動微弱' : kp < 3 ? '活動中等' : kp < 5 ? '活動增強' : kp < 6 ? '地磁風暴' : '強烈地磁風暴';
+const hh = h => String(h % 24).padStart(2, '0') + ':00';
+const nsLink = slug => `https://northseek.net/zh-hant/places/${slug}/`;
+async function auroraPills(day) {
+  const n = day.night;
+  // nothing to forecast once the night is over (it ends around 09:00 next morning)
+  if (Date.now() > Date.parse(day.date + 'T09:00:00Z') + 864e5) return '';
+  const [cloud, kpPts] = await Promise.all([
+    fetchMetnoCloud(n.lat, n.lon).catch(() => fetchWx(n.lat, n.lon).then(omCloud)),
+    fetchKp().catch(() => null)]);
+  let html = '';
+  const a = auroraNight(cloud, day.date, n, kpPts || []);
+  if (a && a.best != null) {
+    const [lvl, cls] = auroraLevel(a.best);
+    html += `<span class="pill ${cls}">🌌 ${esc(n.name)}極光指數 ${Math.round(a.best * 100)}・${lvl}</span>`;
+    if (a.from != null) html += `<span class="pill">🕘 最佳 ${hh(a.from)}–${hh(a.to + 1)}</span>`;
+    html += `<span class="pill">🧲 Kp ${a.kp.toFixed(1)}・${kpLevel(a.kp)}</span>`;
+  }
+  const cc = a && a.cc;
+  if (cc != null) {
+    const cls = cc <= 30 ? 'good' : cc >= 70 ? 'bad' : '';
+    html += `<span class="pill ${cls}">☁️ 21–01 點雲量 ${cc}%</span>`;
+  }
+  if (!html) return '';
+  html += `<a class="pill" href="${nsLink(n.ns)}" target="_blank" rel="noopener">Northseek 即時預報 ↗</a>`;
+  let note = '';
+  if (a && a.best == null && a.kpMissing && kpPts) note = '極光活動（Kp）預報只到約 3 天後，指數到時才會出現。';
+  else if (!kpPts) note = '極光活動（Kp）預報暫時無法讀取，先只看雲量。';
+  else if (a && a.best != null && !a.full) note = '部分時段的預報還沒出來，指數只算到目前有資料的時段。';
+  return `<div class="wx-extra">${html}</div>${note ? `<div class="small muted" style="margin-top:6px">${note}</div>` : ''}`;
 }
 const wxErr = e => esc(e && e.name === 'TimeoutError' ? '連線逾時' : (e && e.message) || String(e));
 async function renderDayWx(day, el) {
@@ -1063,15 +1190,11 @@ async function renderDayWx(day, el) {
           ${windPill(d.daily.wind_speed_10m_max[i])}
           <span class="pill">🌅 日出 ${hhmm(d.daily.sunrise[i])}</span>
           <span class="pill">🌇 日落 ${hhmm(d.daily.sunset[i])}</span>`;
-      if (day.aurora) {
-        const cc = nightCloud(d, day.date);
-        if (cc != null) {
-          const cls = cc <= 30 ? 'good' : cc >= 70 ? 'bad' : '';
-          const lvl = cc <= 30 ? '極光條件佳' : cc >= 70 ? '雲多，極光機會較低' : '極光機會普通';
-          html += `<span class="pill ${cls}">🌌 晚間雲量 ${cc}%・${lvl}</span>`;
-        }
+      html += `</div>`;
+      if (day.aurora && day.night) {
+        try { html += await auroraPills(day); } catch {}
       }
-      html += `</div>${wxStaleNote(d)}`;
+      html += wxStaleNote(d);
     } else {
       const c = d.current, [ic, tx] = wmo(c.weather_code);
       html = `<div class="weather"><div class="ic">${ic}</div><div>
