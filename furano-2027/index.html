@@ -1,0 +1,1738 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>富良野滑雪之旅</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#f4f6fa; --surface:#ffffff; --surface-2:#eef1f6; --text:#121826; --muted:#5b6475; --line:#e2e6ee;
+  --accent:#0f9d8a; --accent-2:#6d4bd8; --accent-soft:#e3f6f2; --warn:#b4540a; --warn-soft:#fff3e4;
+  --uk:#c8102e; --is:#02529c; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06);
+  --radius:16px; --nav-h:64px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1220; --surface:#131c2e; --surface-2:#1a2539; --text:#e8edf6; --muted:#97a3b8; --line:#243149;
+    --accent:#3fd9be; --accent-2:#a58bff; --accent-soft:#12302e; --warn:#ffb36b; --warn-soft:#33240f;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#131c2e; --surface-2:#1a2539; --text:#e8edf6; --muted:#97a3b8; --line:#243149;
+  --accent:#3fd9be; --accent-2:#a58bff; --accent-soft:#12302e; --warn:#ffb36b; --warn-soft:#33240f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:16px;line-height:1.6;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px)}
+a{color:var(--accent)}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+h2{font-size:22px;margin:24px 0 12px}
+h3{font-size:18px;margin:0}
+
+/* hero */
+.hero{position:relative;color:#fff;min-height:300px;display:flex;align-items:flex-end;
+  background:#0b1220 url("https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Furano_Snow_Resort_view2.JPG/1280px-Furano_Snow_Resort_view2.JPG") center/cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,20,.15) 0%,rgba(5,10,20,.85) 100%)}
+.hero .wrap{position:relative;z-index:1;width:100%;padding-top:calc(48px + env(safe-area-inset-top));padding-bottom:20px}
+.hero .eyebrow{font-size:13px;letter-spacing:.08em;opacity:.85}
+.hero h1{font-size:28px;line-height:1.25;margin:6px 0 8px}
+.hero .sub{font-size:14px;opacity:.9}
+.countdown{display:inline-flex;gap:8px;align-items:center;margin-top:14px;background:rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px;font-size:14px}
+.countdown b{font-size:18px}
+
+/* day chips */
+.chips{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.chips-in{position:relative;max-width:560px;margin:0 auto}
+.chips .row{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none;scroll-behavior:smooth;scroll-snap-type:x proximity}
+.chip{scroll-snap-align:center}
+.arrow{position:absolute;top:0;bottom:0;z-index:2;width:44px;border:0;font-size:28px;line-height:1;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;transition:opacity .2s}
+.arrow.left{left:0;justify-content:flex-start;padding-left:6px;background:linear-gradient(90deg,var(--bg) 45%,transparent)}
+.arrow.right{right:0;justify-content:flex-end;padding-right:6px;background:linear-gradient(270deg,var(--bg) 45%,transparent)}
+.arrow[hidden]{display:flex;opacity:0;pointer-events:none}
+.chips .row::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;
+  padding:6px 10px;text-align:center;min-width:58px;font:inherit;cursor:pointer}
+.chip small{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.chip b{display:block;font-size:15px;line-height:1.3}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.on small{color:rgba(255,255,255,.85)}
+.chip .today{display:block;font-size:10px;font-weight:700;color:var(--warn)}
+.chip.on .today{color:#fff}
+
+/* cards */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin:12px 0}
+.pad{padding:14px 16px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.day-head{margin-top:16px}
+.day-head .meta{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.flag{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:1px 7px}
+.flag.uk{background:var(--uk)} .flag.is{background:var(--is)} .flag.tw{background:#555} .flag.jp{background:#bc002d}
+.day-head h2{margin:6px 0 4px;font-size:21px;line-height:1.35}
+.plan-tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:2px 10px}
+.aurora-tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:#fff;
+  background:linear-gradient(90deg,#11b98f,#6d4bd8);border-radius:999px;padding:2px 10px}
+
+.weather{display:flex;align-items:center;gap:12px}
+.weather .ic{font-size:34px;line-height:1}
+.weather .t{font-size:24px;font-weight:700}
+.weather .d{font-size:13px;color:var(--muted);line-height:1.4}
+.wx-extra{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pill{font-size:12px;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.pill.good{background:var(--accent-soft);color:var(--accent)}
+.pill.bad{background:var(--warn-soft);color:var(--warn)}
+
+.map{height:260px;background:var(--surface-2)}
+.map-actions{display:flex;gap:8px;padding:10px 12px}
+.mapbox{position:relative}
+.map-close{display:none}
+.mapbox.full{position:fixed;inset:0;z-index:150;background:var(--surface);display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.mapbox.full .map{flex:1;height:auto}
+.mapbox.full .legend{padding:10px 16px 14px}
+.loc-msg{padding:8px 12px 0;font-size:13px;color:var(--muted)}
+.loc-msg:empty{display:none}
+.mapbox.full .loc-msg{padding:0 16px 14px}
+.map-locate{display:none}
+.mapbox.full .map-locate{display:block;position:absolute;left:12px;top:calc(12px + env(safe-area-inset-top));z-index:1000;
+  border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.mapbox.full .map-close{display:block;position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:1000;
+  border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+
+/* place card */
+.place .img{aspect-ratio:16/9;background:var(--surface-2) center/cover no-repeat;position:relative}
+.place .img .num{position:absolute;left:12px;top:12px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);
+  color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center}
+.place .img .noimg{position:absolute;inset:0;display:grid;place-items:center;font-size:44px}
+.place .en{font-size:13px;color:var(--muted)}
+.place p{margin:8px 0 0;font-size:15px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent)}
+.tag.star{background:#fff1c2;color:#7a5600}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.place .lead{font-weight:500}
+.story p{margin:10px 0 0;color:var(--text)}
+.story figure{margin:12px -16px 0}
+.story figure img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;background:var(--surface-2);cursor:zoom-in}
+.story figcaption{font-size:12px;color:var(--muted);padding:6px 16px 0}
+.tips{list-style:none;margin:12px 0 0;padding:10px 12px;background:var(--surface-2);border-radius:12px;font-size:14px}
+.tips li{padding-left:1.3em;position:relative;margin:3px 0}
+.tips li::before{content:"💡";position:absolute;left:0;font-size:12px;top:2px}
+.place .img[data-full]{cursor:zoom-in}
+html{touch-action:manipulation}
+.lightbox{position:fixed;inset:0;z-index:300;display:none;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
+.lightbox.on{display:block}
+.lightbox .bg{position:absolute;inset:0;background:#000}
+.lightbox .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.lightbox .stage img{max-width:100%;max-height:100%;object-fit:contain;transform-origin:0 0;will-change:transform;-webkit-user-drag:none;pointer-events:none}
+.lightbox .anim img{transition:transform .25s ease}
+.lightbox .top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;
+  padding:calc(10px + env(safe-area-inset-top)) 12px 10px 16px;color:#fff;font-size:14px;background:linear-gradient(rgba(0,0,0,.5),transparent);transition:opacity .2s}
+.lightbox .x{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px}
+.lightbox .cap{position:absolute;left:0;right:0;bottom:0;color:#eee;text-align:center;font-size:14px;
+  padding:24px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6));transition:opacity .2s}
+.lightbox .hint{font-size:12px;opacity:.7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.star{background:#3a2f0c;color:#ffd36b}}
+.btns{display:flex;gap:8px;margin-top:12px}
+.btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border-radius:12px;
+  border:1px solid var(--line);background:var(--surface);color:var(--text);text-decoration:none;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.note{background:var(--warn-soft);color:var(--text);border-radius:12px;padding:10px 12px;font-size:14px;margin-top:10px}
+.note b{color:var(--warn)}
+
+.meals{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px}
+.meals dt{color:var(--muted);font-size:13px;padding-top:2px}
+.meals dd{margin:0}
+
+/* flight */
+.flight{padding:16px}
+.flight .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.flight .no{font-weight:700;color:var(--text);font-size:15px}
+.flight .route{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin:10px 0 4px;gap:8px}
+.flight .code{font-size:30px;font-weight:800;letter-spacing:.02em;line-height:1.1}
+.flight .time{font-size:20px;font-weight:700}
+.flight .city{font-size:13px;color:var(--muted)}
+.flight .mid{text-align:center;color:var(--muted);font-size:12px}
+.flight .mid .line{width:64px;height:2px;background:var(--line);margin:6px auto;position:relative}
+.flight .mid .line::after{content:"✈";position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);background:var(--surface);padding:0 4px;color:var(--accent);font-size:14px}
+.r{text-align:right}
+.perf{border-top:1px dashed var(--line);margin:12px -16px 0;padding:10px 16px 0;font-size:13px;color:var(--muted)}
+
+/* hotel */
+.hotel .hdr{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.hotel .nights{font-size:12px;background:var(--surface-2);border-radius:8px;padding:2px 8px;white-space:nowrap;color:var(--muted)}
+.hotel iframe{display:block;width:100%;height:180px;border:0;background:var(--surface-2)}
+.kv{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;font-size:14px;margin-top:8px}
+.kv span:nth-child(odd){color:var(--muted)}
+
+/* tools */
+.clock{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.clock:first-child{border-top:0}
+.clock .name{font-weight:600}
+.clock .diff{font-size:12px;color:var(--muted)}
+.clock .time{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.clock .date{font-size:12px;color:var(--muted);text-align:right}
+.fx-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line)}
+.fx-row:first-of-type{border-top:0}
+.fx-row label{width:96px;flex:0 0 auto}
+.fx-row label > b{display:block;font-size:16px}
+.fx-row .sym{font-size:13px;color:var(--text)}
+.fx-in{flex:1;min-width:0;position:relative}
+.fx-in .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;font-size:16px;pointer-events:none}
+.fx-row label small{color:var(--muted);font-size:12px}
+.fx-row input{width:100%;padding-left:48px !important;font:inherit;font-size:22px;font-weight:700;text-align:right;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--text);border-radius:12px;padding:8px 12px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px}
+.quick button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:4px 12px;cursor:pointer}
+.wx-list .row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.wx-list .row:first-child{border-top:0}
+.wx-list .ic{font-size:28px;width:36px;text-align:center}
+.wx-list .nm{flex:1}
+.wx-list .ctry{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:6px;padding:0 6px;margin-right:6px;vertical-align:1px}
+.wx-list .ctry.uk{background:var(--uk)} .wx-list .ctry.is{background:var(--is)}
+.wx-list .nm small{display:block;color:var(--muted);font-size:12px}
+.wx-list .tt{text-align:right}
+.wx-list .tt b{font-size:20px}
+.wx-list .tt small{display:block;color:var(--muted);font-size:12px}
+
+.list{margin:0;padding-left:20px}
+.list li{margin:4px 0}
+.check{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:15px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;flex:0 0 auto;accent-color:var(--accent)}
+.check .ct{display:flex;flex-direction:column;min-width:0}
+.check .why{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:1px}
+.check .opt{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:6px;vertical-align:1px}
+.check.done .t{text-decoration:line-through;color:var(--muted)}
+.check-group{border-top:1px solid var(--line)}
+.check-group summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;font-weight:700;font-size:15px;
+  padding:12px 16px;background:var(--surface-2);-webkit-tap-highlight-color:transparent}
+.check-group summary::-webkit-details-marker{display:none}
+.check-group summary span:first-child{flex:1}
+.check-group summary::after{content:"›";font-size:22px;line-height:1;color:var(--muted);width:16px;text-align:center;
+  transform:rotate(90deg);transition:transform .2s}
+.check-group[open] summary::after{transform:rotate(-90deg)}
+.gcount{font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);border-radius:999px;padding:1px 8px}
+.gcount.full{color:#fff;background:var(--accent)}
+.check-group .check:first-of-type{border-top:0}
+.check-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;font-size:13px;color:var(--accent);font-weight:700}
+.check-all{display:flex;gap:6px}
+.check-all button{font:inherit;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:3px 10px;cursor:pointer}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+table.tbl th,table.tbl td{text-align:left;padding:8px 0;border-top:1px solid var(--line);vertical-align:top}
+table.tbl th{color:var(--muted);font-weight:500;width:92px}
+
+/* bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{display:flex;max-width:560px;margin:0 auto;height:var(--nav-h)}
+nav.tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-size:11px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;cursor:pointer}
+nav.tabs button .i{display:grid;place-items:center;width:44px;height:32px;border-radius:999px;transition:background .2s}
+nav.tabs button .i img{width:28px;height:28px;filter:saturate(.85) opacity(.8);transition:filter .2s,transform .2s}
+nav.tabs button.on{color:var(--accent);font-weight:700}
+nav.tabs button.on .i{background:var(--accent-soft)}
+nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s ease}
+@keyframes hop{0%{transform:scale(1)}40%{transform:translateY(-5px) scale(1.18)}70%{transform:translateY(1px) scale(1.08)}100%{transform:scale(1.12)}}
+@media (prefers-reduced-motion: reduce){nav.tabs button.on .i img{animation:none}}
+.view{display:none}
+.view.on{display:block}
+/* phones: tighter gutters so cards show more content */
+@media (max-width: 480px){
+  .wrap{padding:0 8px}
+  .pad{padding:12px}
+  .card{border-radius:14px;margin:10px 0}
+  .story figure{margin:12px -12px 0}
+  .story figcaption{padding:6px 12px 0}
+  .chips .row{padding:8px 8px}
+  .flight{padding:14px 12px}
+  .perf{margin:12px -12px 0;padding:10px 12px 0}
+  .fx-row,.clock,.wx-list .row,.check,.check-group summary,.check-sum{padding-left:12px;padding-right:12px}
+  .quick{padding:0 12px 12px}
+  .hero .wrap{padding-left:16px;padding-right:16px}
+}
+.footer{font-size:12px;color:var(--muted);text-align:center;margin:28px 0 8px}
+.home-link{position:absolute;left:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;display:inline-flex;align-items:center;gap:4px;height:36px;padding:0 14px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.theme-toggle{position:absolute;right:16px;top:calc(12px + env(safe-area-inset-top));z-index:2;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;width:36px;height:36px;font-size:16px;cursor:pointer}
+.leaflet-container{isolation:isolate;font:inherit;background:#e8edf2}
+.pin{width:30px;height:30px;border-radius:50%;background:#e8590c;color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;
+  border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin.h{background:#0f9d8a;font-size:15px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;padding:10px 12px 0;font-size:13px}
+.legend:empty{display:none}
+.legend b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e8590c;color:#fff;font-size:11px;margin-right:4px}
+.legend b.h{background:#0f9d8a}
+.search-btn{right:60px}
+.search-fab{position:fixed;right:14px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);z-index:40;width:46px;height:46px;
+  border-radius:50%;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);font-size:19px;cursor:pointer;
+  opacity:0;transform:scale(.8);pointer-events:none;transition:opacity .2s,transform .2s}
+.search-fab.on{opacity:1;transform:none;pointer-events:auto}
+.search{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column}
+.search[hidden]{display:none}
+.sbar{display:flex;gap:8px;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.sin{flex:1;display:flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:12px;padding:0 10px}
+.sin input{flex:1;min-width:0;border:0;background:none;color:var(--text);font:inherit;font-size:16px;padding:10px 0;outline:none}
+.sin input::-webkit-search-cancel-button{display:none}
+.sclear{border:0;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px}
+.scancel{border:0;background:none;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;padding:6px 4px}
+.sres{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 12px calc(24px + env(safe-area-inset-bottom))}
+.sres .meta{font-size:13px;color:var(--muted);margin:6px 4px 8px}
+.sres .sugg{display:flex;flex-wrap:wrap;gap:8px;margin:4px}
+.sres .sugg button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:6px 12px;font:inherit;font-size:14px;cursor:pointer}
+.sr{display:block;width:100%;text-align:left;border:0;background:var(--surface);color:var(--text);font:inherit;border-radius:12px;
+  padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);cursor:pointer}
+.sr .st{font-weight:700;font-size:15px}
+.sr .ss{display:block;font-size:12px;color:var(--muted)}
+.sr .sb{display:block;font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sr mark{background:#ffe08a;color:#121826;border-radius:3px;padding:0 1px}
+.sk{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-right:6px;vertical-align:2px;
+  background:var(--accent-soft);color:var(--accent)}
+.sk.k1{background:#fde8dc;color:#c2410c}.sk.k2{background:#e4ecfb;color:#1d4ed8}.sk.k3{background:#efe8fd;color:#6d28d9}.sk.k4{background:var(--warn-soft);color:var(--warn)}
+.hit{animation:hit 1.8s ease}
+@keyframes hit{0%,45%{background:var(--accent-soft)}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <a class="home-link" href="../">‹ 所有行程</a>
+  <button class="theme-toggle search-btn" id="searchBtn" aria-label="搜尋">🔍</button>
+  <button class="theme-toggle" id="themeBtn" aria-label="切換深淺色">◐</button>
+  <div class="wrap">
+    <div class="eyebrow">2027.01.09 – 01.17 · 9 天 8 夜</div>
+    <h1>北海道<br>富良野滑雪之旅</h1>
+    <div class="sub">富良野滑雪場・北之峰・美瑛・札幌美食</div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</header>
+
+<!-- ============ 行程 ============ -->
+<section class="view on" id="v-days">
+  <div class="chips"><div class="chips-in">
+    <button class="arrow left" id="chipsL" aria-label="前幾天">‹</button>
+    <div class="row" id="chips"></div>
+    <button class="arrow right" id="chipsR" aria-label="後幾天">›</button>
+  </div></div>
+  <div class="wrap" id="day"></div>
+</section>
+
+<!-- ============ 航班 ============ -->
+<section class="view" id="v-flights">
+  <div class="wrap">
+    <h2>航班資訊</h2>
+    <div id="flights"></div>
+    <div class="card pad">
+      <h3>行李提醒</h3>
+      <table class="tbl" style="margin-top:8px">
+        <tr><th>托運額度</th><td>以長榮電子機票上的額度為準（經濟艙依票種不同）</td></tr>
+        <tr><th>雪具</th><td>自備雪板、雪鞋的話，先查長榮的<b>運動用品托運</b>規定，通常可抵 1 件行李</td></tr>
+        <tr><th>回程</th><td>伴手禮很重！行李箱留空間，或帶一個可折疊的備用袋</td></tr>
+      </table>
+    </div>
+    <div class="card pad small">
+      <h3>登機安檢</h3>
+      <ul class="list" style="margin-top:6px">
+        <li><b>行動電源</b>只能隨身帶、不能托運，不超過 100Wh（約 27,000mAh）。</li>
+        <li>隨身液體每瓶 ≤ 100ml，裝進透明夾鏈袋；果醬、牛奶、酒等伴手禮放托運。</li>
+        <li>暖暖包可以帶（隨身、托運都可）。</li>
+      </ul>
+    </div>
+    <div class="card pad small">
+      <b>入境日本：</b>出發前在 <a href="https://www.vjw.digital.go.jp/" target="_blank" rel="noopener">Visit Japan Web ↗</a> 填好入境審查與海關申報，抵達時出示 QR Code。<br>
+      <b>線上報到：</b>長榮起飛前 48 小時開放 <a href="https://www.evaair.com/" target="_blank" rel="noopener">官網 ↗</a> 線上報到、選位。
+    </div>
+  </div>
+</section>
+
+<!-- ============ 住宿 ============ -->
+<section class="view" id="v-hotels">
+  <div class="wrap">
+    <h2>住宿資訊</h2>
+    <div id="hotels"></div>
+  </div>
+</section>
+
+<!-- ============ 工具 ============ -->
+<section class="view" id="v-tools">
+  <div class="wrap">
+    <h2>時區</h2>
+    <div class="card" id="clocks"></div>
+    <p class="small muted">日本比台灣快 1 小時，沒有夏令時間。</p>
+
+    <h2>匯率換算</h2>
+    <div class="card">
+      <div class="fx-row"><label for="fx-JPY"><b>🇯🇵 日圓</b><small>符號 <b class="sym">¥</b>・JPY</small></label><div class="fx-in"><span class="pre">¥</span><input inputmode="decimal" id="fx-JPY" autocomplete="off"></div></div>
+      <div class="fx-row"><label for="fx-TWD"><b>🇹🇼 新台幣</b><small>符號 <b class="sym">NT$</b>・TWD</small></label><div class="fx-in"><span class="pre">NT$</span><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div></div>
+      <div class="quick" id="fxQuick"></div>
+      <div class="pad small muted" style="padding-top:0" id="fxInfo">讀取匯率中…</div>
+    </div>
+
+    <h2>各地天氣</h2>
+    <div class="card wx-list" id="wxList"><div class="pad muted">讀取天氣中…</div></div>
+    <p class="small muted">資料來源：Open-Meteo。雪場山頂比山下冷很多（常低 5–10°C）；雪況可看 <a href="https://www.princehotels.co.jp/ski/furano/" target="_blank" rel="noopener">富良野滑雪場官網 ↗</a></p>
+  </div>
+</section>
+
+<!-- ============ 須知 ============ -->
+<section class="view" id="v-info">
+  <div class="wrap">
+    <div id="checklistHome"></div>
+    <div id="checklistSec">
+      <h2>待辦與行前清單</h2>
+      <div class="card" id="checklist"></div>
+    </div>
+
+    <h2>滑雪資訊</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>雪場</th><td><b>富良野滑雪場</b>，分「富良野區」（新富良野王子旁）和「北之峰區」，一張雪票通用，山上雪道相連</td></tr>
+        <tr><th>雪票</th><td>1 日券 2025–26 季約 <b>¥8,000</b>、夜間券約 ¥3,100（平日）；2026–27 季（12/5 – 3/22）價格以 <a href="https://www.princehotels.co.jp/ski/furano/winter/lift/" target="_blank" rel="noopener">官網 ↗</a> 為準。12 歲以下免費</td></tr>
+        <tr><th>營業時間</th><td>約 8:30 – 16:00，富良野區另有夜滑</td></tr>
+        <tr><th>滑雪學校</th><td><b>FISS</b>（Furano International Snow Sports）<br><a href="tel:+818029513216">+81 80-2951-3216</a>・<a href="mailto:mail@fiss.jp">mail@fiss.jp</a></td></tr>
+        <tr><th>天黑</th><td>1 月約 <b>16:20</b> 日落，下午 3 點後光線變暗、雪面看不清楚</td></tr>
+      </table>
+    </div>
+
+    <h2>交通</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>機場 → 富良野</th><td><b>北海道 Resort Liner</b> 直達新富良野王子（約 3 小時，要預約），或 JR 經札幌、瀧川到富良野站（⚠️ 待預訂）</td></tr>
+        <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店房客專用接駁車（2025–26 季免費），時刻表在櫃台；也可以在山上滑過去</td></tr>
+        <tr><th>飯店 ⇄ 市區</th><td>薰衣草巴士（富良野站 ⇄ 新富良野王子）；晚上的 Evening Shuttle Bus 單程 ¥500（2025–26 季）；計程車約 10 分鐘</td></tr>
+        <tr><th>富良野 → 札幌</th><td>中央巴士高速巴士約 2.5 小時，或 JR 經瀧川約 2 小時（⚠️ 待預訂）</td></tr>
+        <tr><th>札幌 → 機場</th><td>JR 快速 Airport 約 37 分鐘，可刷 IC 卡</td></tr>
+      </table>
+    </div>
+
+    <h2>現金與付款</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>信用卡</th><td>飯店、雪場、超商、大部分餐廳都能刷，帶 2 張 Visa／Master／JCB</td></tr>
+        <tr><th>現金</th><td>小餐廳、巴士、市場攤位可能只收現金，每人帶 ¥30,000 左右</td></tr>
+        <tr><th>IC 卡</th><td>iPhone 錢包可以加 <b>Suica</b>，札幌地鐵、JR、超商都能用</td></tr>
+        <tr><th>免稅</th><td>同店同日購物滿 ¥5,000（未稅）可免稅。<b>2026/11/1 起改新制</b>：先付含稅價，出境時在機場確認後退稅，購物時出示護照</td></tr>
+        <tr><th>小費</th><td>日本不用給小費</td></tr>
+      </table>
+    </div>
+
+    <h2>實用資訊</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>時差</th><td>日本比台灣<b>快 1 小時</b></td></tr>
+        <tr><th>電壓插座</th><td>100V，雙平腳插座（和台灣一樣），手機、筆電充電器可以直接用</td></tr>
+        <tr><th>網路</th><td>出發前買日本 eSIM 或網卡</td></tr>
+        <tr><th>國碼</th><td>日本 +81・台灣 +886<br>打回台灣：+886 ＋ 區碼去 0 ＋ 號碼</td></tr>
+        <tr><th>緊急電話</th><td>警察 <a href="tel:110">110</a>・救護車／消防 <a href="tel:119">119</a></td></tr>
+        <tr><th>飯店</th><td>新富良野王子 <a href="tel:+81167221111">+81 167-22-1111</a></td></tr>
+      </table>
+    </div>
+
+    <h2>雪地生活</h2>
+    <div class="card pad small">
+      <table class="tbl">
+        <tr><th>氣溫</th><td>富良野 1 月白天約 −5°C、清晨常到 <b>−15°C 以下</b>；札幌約 −1 至 −7°C</td></tr>
+        <tr><th>穿著</th><td>洋蔥式：排汗衣 → 刷毛中層 → 防水外套。室內暖氣很強，進門要能快速脫掉</td></tr>
+        <tr><th>走路</th><td>人行道結冰很滑，穿<b>防滑雪靴</b>或加冰爪，小步走、手不要插口袋</td></tr>
+        <tr><th>乾燥</th><td>室內很乾，護唇膏、乳液、保濕面膜；房間可以掛濕毛巾</td></tr>
+      </table>
+    </div>
+
+    <h2>滑雪安全</h2>
+    <div class="card pad small">
+      <ul class="list">
+        <li>建議投保<b>含滑雪意外</b>的旅平險、海外醫療險，一般旅平險有些不保滑雪。</li>
+        <li>不要滑出雪場邊界（Off-piste），富良野對越界滑行管理很嚴。</li>
+        <li>山頂風大、能見度低時改滑下半段，同行的人約好集合點和時間。</li>
+        <li>手機在低溫很快沒電，放內層口袋，帶行動電源。</li>
+      </ul>
+    </div>
+    <div id="checklistEnd"></div>
+    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・匯率：ExchangeRate-API</div>
+  </div>
+</section>
+
+<nav class="tabs"><div class="in">
+  <button data-v="days" class="on"><span class="i"><img src="../assets/icons/days.png" alt="" width="30" height="30"></span>行程</button>
+  <button data-v="flights"><span class="i"><img src="../assets/icons/flights.png" alt="" width="30" height="30"></span>航班</button>
+  <button data-v="hotels"><span class="i"><img src="../assets/icons/hotels.png" alt="" width="30" height="30"></span>住宿</button>
+  <button data-v="tools"><span class="i"><img src="../assets/icons/tools.png" alt="" width="30" height="30"></span>工具</button>
+  <button data-v="info"><span class="i"><img src="../assets/icons/info.png" alt="" width="30" height="30"></span>須知</button>
+</div></nav>
+
+<div class="lightbox" id="lightbox"><div class="bg"></div><div class="stage"><img alt=""></div><div class="top"><span class="count"></span><button class="x" aria-label="關閉">✕</button></div><div class="cap"><div class="txt"></div><div class="hint">雙指縮放・雙擊放大・上下滑關閉・左右滑看下一張</div></div></div>
+
+<button class="search-fab" id="searchFab" aria-label="搜尋">🔍</button>
+<div class="search" id="search" role="dialog" aria-label="搜尋" hidden>
+  <div class="sbar">
+    <div class="sin"><span aria-hidden="true">🔍</span><input type="search" id="sq" placeholder="搜尋景點、美食、航班、飯店、須知…" enterkeyhint="search" autocomplete="off"><button class="sclear" id="sclear" aria-label="清除" hidden>✕</button></div>
+    <button class="scancel" id="sx">取消</button>
+  </div>
+  <div class="sres" id="sres"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+<script>
+/* ---------------- helpers ---------------- */
+const W = (path, w = 960) => {
+  const name = path.split('/').pop();
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${path}/${w}px-${name}`;
+};
+const gmap = q => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const gnav = (lat, lon) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+const gembed = q => `https://maps.google.com/maps?hl=zh-TW&q=${encodeURIComponent(q)}&z=14&output=embed`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// every trip lives on the same origin, so keys are prefixed per trip (the theme is shared)
+const NS = 'fu27:', nsKey = k => k === 'theme' ? k : NS + k;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(nsKey(k)); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(nsKey(k), JSON.stringify(v)); } catch {} }
+};
+
+/* ---------------- data ---------------- */
+const HOTELS = {
+  shinfurano: { name:'New Furano Prince Hotel', zh:'新富良野王子大飯店', city:'富良野', country:'jp',
+    tel:'+81167221111', telShow:'+81 167-22-1111', addr:'北海道富良野市中御料 〒076-8511',
+    lat:43.3233, lon:142.3541, nights:['1/9 – 1/14・6 晚'],
+    note:'就在富良野滑雪場「富良野區」雪道旁，富良野纜車、Ningle Terrace、森之時計咖啡都在飯店範圍內。' },
+  sapporo: { tbd:true, name:'札幌住宿（還沒訂）', zh:'建議住札幌站、大通或薄野一帶', city:'札幌', country:'jp',
+    tel:'', telShow:'', addr:'', lat:43.0609, lon:141.3545, nights:['1/15、1/16・2 晚'],
+    tips:['<b>札幌站周邊</b>：搭 JR 去機場、小樽最方便，地下街下雪天也好走','<b>大通／狸小路</b>：位在中間，逛街、吃飯走路就到','<b>薄野</b>：吃宵夜、喝酒最方便，晚上熱鬧；去機場要先搭地鐵到札幌站','回程 1/17 是 12:10 的飛機，住札幌站附近早上最從容'] },
+};
+
+const FLIGHTS = [
+  { date:'2027-01-09', no:'BR116', airline:'長榮航空', from:'TPE', fromCity:'台北 桃園 第二航廈', dep:'09:30', to:'CTS', toCity:'札幌 新千歲', arr:'14:05', dur:'約 3 小時 35 分', plane:'波音 787-10・經濟艙・含餐' },
+  { date:'2027-01-17', no:'BR165', airline:'長榮航空', from:'CTS', fromCity:'札幌 新千歲', dep:'12:10', to:'TPE', toCity:'台北 桃園 第二航廈', arr:'16:05', dur:'約 4 小時 55 分', plane:'空中巴士 A321・經濟艙・含餐' },
+];
+
+const FURANO = { name:'富良野', lat:43.342, lon:142.383 };
+const SKI = { name:'富良野滑雪場', lat:43.3233, lon:142.3541 };
+const SAPPORO = { name:'札幌', lat:43.0618, lon:141.3545 };
+
+const DAYS = [
+  { date:'2027-01-09', title:'桃園 ✈ 新千歲 → 富良野', subtitle:'長榮 BR116 下午抵達北海道，搭巴士到富良野入住',
+    wx:SKI, hotel:'shinfurano', flight:'BR116',
+    meals:{ b:'自理', l:'機上（長榮）', d:'飯店內餐廳或 Ningle Terrace 附近（待定）' },
+    places:[
+      { zh:'桃園國際機場 第二航廈', en:'Taoyuan International Airport T2', img:null, emoji:'🛫',
+        lat:25.0777, lon:121.2328, q:'Taoyuan International Airport Terminal 2',
+        desc:'長榮航空 BR116 09:30 起飛，建議 07:00 前到機場報到。飛行約 3.5 小時，日本比台灣快 1 小時。', tags:['09:30 起飛','第二航廈'],
+        tips:['如果自備雪板、雪鞋，先查長榮的運動用品托運規定','行動電源只能放隨身行李','出發前在 <b>Visit Japan Web</b> 填好入境與海關資料，入境時出示 QR Code 比較快'] },
+      { zh:'新千歲機場', en:'New Chitose Airport', img:'8/87/Hokkaido_New_Chitose_Airport13n4272.jpg',
+        lat:42.7868, lon:141.6830, q:'New Chitose Airport',
+        desc:'當地時間 14:05 抵達國際線航廈。入境、領行李後走到國內線航廈，這邊有比較多吃的和巴士站。', tags:['14:05 抵達'],
+        story:[
+          '國內線航廈 3 樓有「北海道拉麵道場」，集合了北海道各地的拉麵名店；2 樓是伴手禮區，ROYCE\' 巧克力、白色戀人、六花亭、LeTAO 都買得到。',
+          { img:'c/c7/Niku_udon_in_New_Chitose_Airport_%28extended%29.jpg', cap:'機場美食街的烏龍麵' },
+          '去程先別急著買伴手禮，回程 1/17 還會經過這裡；先在超商買水和零食帶去飯店。',
+        ],
+        tips:['國際線和國內線航廈之間有室內連通道，走路約 10 分鐘','1 月北海道白天約 −5°C，羽絨外套放隨身行李，下飛機就穿'] },
+      { zh:'前往富良野', en:'New Chitose → Furano（約 3 小時）', img:null, emoji:'🚌',
+        lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
+        desc:'從機場到新富良野王子大飯店約 3 小時車程。⚠️ 接駁方式還沒決定（試算表待辦）。', tags:['⚠️ 待預訂','約 3 小時'],
+        tips:['<b>北海道 Resort Liner</b>：滑雪季的機場 ⇄ 富良野直達巴士，停新富良野王子門口。2025–26 季從國內線航廈出發，<b>要事先預約</b>，常常客滿','<b>JR</b>：新千歲機場 → 札幌 → 瀧川轉車 → 富良野站，再搭計程車約 10 分鐘到飯店；轉車多、帶行李辛苦','<b>包車</b>：人數多、行李和雪具多時最省事，可在 Klook、KKday 預訂','14:05 落地、入境約 1 小時，巴士到飯店大概 18:30 以後；北海道 16:20 左右就天黑'] },
+      { zh:'Ningle Terrace 森林小木屋', en:'Ningle Terrace', img:'e/e8/130503_Ningle_Terrace_Furano_Hokkaido_Japan03s.jpg',
+        lat:43.3234, lon:142.3563, q:'Ningle Terrace Furano',
+        desc:'飯店旁森林裡的 15 間小木屋商店，冬天晚上點燈、木棧道積滿雪，像童話裡的小村子。', tags:['飯店旁','夜間點燈'],
+        story:[
+          '名字來自富良野劇作家倉本聰的作品，「Ningle」是傳說中住在森林裡、只有 15 公分高的小精靈。每間小木屋都是一位手作職人的工作室，有木雕、蠟燭、玻璃、皮革等。',
+          { img:'6/6c/130503_Ningle_Terrace_Furano_Hokkaido_Japan02s.jpg', cap:'木棧道串起一間間小木屋' },
+          '冬季營業時間約 12:00–20:45（11 月有休館期，各店可能不定休），到飯店放好行李後散步過去剛好。',
+        ],
+        tips:['木棧道會結冰，穿防滑的鞋','小木屋裡請勿拍攝職人作品，拍照前先問'] },
+    ],
+    notes:['北海道 Resort Liner 等接駁巴士在滑雪季常客滿，<b>確定航班後就先訂</b>。','入住後先到飯店櫃台問清楚：往北之峰的接駁車時刻、雪具寄放處、溫泉時間。'] },
+
+  { date:'2027-01-10', title:'自由滑雪・富良野市區・北之峰', subtitle:'自己滑，順便去市區採買、北之峰區走走', plan:'細節還沒安排',
+    wx:SKI, hotel:'shinfurano',
+    meals:{ b:'飯店', l:'建議：唯我獨尊 香腸咖哩', d:'建議：くまげら 鄉土料理（先訂位）' },
+    places:[
+      { zh:'富良野滑雪場・富良野區', en:'Furano Ski Resort – Furano Zone', img:'e/ed/Furano_Snow_Resort_view2.JPG',
+        lat:43.3266, lon:142.3394, q:'Furano Ropeway',
+        desc:'富良野滑雪場分成「富良野區」和「北之峰區」，一張雪票兩區通用，山上雪道相連。富良野區就在飯店門口。', tags:['★滑雪','雪票兩區通用'],
+        story:[
+          '富良野位在北海道正中央，盆地內陸氣候讓雪又乾又輕，是日本知名的「粉雪」雪場，也辦過好幾次國際雪聯（FIS）高山滑雪世界盃。',
+          { img:'b/b9/Furano_Snow_Resort_view1.JPG', cap:'富良野滑雪場與山下的富良野盆地' },
+          '飯店旁的「富良野纜車 Ropeway」可以直上山頂，第一天先在中段的初中級雪道熱身，習慣雪況再往上。',
+        ],
+        tips:['雪票 1 日券 2025–26 季約 ¥8,000，2026–27 季價格以官網為準；12 歲以下兒童免費','纜車、吊椅約 8:30 開始；1 月下午 4 點多就暗了','山頂常常 −15°C 以下，臉、手指要包好'] },
+      { zh:'北之峰區', en:'Kitanomine Zone', img:'f/f7/Furano_Snow_Resort_view3.JPG',
+        lat:43.3441, lon:142.3661, q:'Kitanomine Gondola Furano',
+        desc:'山的另一側，坐北之峰纜車上山。山腳就是北之峰小鎮，有餐廳、居酒屋和雪具店。', tags:['可滑過去'],
+        tips:['從富良野區可以在山上滑過去，回程記得留時間滑回來（或搭接駁車）','新富良野王子 ⇄ 北之峰有<b>王子飯店房客專用接駁車</b>（2025–26 季免費），時刻以櫃台公告為準','新富良野王子在北之峰也有拉麵店，富良野名店「とみ川」的新品牌就開在這裡'] },
+      { zh:'富良野市區採買', en:'Furano Station & Furano Marché', img:'6/62/JRH_Furano_Station_20100908.jpg',
+        lat:43.3424, lon:142.3866, q:'Furano Marche',
+        desc:'富良野車站一帶是市區，有 Furano Marché（富良野物產、甜點、麵包）、超市和藥妝店。從飯店搭計程車約 10 分鐘。', tags:['購物'],
+        tips:['超市買水、零食、啤酒比飯店便宜很多','<b>薰衣草巴士</b>：富良野站 ⇄ 新富良野王子，冬季每天行駛','晚上有「Evening Shuttle Bus」往返飯店和市區餐廳，2025–26 季單程 ¥500','人行道結冰很滑，走路小步、鞋底要防滑'] },
+      { zh:'唯我獨尊', en:'Yuigadokuson・香腸咖哩', img:null, emoji:'🍛',
+        lat:43.3449, lon:142.3895, q:'唯我独尊 富良野',
+        desc:'富良野最有名的咖哩店，木屋裡掛滿客人留下的名片。招牌是自家煙燻香腸咖哩，醬汁用炒到焦香的富良野蔬菜加 29 種香料熬成。', tags:['午餐','咖哩百名店'],
+        tips:['入選 2026 Tabelog「咖哩百名店」，開店前就排隊，建議一開門就到','公休日、營業時間出發前到 Tabelog 確認'] },
+      { zh:'くまげら Kumagera', en:'富良野鄉土料理', img:null, emoji:'🍲',
+        lat:43.3462, lon:142.3888, q:'くまげら 富良野',
+        desc:'富良野車站旁的老字號，招牌是放了鴨、雞、鹿肉的「山賊鍋」，還有富良野和牛壽喜燒、和牛丼。2017 年獲北海道米其林必比登推介。', tags:['晚餐','米其林必比登'],
+        tips:['地址：富良野市日の出町 3-22，11:30 開始營業，<b>週三公休</b>','滑雪季晚餐非常熱門，<b>一定要先訂位</b>'] },
+    ],
+    notes:['這天還沒排定，以上是順路的建議。'] },
+
+  { date:'2027-01-11', title:'FISS 滑雪課', subtitle:'在新富良野王子前集合（教練詢問中）', plan:'教練還在確認',
+    wx:SKI, hotel:'shinfurano',
+    meals:{ b:'飯店', l:'雪場餐廳', d:'待定' },
+    places:[
+      { zh:'FISS 滑雪學校', en:'Furano International Snow Sports School', img:'b/b9/Furano_Snow_Resort_view1.JPG',
+        lat:43.3236, lon:142.3530, q:'New Furano Prince Hotel',
+        desc:'FISS 是富良野當地的滑雪學校，有英語教練、私人課程。這天在新富良野王子大飯店前集合（目前還在詢問中）。', tags:['★滑雪課','⚠️ 詢問中'],
+        story:[
+          '網路上的資料說，富良野區的集合點在飯店雪具室出口外約 40 公尺的「Atomic 租借站」前；北之峰區則在纜車站外、餐廳前的平地。實際地點以教練通知為準。',
+          '初學者通常從飯店旁有「雪上手扶梯」的平緩區開始練習。',
+        ],
+        tips:['聯絡方式（王子飯店網站提供）：<a href="tel:+818029513216">+81 80-2951-3216</a>・<a href="mailto:mail@fiss.jp">mail@fiss.jp</a>','提早 10 分鐘到，雪衣、雪鞋、板子都穿好','問清楚：課程時間、雪票是否自己買、可不可以租裝備','1/11 是日本「成人之日」國定假日（三連休最後一天），雪場人會比較多'] },
+      { zh:'森之時計 咖啡', en:'Mori no Tokei Café', img:null, emoji:'☕',
+        lat:43.3240, lon:142.3570, q:'森の時計 富良野',
+        desc:'飯店森林深處的咖啡館，日劇《溫柔時光》的拍攝場景。坐在吧台可以自己磨咖啡豆，窗外就是雪林。', tags:['飯店內','日劇場景'],
+        tips:['很熱門，下課後去可能要排一下','營業時間以飯店公告為準'] },
+      { zh:'溫泉放鬆', en:'Onsen after skiing', img:null, emoji:'♨️',
+        lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
+        desc:'新富良野王子大飯店有天然溫泉大浴場，上完課泡一下，腳比較不會痠。', tags:['飯店內'],
+        tips:['日本溫泉要全裸入池，先在洗身處洗乾淨','大毛巾不能放進池子裡','有刺青的話先問飯店規定'] },
+    ],
+    notes:['FISS 回覆後，把確定的時間、集合地點和費用更新到這裡。'] },
+
+  { date:'2027-01-12', title:'滑雪 或 美瑛青池半日遊', subtitle:'還沒安排：以下是附近的建議', plan:'待安排',
+    wx:SKI, hotel:'shinfurano',
+    meals:{ b:'飯店', l:'待定', d:'待定' },
+    places:[
+      { zh:'白金青池（冬季點燈）', en:'Shirogane Blue Pond, Biei', img:'2/2d/Shirogane_Blue_Pond_by_night%2C_April_2023_08.jpg',
+        lat:43.4935, lon:142.6141, q:'Shirogane Blue Pond',
+        desc:'美瑛的青池因水中的鋁成分呈現夢幻藍色。冬天池面結冰積雪，晚上會打燈，枯樹在雪中發光非常漂亮。', tags:['建議','冬季點燈'],
+        story:[
+          { img:'d/d4/Biei_Blue-pond.jpg', cap:'沒有結冰的季節，池水是這樣的藍' },
+          '從富良野開車約 1 小時。冬季點燈的日期、時間每年由美瑛町公告，出發前查一下。',
+        ],
+        tips:['沒有租車的話，可以找富良野、旭川出發的「冬季美瑛一日遊」或包車','晚上非常冷，暖暖包、手套、毛帽都帶上'] },
+      { zh:'白鬚瀑布', en:'Shirahige Falls', img:'e/e1/Shirahige_Falls%2C_Biei_River%2C_Hokkaido%2C_Japan.jpg',
+        lat:43.4746, lon:142.6392, q:'Shirahige Falls',
+        desc:'在青池附近的白金溫泉，地下水從岩壁縫隙流出，像老人的白鬍子。冬天河水不結冰，藍色河水配白雪。', tags:['建議'],
+        tips:['從「白金溫泉」的橋上看，照片中是夏天的樣子','和青池一起排成半日遊剛好'] },
+      { zh:'富良野起司工房', en:'Furano Cheese Factory', img:'5/52/Wine_Cheddar_Brand_of_Furano_Cheese_-_Cheese_Factory_-_Furano_-_Hokkaido_-_Japan_%2848012225498%29.jpg',
+        lat:43.3207, lon:142.3772, q:'Furano Cheese Factory',
+        desc:'離飯店很近的起司工廠，可以試吃起司、喝牛奶、吃起司冰淇淋，隔壁的披薩工房用富良野起司烤披薩。', tags:['建議','離飯店近'],
+        tips:['有手作奶油、冰淇淋體驗（要預約），冬季營業時間以官網為準'] },
+    ],
+    notes:['如果想多滑一天，這天就留在雪場；景點可以挪到 1/13 或 1/14。'] },
+
+  { date:'2027-01-13', title:'旭山動物園企鵝散步・旭川拉麵', subtitle:'還沒安排：可以排一天去旭川', plan:'待安排',
+    wx:{ name:'旭川', lat:43.7706, lon:142.365 }, hotel:'shinfurano',
+    meals:{ b:'飯店', l:'建議：旭川醬油拉麵', d:'待定' },
+    places:[
+      { zh:'旭山動物園', en:'Asahiyama Zoo', img:'c/ca/Walking_Penguins_in_Asahiyama_Zoo_%28back%29.JPG',
+        lat:43.7686, lon:142.4793, q:'Asahiyama Zoo',
+        desc:'日本最北的動物園，以「行動展示」聞名，冬天最有名的是國王企鵝排隊在雪地上散步。', tags:['建議','企鵝散步'],
+        story:[
+          '企鵝散步是為了讓企鵝冬天運動，積雪夠的時候每天約 11:00 舉行（雪多時下午可能加一場），企鵝就從你面前搖搖擺擺走過。',
+          { img:'c/c6/Asahiyama_zoo_Penguin_02.jpg', cap:'在雪地上散步的國王企鵝' },
+          '還有北極熊館、海豹的垂直水管、雪豹，都可以近距離看到。',
+        ],
+        tips:['富良野 → 旭川：JR 富良野線約 1 小時 10 分，或薰衣草巴士約 1.5 小時；旭川站前再搭巴士約 40 分到動物園','企鵝散步的日期、時間以動物園公告為準','冬季開園時間短（約 10:30–15:30），早點出發'] },
+      { zh:'旭川拉麵', en:'Asahikawa Ramen', img:null, emoji:'🍜',
+        lat:43.7633, lon:142.3580, q:'旭川ラーメン村',
+        desc:'旭川是北海道三大拉麵之一，以豬骨＋海鮮雙湯頭的醬油拉麵為主，表面一層豬油保溫，冬天吃最暖。', tags:['建議','午餐'],
+        tips:['車站附近有很多名店；郊區有「旭川拉麵村」一次集合 8 家','回程順路逛旭川站前的 AEON 購物中心'] },
+    ],
+    notes:['旭川比富良野更冷，1 月白天常在 −5°C 以下。'] },
+
+  { date:'2027-01-14', title:'最後一天滑雪・夜滑', subtitle:'還沒安排：把握富良野最後一天', plan:'待安排',
+    wx:SKI, hotel:'shinfurano',
+    meals:{ b:'飯店', l:'建議：富良野歐姆蛋咖哩', d:'待定' },
+    places:[
+      { zh:'夜間滑雪', en:'Night Skiing', img:'f/f7/Furano_Snow_Resort_view3.JPG',
+        lat:43.3240, lon:142.3500, q:'Furano Ski Resort',
+        desc:'富良野區晚上有夜滑，雪道打燈，人少、雪況穩定，看著山下富良野市區的燈光滑下來。', tags:['建議'],
+        tips:['夜間券約 ¥3,100（平日），以官網為準；一般日券通常也能接著滑夜場','晚上更冷，加一層中層保暖衣'] },
+      { zh:'富良野歐姆蛋咖哩', en:'Furano Omu-Curry', img:'2/24/Furano_Omu-Curry_3.jpg',
+        lat:43.3424, lon:142.3866, q:'富良野オムカレー',
+        desc:'富良野的在地美食，用富良野的米、蛋、蔬菜和起司做成，每家店口味不同，套餐會附一瓶富良野牛奶。', tags:['在地美食'],
+        story:[
+          { img:'f/f7/Furano_Omu-Curry_2.jpg', cap:'每家店的擺盤都不一樣，蛋上插著小旗子' },
+          '規定一定要插「富良野歐姆蛋咖哩」的小旗子、附富良野牛奶，市區有十多家店參加。',
+        ] },
+      { zh:'打包・寄行李', en:'Prepare for Sapporo', img:null, emoji:'🧳',
+        lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
+        desc:'明天要移動到札幌。雪具、大行李可以在飯店櫃台用「宅急便」寄到札幌飯店或新千歲機場，移動時輕鬆很多。', tags:['實用'],
+        tips:['宅急便通常隔天或後天送到，寄到機場的話要寫航班日期','租的雪具記得今天歸還'] },
+    ],
+    notes:[] },
+
+  { date:'2027-01-15', title:'富良野 → 札幌', subtitle:'退房後移動到札幌，晚上逛大通、狸小路、薄野',
+    wx:SAPPORO, hotel:'sapporo',
+    meals:{ b:'飯店', l:'途中或抵達後', d:'建議：成吉思汗烤羊肉（だるま）' },
+    places:[
+      { zh:'前往札幌', en:'Furano → Sapporo（約 2–2.5 小時）', img:null, emoji:'🚌',
+        lat:43.0687, lon:141.3508, q:'Sapporo Station',
+        desc:'⚠️ 交通方式還沒決定（試算表待辦）。巴士或 JR 都約 2–2.5 小時。', tags:['⚠️ 待預訂'],
+        tips:['<b>高速巴士</b>：北海道中央巴士 富良野 ⇄ 札幌，約 2.5 小時，可在富良野巴士站買票或車上付現／IC 卡','<b>JR</b>：富良野 → 瀧川轉車 → 札幌，約 2 小時（夏天才有直達的薰衣草特急）','<b>北海道 Resort Liner</b>：滑雪季有富良野 ⇄ 札幌市區的路線，要預約','大行李前一天用宅急便先寄，移動輕鬆很多'] },
+      { zh:'大通公園・札幌電視塔', en:'Odori Park & Sapporo TV Tower', img:'0/0d/Hokkaido_Sapporo_Odori_Park.jpg',
+        lat:43.0611, lon:141.3564, q:'Sapporo TV Tower',
+        desc:'貫穿札幌市中心的公園，2 月的雪祭就在這裡。東端的電視塔展望台可以看整條大通公園的夜景。', tags:['建議','夜景'],
+        story:[
+          { img:'a/ac/Sapporo_TV_tower-20091013-RM-162316.jpg', cap:'札幌電視塔，塔身就是大時鐘' },
+          '電視塔高 147 公尺，90 公尺處是展望台。冬天下雪的大通公園一片白，晚上很有氣氛。',
+        ] },
+      { zh:'札幌市時計台', en:'Sapporo Clock Tower', img:'3/39/Sapporo_Clock_Tower_20090112.jpg',
+        lat:43.0626, lon:141.3536, q:'Sapporo Clock Tower',
+        desc:'1878 年建的札幌農學校演武場，札幌最有名的地標，鐘到現在還會整點報時。', tags:['建議','拍照點'],
+        tips:['📸 對面大樓 2 樓有拍照平台，可以拍到整棟時計台','外觀看看就好，在大樓間小小一棟，很多人第一次看都覺得「比想像中小」'] },
+      { zh:'狸小路商店街', en:'Tanukikoji Shopping Street', img:'3/3f/Tanukikoji_01.jpg',
+        lat:43.0573, lon:141.3527, q:'Tanukikoji Shopping Street',
+        desc:'有屋頂的商店街，從 1 丁目到 7 丁目約 900 公尺，藥妝、唐吉訶德、伴手禮、拉麵店都在這裡，下雪天也好逛。', tags:['購物'],
+        tips:['藥妝店滿 ¥5,000（未稅）可以免稅，記得帶護照'] },
+      { zh:'薄野・成吉思汗烤羊肉', en:'Susukino & Jingisukan', img:'2/24/Tsukisappu_genghis_khan_club_genghis_khan.JPG',
+        lat:43.0554, lon:141.3534, q:'だるま 本店 すすきの',
+        desc:'北海道名物，用中間凸起的鐵鍋烤羊肉，旁邊放洋蔥、豆芽。薄野的「だるま」本店是最有名的老店。', tags:['晚餐','北海道名物'],
+        story:[
+          { img:'e/e0/Susukino-night_from_TV_Tower.JPG', cap:'從電視塔看薄野夜景' },
+          '薄野是札幌最大的鬧區，餐廳、居酒屋、拉麵店一路開到半夜。吃完烤羊肉，可以學札幌人來一份「シメパフェ」（收尾聖代）。',
+        ],
+        tips:['だるま不能訂位，晚餐時段排隊很長，可以開店就去或吃宵夜時段','烤肉味很重，外套可以放店家給的袋子裡'] },
+    ],
+    notes:['札幌住宿還沒訂（試算表待辦）。'] },
+
+  { date:'2027-01-16', title:'札幌一日：市場・小樽・夜景', subtitle:'還沒安排：以下挑幾個喜歡的', plan:'自由安排',
+    wx:SAPPORO, hotel:'sapporo',
+    meals:{ b:'建議：二条市場 海鮮丼', l:'建議：小樽壽司或湯咖哩', d:'建議：札幌味噌拉麵＋シメパフェ' },
+    places:[
+      { zh:'二条市場', en:'Nijo Market', img:'f/fc/Nijo_fish_Market_2014.jpg',
+        lat:43.0582, lon:141.3585, q:'Nijo Market Sapporo',
+        desc:'札幌市中心的百年海鮮市場，早上吃一碗放滿海膽、鮭魚卵、螃蟹的海鮮丼。', tags:['建議','早餐'],
+        tips:['早上 7 點左右就有店開，越早越好','螃蟹、海膽價格差很多，看清楚標價（有的是「時價」）'] },
+      { zh:'小樽運河', en:'Otaru Canal', img:'a/a0/%E5%B0%8F%E6%A8%BD%E9%9B%AA%E3%81%82%E3%81%8B%E3%82%8A%E3%81%AE%E8%B7%AF2013%EF%BC%88Otaru_Snow_Light_Path_2013%EF%BC%89_-_panoramio_%283%29.jpg',
+        lat:43.2020, lon:141.0006, q:'Otaru Canal',
+        desc:'JR 從札幌搭快速列車約 35 分鐘。運河旁的石造倉庫、堺町通的玻璃工藝、音樂盒堂和 LeTAO 甜點，半天就能逛完。', tags:['建議','半日遊'],
+        story:[
+          '小樽在明治、大正時期是北海道的金融與貿易中心，運河兩旁的倉庫現在改成餐廳和商店。傍晚煤氣燈亮起時最漂亮。',
+          '照片是 2 月「小樽雪燈之路」時的運河；1 月中還沒有雪燈，但雪景一樣很美。',
+        ],
+        tips:['堺町通坡道結冰很滑，鞋子要防滑','小樽的壽司屋通很有名，午餐可以在這裡吃'] },
+      { zh:'白色戀人公園', en:'Shiroi Koibito Park', img:'5/53/Shiroi_Koibito_Park_20260703k.jpg',
+        lat:43.0887, lon:141.2717, q:'Shiroi Koibito Park',
+        desc:'「白色戀人」餅乾的工廠，可以參觀生產線、做餅乾，英式建築和花園很好拍。冬天晚上有點燈。', tags:['建議'],
+        tips:['從札幌搭地鐵東西線到「宮の沢」站，走路約 7 分鐘','手作餅乾體驗要先預約'] },
+      { zh:'湯咖哩', en:'Soup Curry', img:'b/b1/Soup-Curry_%EF%BC%9A_PICANTE%2C_Sapporo%2C_Japan_-_panoramio.jpg',
+        lat:43.0600, lon:141.3500, q:'スープカレー 札幌',
+        desc:'札幌發明的料理：像湯一樣的咖哩，裡面有一整支雞腿和烤得香甜的北海道蔬菜，可以選辣度。', tags:['建議','札幌名物'],
+        tips:['人氣店：Suage+、GARAKU、Picante 等，熱門時段要排隊','辣度通常分很多級，第一次選中間就好'] },
+      { zh:'札幌味噌拉麵', en:'Sapporo Miso Ramen', img:'8/85/Miso_ramen_of_Sapporo_01.jpg',
+        lat:43.0560, lon:141.3540, q:'元祖さっぽろラーメン横丁',
+        desc:'札幌是味噌拉麵的發源地，濃郁的味噌湯頭加上炒過的豆芽、玉米、奶油。薄野的「拉麵橫丁」有十幾家小店。', tags:['建議'],
+        tips:['吃完可以去吃「シメパフェ」：札幌人喝完酒、吃完晚餐後吃聖代收尾的文化，很多店開到深夜'] },
+      { zh:'藻岩山夜景', en:'Mt. Moiwa Night View', img:'d/d9/City_nightscape_of_Sapporo_from_Mt._Moiwa_20260703b.jpg',
+        lat:43.0270, lon:141.3294, q:'Mt. Moiwa Ropeway',
+        desc:'搭纜車加迷你纜車上山，從山頂可以看到整個札幌的夜景，被選為「日本新三大夜景」之一。', tags:['建議','夜景'],
+        tips:['從市區搭路面電車到「ロープウェイ入口」，再走路或搭免費接駁車到纜車站','山頂風大很冷，穿最厚的外套'] },
+      { zh:'札幌啤酒博物館', en:'Sapporo Beer Museum', img:'a/a6/Sapporo_Beer_Museum.jpg',
+        lat:43.0714, lon:141.3690, q:'Sapporo Beer Museum',
+        desc:'紅磚建築是以前的製糖工廠，介紹日本啤酒的歷史，最後可以付費試喝。旁邊的啤酒園可以吃成吉思汗烤羊肉配生啤酒。', tags:['建議'] },
+    ],
+    notes:['1/16 是週六，熱門餐廳建議先訂位。'] },
+
+  { date:'2027-01-17', title:'札幌 ✈ 桃園', subtitle:'長榮 BR165 12:10 起飛，16:05 回到台灣',
+    wx:SAPPORO, flight:'BR165',
+    meals:{ b:'飯店或札幌站', l:'機上（長榮）', d:'回到台灣' },
+    places:[
+      { zh:'札幌站 → 新千歲機場', en:'JR Rapid Airport', img:'f/fa/Sapporo_Station_at_night.jpg',
+        lat:43.0687, lon:141.3508, q:'Sapporo Station',
+        desc:'搭 JR「快速 Airport」約 37 分鐘直達新千歲機場站。國際線建議起飛前 2.5 小時到，最晚 09:00 左右從札幌出發。', tags:['最晚 09:00 出發'],
+        tips:['下雪可能誤點，時間抓寬一點','可以用 Suica 等 IC 卡直接刷進站'] },
+      { zh:'新千歲機場 買伴手禮', en:'New Chitose Airport', img:'a/ad/New_Chitose_Airport_outside_%28International%29.jpg',
+        lat:42.7868, lon:141.6830, q:'New Chitose Airport',
+        desc:'國內線航廈 2 樓的伴手禮區是北海道最齊全的地方之一，ROYCE\'、白色戀人、六花亭、LeTAO、薯條三兄弟都在這裡。', tags:['伴手禮'],
+        tips:['國內線買完再走到國際線（約 10 分鐘）報到','液體（果醬、酒、牛奶）要托運，或過安檢後再買','免稅：2026/11 起日本改成「先付含稅價，出境時退稅」，購物時要出示護照'] },
+    ],
+    notes:[] },
+];
+
+const TRIP_START = '2027-01-09', TRIP_END = '2027-01-17';
+
+/* ---------------- date helpers ---------------- */
+const WK = ['日','一','二','三','四','五','六'];
+const md = iso => { const [y,m,d] = iso.split('-').map(Number); return `${m}/${d}`; };
+const wk = iso => WK[new Date(iso + 'T12:00:00').getDay()];
+// The whole trip is in Japan, so "today" is judged on Japan time.
+const tzOf = () => 'Asia/Tokyo';
+// ?now=2027-01-11T09:00:00+09:00 simulates another moment (for checking the "today" logic)
+const NOW_OFFSET = (() => {
+  const q = new URLSearchParams(location.search).get('now');
+  const t = q ? Date.parse(q) : NaN;
+  return isNaN(t) ? 0 : t - Date.now();
+})();
+const now = () => new Date(Date.now() + NOW_OFFSET);
+const isoIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(now());
+const dayTz = () => 'Asia/Tokyo';
+function todayIndex() {
+  for (let i = 0; i < DAYS.length; i++) if (isoIn(dayTz(i)) === DAYS[i].date) return i;
+  return -1;
+}
+
+/* ---------------- countdown ---------------- */
+function renderCountdown() {
+  const tw = isoIn('Asia/Taipei');
+  const diff = Math.round((new Date(TRIP_START) - new Date(tw)) / 864e5);
+  const ti = todayIndex();
+  let html;
+  if (ti >= 0) html = `⛷️ 旅程第 <b>${ti + 1}</b> / ${DAYS.length} 天・${DAYS[ti].wx.name}`;
+  else if (diff > 0) html = `距離出發還有 <b>${diff}</b> 天`;
+  else if (tw > TRIP_END) html = `旅程結束，謝謝一起出發 ✨`;
+  else html = `今天出發！`;
+  $('#countdown').innerHTML = html;
+}
+
+/* ---------------- weather ---------------- */
+const WMO = {0:['☀️','晴'],1:['🌤️','大致晴'],2:['⛅','多雲'],3:['☁️','陰'],45:['🌫️','霧'],48:['🌫️','霧凇'],
+  51:['🌦️','毛毛雨'],53:['🌦️','毛毛雨'],55:['🌧️','毛毛雨'],56:['🌧️','凍毛毛雨'],57:['🌧️','凍毛毛雨'],
+  61:['🌧️','小雨'],63:['🌧️','雨'],65:['🌧️','大雨'],66:['🌧️','凍雨'],67:['🌧️','凍雨'],
+  71:['🌨️','小雪'],73:['🌨️','雪'],75:['❄️','大雪'],77:['🌨️','霰'],80:['🌦️','陣雨'],81:['🌧️','陣雨'],82:['⛈️','強陣雨'],
+  85:['🌨️','陣雪'],86:['❄️','強陣雪'],95:['⛈️','雷雨'],96:['⛈️','雷雨冰雹'],99:['⛈️','雷雨冰雹']};
+const wmo = c => WMO[c] || ['🌡️','—'];
+/* All trip locations go into ONE Open-Meteo request (it accepts comma-separated coordinates),
+   so a busy API sees 1 call instead of ~9. 503 "overloaded" / 429 are retried with backoff, and
+   the last good response is kept on the phone so a failure shows saved data instead of nothing. */
+const WX_TTL = 30 * 60 * 1000, WX_STORE = 'wx-v1';
+const wxKey = (lat, lon) => `${+lat},${+lon}`;
+let wxReq = null;   // { at, p } – the batch in flight or the latest fresh one
+let wxSaved = store.get(WX_STORE, null);   // { at, data: { key: response } }
+function wxPoints() {
+  const m = new Map();
+  [...DAYS.map(d => d.wx), ...DAYS.map(d => d.night), ...WX_CITIES].forEach(w => w && m.set(wxKey(w.lat, w.lon), w));
+  return [...m.values()];
+}
+async function wxGet(u) {
+  const r = await fetch(u, { cache: 'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined });
+  if (!r.ok) {
+    // Open-Meteo explains failures as {"error":true,"reason":"..."}
+    let why = ''; try { why = (await r.json()).reason || ''; } catch {}
+    const e = new Error(`HTTP ${r.status}${why ? '：' + why : ''}`); e.status = r.status; throw e;
+  }
+  return r.json();
+}
+async function wxLoadAll() {
+  const pts = wxPoints();
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${pts.map(w => w.lat).join(',')}&longitude=${pts.map(w => w.lon).join(',')}`
+    + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,wind_speed_10m_max,snowfall_sum`
+    + `&timezone=Asia%2FTokyo`
+    + `&forecast_days=16&wind_speed_unit=ms`;
+  let err;
+  for (const wait of [0, 2000, 5000, 10000]) {
+    if (wait) await new Promise(res => setTimeout(res, wait));
+    try {
+      const j = await wxGet(u), arr = Array.isArray(j) ? j : [j], data = {};
+      pts.forEach((w, i) => { if (arr[i]) data[wxKey(w.lat, w.lon)] = arr[i]; });
+      wxSaved = { at: Date.now(), data };
+      store.set(WX_STORE, wxSaved);
+      return data;
+    } catch (e) {
+      err = e;
+      if (e.status && e.status < 500 && e.status !== 429) break;   // a bad request won't fix itself
+    }
+  }
+  throw err;
+}
+// resolves to the location's response; when the API fails it falls back to the saved copy,
+// marked with .stale = time it was fetched
+function fetchWx(lat, lon) {
+  if (!wxReq || Date.now() - wxReq.at >= WX_TTL) {
+    const entry = wxReq = { at: Date.now(), p: wxLoadAll() };
+    entry.p.catch(() => { if (wxReq === entry) wxReq = null; });   // don't cache failures
+  }
+  const k = wxKey(lat, lon);
+  return wxReq.p.then(data => {
+    if (!data[k]) throw new Error('沒有這個地點的資料');
+    return data[k];
+  }, e => {
+    const old = wxSaved && wxSaved.data && wxSaved.data[k];
+    if (!old) throw e;
+    return Object.assign({}, old, { stale: wxSaved.at, staleWhy: e });
+  });
+}
+const wxStaleNote = d => {
+  if (!d.stale) return '';
+  const t = new Date(d.stale), why = d.staleWhy && d.staleWhy.status === 503 ? '天氣服務忙線' : '暫時無法更新';
+  return `<div class="small muted" style="margin-top:6px">⚠️ ${why}，顯示 ${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')} 的資料</div>`;
+};
+const hhmm = s => s ? s.slice(11, 16) : '';
+// ≥ 10.8 m/s is Beaufort 6 ("strong breeze"): lifts may slow down or stop
+const windPill = ms => ms >= 10.8
+  ? `<span class="pill bad">💨 大風 ${Math.round(ms)} m/s</span>`
+  : `<span class="pill">💨 風 ${Math.round(ms)} m/s</span>`;
+// Open-Meteo gives snowfall in cm
+const snowPill = cm => cm >= 0.1 ? `<span class="pill good">❄️ 降雪 ${cm < 1 ? cm.toFixed(1) : Math.round(cm)} cm</span>` : '';
+const wxErr = e => esc(e && e.name === 'TimeoutError' ? '連線逾時' : (e && e.message) || String(e));
+async function renderDayWx(day, el) {
+  try {
+    const d = await fetchWx(day.wx.lat, day.wx.lon);
+    const i = d.daily.time.indexOf(day.date);
+    let html;
+    if (i >= 0) {
+      const [ic, tx] = wmo(d.daily.weather_code[i]);
+      html = `<div class="weather"><div class="ic">${ic}</div><div>
+        <div class="t">${Math.round(d.daily.temperature_2m_min[i])}° / ${Math.round(d.daily.temperature_2m_max[i])}°C</div>
+        <div class="d">${esc(day.wx.name)}・${md(day.date)} 預報・${tx}</div></div></div>
+        <div class="wx-extra">
+          <span class="pill">☔ 降雨 ${d.daily.precipitation_probability_max[i] ?? '–'}%</span>
+          ${snowPill(d.daily.snowfall_sum[i])}
+          ${windPill(d.daily.wind_speed_10m_max[i])}
+          <span class="pill">🌅 日出 ${hhmm(d.daily.sunrise[i])}</span>
+          <span class="pill">🌇 日落 ${hhmm(d.daily.sunset[i])}</span>`;
+      html += `</div>`;
+      html += wxStaleNote(d);
+    } else {
+      const c = d.current, [ic, tx] = wmo(c.weather_code);
+      html = `<div class="weather"><div class="ic">${ic}</div><div>
+        <div class="t">${Math.round(c.temperature_2m)}°C</div>
+        <div class="d">${esc(day.wx.name)}・現在 ${tx}・體感 ${Math.round(c.apparent_temperature)}°<br>
+        ${md(day.date)} 的預報約在 16 天內開放</div></div></div>${wxStaleNote(d)}`;
+    }
+    el.innerHTML = html;
+  } catch (e) {
+    el.innerHTML = `<div class="small muted">天氣暫時無法讀取（${wxErr(e)}）</div>`;
+  }
+}
+
+const WX_CITIES = [
+  { name:'富良野滑雪場', sub:'新富良野王子', lat:SKI.lat, lon:SKI.lon },
+  { name:'富良野市區', sub:'Furano', lat:FURANO.lat, lon:FURANO.lon },
+  { name:'美瑛 白金青池', sub:'Biei', lat:43.4935, lon:142.6141 },
+  { name:'旭川', sub:'Asahikawa', lat:43.7706, lon:142.365 },
+  { name:'札幌', sub:'Sapporo', lat:SAPPORO.lat, lon:SAPPORO.lon },
+  { name:'小樽', sub:'Otaru', lat:43.1907, lon:140.9947 },
+];
+async function renderWxList() {
+  let stale = null;
+  const rows = await Promise.all(WX_CITIES.map(async c => {
+    try {
+      const d = await fetchWx(c.lat, c.lon);
+      if (d.stale) stale = d;
+      const [ic, tx] = wmo(d.current.weather_code);
+      const snow = d.daily.snowfall_sum && d.daily.snowfall_sum[0];
+      return `<div class="row"><div class="ic">${ic}</div>
+        <div class="nm">${esc(c.name)}<small>${esc(c.sub)}・${tx}・體感 ${Math.round(d.current.apparent_temperature)}°${snow >= 0.1 ? `・今日降雪 ${snow < 1 ? snow.toFixed(1) : Math.round(snow)} cm` : ''}${d.stale ? '・舊資料' : ''}</small></div>
+        <div class="tt"><b>${Math.round(d.current.temperature_2m)}°</b><small>${Math.round(d.daily.temperature_2m_min[0])}° / ${Math.round(d.daily.temperature_2m_max[0])}°</small></div></div>`;
+    } catch (e) {
+      return `<div class="row"><div class="ic">–</div><div class="nm">${esc(c.name)}<small>無法讀取（${wxErr(e)}）</small></div></div>`;
+    }
+  }));
+  $('#wxList').innerHTML = rows.join('') + (stale ? `<div class="pad">${wxStaleNote(stale)}</div>` : '');
+}
+
+/* ---------------- day view ---------------- */
+let current = 0;
+
+function placeCard(p, n) {
+  const img = p.img
+    ? `<div class="img" style="background-image:url('${W(p.img)}')" data-full="${W(p.img, 1280)}"><span class="num">${n}</span></div>`
+    : `<div class="img"><div class="noimg">${p.emoji || '📍'}</div><span class="num">${n}</span></div>`;
+  const tags = (p.tags || []).map(t => `<span class="tag ${t.startsWith('★') ? 'star' : t.startsWith('⚠️') ? 'warn' : ''}">${esc(t)}</span>`).join('');
+  const story = (p.story || []).map(b => typeof b === 'string'
+    ? `<p>${esc(b)}</p>`
+    : `<figure><img loading="lazy" src="${W(b.img)}" alt="${esc(b.cap)}" data-full="${W(b.img, 1280)}"><figcaption>${esc(b.cap)}</figcaption></figure>`).join('');
+  const tips = (p.tips || []).map(t => `<li>${t}</li>`).join('');
+  return `<article class="card place">${img}<div class="pad">
+    <h3>${esc(p.zh)}</h3><div class="en">${esc(p.en)}</div>
+    ${tags ? `<div class="tags">${tags}</div>` : ''}
+    <p class="lead">${esc(p.desc)}</p>
+    ${story ? `<div class="story">${story}</div>` : ''}
+    ${tips ? `<ul class="tips">${tips}</ul>` : ''}
+    <div class="btns">
+      <a class="btn" href="${gmap(p.q)}" target="_blank" rel="noopener">📍 在 Google 地圖開啟</a>
+    </div></div></article>`;
+}
+
+function flightCard(f) {
+  const arrParts = f.arr.split(' ');
+  const arrTime = arrParts.pop(), arrDate = arrParts[0];
+  return `<div class="card flight">
+    <div class="top"><span><span class="no">${f.no}</span>・${f.airline}</span><span>${md(f.date)}（${wk(f.date)}）</span></div>
+    <div class="route">
+      <div><div class="code">${f.from}</div><div class="time">${f.dep}</div><div class="city">${f.fromCity}</div></div>
+      <div class="mid"><div class="line"></div>${f.dur}</div>
+      <div class="r"><div class="code">${f.to}</div><div class="time">${arrTime}${arrDate ? `<small class="muted" style="font-size:12px"> ${arrDate}</small>` : ''}</div><div class="city">${f.toCity}</div></div>
+    </div>
+    <div class="perf">${f.plane ? esc(f.plane) + '<br>' : ''}<a href="https://www.flightradar24.com/data/flights/${f.no.toLowerCase()}" target="_blank" rel="noopener">查航班動態 ↗</a>・時間皆為當地時間</div>
+  </div>`;
+}
+
+function hotelCard(key, compact) {
+  const h = HOTELS[key];
+  if (h.tbd) return `<article class="card hotel"><div class="pad">
+      <div class="hdr"><div><h3>${esc(h.name)}</h3><div class="small muted">${esc(h.zh)}</div></div>
+        <span class="nights">${h.nights.join('、')}</span></div>
+      ${h.tips ? `<ul class="tips">${h.tips.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+      <div class="btns"><a class="btn" href="${gmap(h.city + ' 飯店')}" target="_blank" rel="noopener">🔍 在 Google 地圖找飯店</a></div>
+    </div></article>`;
+  return `<article class="card hotel">
+    ${compact ? '' : `<iframe loading="lazy" src="${gembed(h.name + ', ' + h.addr)}" title="${esc(h.name)} 地圖"></iframe>`}
+    <div class="pad">
+      <div class="hdr"><div><h3>${esc(h.name)}</h3><div class="small muted">${esc(h.zh)}・${esc(h.city)}</div></div>
+        <span class="nights">${h.nights.join('、')}</span></div>
+      <div class="kv"><span>地址</span><span>${esc(h.addr)}</span><span>電話</span><span>${esc(h.telShow)}</span></div>
+      ${h.note && !compact ? `<p class="small muted" style="margin:8px 0 0">${esc(h.note)}</p>` : ''}
+      <div class="btns">
+        <a class="btn" href="tel:${h.tel}">📞 撥打</a>
+        <a class="btn" href="${gmap(h.name + ' ' + h.addr)}" target="_blank" rel="noopener">📍 地圖</a>
+        <a class="btn primary" href="${gnav(h.lat, h.lon)}" target="_blank" rel="noopener">🧭 導航</a>
+      </div></div></article>`;
+}
+
+function renderChips() {
+  const ti = todayIndex();
+  $('#chips').innerHTML = DAYS.map((d, i) => `<button class="chip ${i === current ? 'on' : ''}" data-i="${i}">
+      <small>D${i + 1}・${wk(d.date)}</small><b>${md(d.date)}</b>${i === ti ? '<span class="today">今天</span>' : ''}</button>`).join('');
+  $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => selectDay(+b.dataset.i, true));
+  const on = $('#chips .chip.on');
+  if (on) { const row = $('#chips'); row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2; }
+  setTimeout(updateArrows, 350);
+}
+
+function updateArrows() {
+  const row = $('#chips');
+  $('#chipsL').hidden = row.scrollLeft <= 4;
+  $('#chipsR').hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+}
+function initChipScroll() {
+  const row = $('#chips');
+  row.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows);
+  // mouse wheel scrolls the date row sideways on desktop
+  row.addEventListener('wheel', e => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { row.scrollLeft += e.deltaY; e.preventDefault(); }
+  }, { passive: false });
+  $('#chipsL').onclick = () => { row.scrollLeft -= row.clientWidth * 0.7; };
+  $('#chipsR').onclick = () => { row.scrollLeft += row.clientWidth * 0.7; };
+}
+
+function selectDay(i, scroll) {
+  current = i;
+  store.set('day', i);
+  renderChips();
+  renderDay();
+  if (scroll) window.scrollTo({ top: $('.chips').offsetTop, behavior:'smooth' });
+}
+
+function renderDay() {
+  document.body.style.overflow = '';
+  const d = DAYS[current];
+  const flag = ['jp', '🇯🇵 日本'];
+  const hotel = d.hotel && HOTELS[d.hotel];
+  const flight = d.flight && FLIGHTS.find(f => f.no === d.flight);
+
+  $('#day').innerHTML = `
+    <div class="day-head">
+      <div class="meta"><span class="flag ${flag[0]}">${flag[1]}</span>DAY ${current + 1}・${md(d.date)}（${wk(d.date)}）</div>
+      <h2>${esc(d.title)}</h2>
+      <div class="small muted">${esc(d.subtitle)}</div>
+      ${d.plan ? `<span class="plan-tag">🗓️ ${esc(d.plan)}</span>` : ''}
+    </div>
+    <div class="card pad" id="dayWx"><div class="small muted">讀取天氣中…</div></div>
+    <div class="card">
+      <div class="mapbox" id="mapBox">
+        <div class="map" id="dayMap"></div>
+        <button class="map-close" id="mapClose" aria-label="關閉全螢幕地圖">✕ 關閉</button>
+        <button class="map-locate" id="mapLocate2">📍 我的位置</button>
+        <div class="legend" id="mapLegend"></div>
+        <div class="loc-msg" id="locMsg"></div>
+      </div>
+      <div class="map-actions">
+        <button class="btn" id="mapLocate">📍 顯示現在位置</button>
+        <button class="btn" id="mapFull">⛶ 全螢幕地圖</button>
+      </div>
+    </div>
+    ${flight ? flightCard(flight) : ''}
+    ${d.places.map((p, i) => placeCard(p, i + 1)).join('')}
+    <div class="card pad">
+      <h3>🍽️ 今日餐食</h3>
+      <dl class="meals" style="margin:10px 0 0">
+        <dt>早餐</dt><dd>${esc(d.meals.b)}</dd><dt>午餐</dt><dd>${esc(d.meals.l)}</dd><dt>晚餐</dt><dd>${esc(d.meals.d)}</dd>
+      </dl>
+    </div>
+    ${hotel ? `<h3 style="margin:20px 0 0">🏨 今晚住宿</h3>${hotelCard(d.hotel, true)}` : ''}
+    ${d.notes.length ? `<div class="card pad"><h3>⚠️ 貼心提醒</h3>${d.notes.map(n => `<div class="note">${n}</div>`).join('')}</div>` : ''}
+    <div class="btns" style="margin:16px 0">
+      ${current > 0 ? `<button class="btn" id="prevDay">← 前一天</button>` : ''}
+      ${current < DAYS.length - 1 ? `<button class="btn" id="nextDay">後一天 →</button>` : ''}
+    </div>`;
+
+  $('#mapFull').onclick = () => setMapFull(true);
+  $('#mapClose').onclick = () => setMapFull(false);
+  $('#mapLocate').onclick = $('#mapLocate2').onclick = locateMe;
+  const p = $('#prevDay'), n = $('#nextDay');
+  if (p) p.onclick = () => selectDay(current - 1, true);
+  if (n) n.onclick = () => selectDay(current + 1, true);
+
+  renderDayWx(d, $('#dayWx'));
+  drawMap(d, hotel);
+}
+
+// Google Maps API key (Maps JavaScript API). Never committed: the Pages workflow swaps the
+// placeholder for the GMAPS_KEY repo secret at deploy time. The key is restricted to
+// https://feveral.github.io/travel-info/* and capped at 1000 map loads/day in GCP project
+// travel-info-maps-2610. Without a key (e.g. local preview) the day map falls back to Leaflet.
+const GMAPS_KEY = '__GMAPS_KEY__'.startsWith('__') ? '' : '__GMAPS_KEY__';
+
+let dayMap = null, refitMap = () => {};
+function setMapFull(on) {
+  $('#mapBox').classList.toggle('full', on);
+  document.body.style.overflow = on ? 'hidden' : '';
+  if (gmap1) gmap1.setOptions({ gestureHandling: on ? 'greedy' : 'cooperative' });
+  if (dayMap && dayMap.invalidateSize) dayMap.invalidateSize();
+  setTimeout(refitMap, 120);
+}
+function drawMap(d, hotel) {
+  if (dayMap && dayMap.remove) {
+    myMarks = myMarks.filter(m => m.setMap);   // Leaflet dots go away with their map
+    dayMap.remove();
+  }
+  dayMap = null;
+  const stops = d.places.map((p, i) => ({ n: String(i + 1), zh: p.zh, q: p.q, lat: p.lat, lon: p.lon }));
+  if (hotel && !hotel.tbd) stops.push({ n: '🏨', zh: hotel.zh, q: `${hotel.name} ${hotel.addr}`, lat: hotel.lat, lon: hotel.lon, hotel: true });
+  // keep the cluster around tonight's stay; drop far-away airports (e.g. Taoyuan on a London day)
+  const ref = stops[stops.length - 1];
+  const near = stops.filter(s => Math.abs(s.lat - ref.lat) < 15 && Math.abs(s.lon - ref.lon) < 30);
+  $('#mapLegend').innerHTML = near.map(s => `<span><b class="${s.hotel ? 'h' : ''}">${s.n}</b>${esc(s.zh)}</span>`).join('');
+  const popup = s => `<b>${esc(s.zh)}</b><br><a href="${gmap(s.q)}" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>`;
+  if (GMAPS_KEY) drawGoogle(near, popup).catch(() => drawLeaflet(near, popup)).then(showMe);
+  else { drawLeaflet(near, popup); showMe(); }
+  if (myPos) setLocMsg();
+}
+
+/* ---------------- my location ----------------
+   Only starts when the button is tapped: the first time, the phone asks for permission.
+   After that the position keeps updating while the page is open, and each day's map shows it. */
+let myPos = null, myWatch = null, myMarks = [], centerOnMe = false;
+const LOC_DENIED = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  ? '沒有定位權限。請到 iPhone「設定 → 隱私權與安全性 → 定位服務」，確認定位服務已開啟，並把 Safari 網站（或你用的瀏覽器）設為「使用 App 期間」，然後回來再按一次。'
+  : '沒有定位權限。請點網址列左邊的圖示 → 權限 → 位置 → 允許，並確認手機的定位已開啟，然後再按一次。';
+const setLocMsg = t => { const m = $('#locMsg'); if (m) m.textContent = t != null ? t : myPos ? `🔵 藍點是你現在的位置（誤差約 ${Math.round(myPos.acc)} 公尺）` : ''; };
+function locateMe() {
+  if (!('geolocation' in navigator) || !window.isSecureContext) { setLocMsg('這個瀏覽器無法定位'); return; }
+  centerOnMe = true;
+  if (myPos) showMe();
+  if (myWatch != null) return;
+  setLocMsg('定位中…第一次會跳出詢問，請按「允許」');
+  myWatch = navigator.geolocation.watchPosition(p => {
+    myPos = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy };
+    setLocMsg();
+    showMe();
+  }, e => {
+    navigator.geolocation.clearWatch(myWatch);
+    myWatch = null;
+    if (myPos && e.code !== 1) return;   // keep the last known spot on a passing hiccup
+    setLocMsg(e.code === 1 ? LOC_DENIED : e.code === 3 ? '定位逾時，請到比較空曠的地方再按一次' : '暫時無法取得位置，請稍後再按一次');
+  }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
+}
+// draws the blue dot on whichever map is showing; right after a tap it pans (never zooms) to it
+function showMe() {
+  myMarks.forEach(m => m.setMap ? m.setMap(null) : m.remove());
+  myMarks = [];
+  if (!myPos) return;
+  const { lat, lon, acc } = myPos;
+  if (gmap1 && gmapEl && gmapEl.isConnected) {
+    const g = google.maps, pos = { lat, lng: lon };
+    myMarks.push(new g.Circle({ map: gmap1, center: pos, radius: acc, clickable: false,
+      fillColor: '#1a73e8', fillOpacity: .12, strokeColor: '#1a73e8', strokeOpacity: .3, strokeWeight: 1 }));
+    myMarks.push(new g.Marker({ map: gmap1, position: pos, title: '你在這裡', zIndex: 999,
+      icon: { path: g.SymbolPath.CIRCLE, scale: 8, fillColor: '#1a73e8', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 } }));
+    // keep the zoom so the day's pins stay in view; only pan when the dot is off-screen
+    if (centerOnMe && !(gmap1.getBounds() && gmap1.getBounds().contains(pos))) gmap1.panTo(pos);
+  } else if (dayMap && dayMap.getContainer && dayMap.getContainer().isConnected) {
+    myMarks.push(L.circle([lat, lon], { radius: acc, interactive: false, color: '#1a73e8', weight: 1, opacity: .3, fillOpacity: .12 }).addTo(dayMap));
+    myMarks.push(L.circleMarker([lat, lon], { radius: 8, color: '#fff', weight: 3, fillColor: '#1a73e8', fillOpacity: 1 })
+      .addTo(dayMap).bindPopup('你在這裡'));
+    if (centerOnMe && !dayMap.getBounds().contains([lat, lon])) dayMap.panTo([lat, lon]);
+  } else return;
+  centerOnMe = false;
+}
+
+// language=zh-TW pins Google's own map labels to Traditional Chinese regardless of system language
+let gmapsReady = null;
+function loadGoogle() {
+  if (!gmapsReady) gmapsReady = new Promise((ok, fail) => {
+    window.__gmapsCb = ok;
+    const sc = document.createElement('script');
+    sc.src = `https://maps.googleapis.com/maps/api/js?key=${GMAPS_KEY}&language=zh-TW&region=TW&callback=__gmapsCb`;
+    sc.onerror = fail;
+    document.head.appendChild(sc);
+  });
+  return gmapsReady;
+}
+// One google.maps.Map per page view: every Map construction is a billable map load, so the
+// map element is created once, moved into each day's container, and only the pins change.
+let gmap1 = null, gmapEl = null, gmapPins = [], gmapInfo = null;
+async function drawGoogle(near, popup) {
+  await loadGoogle();
+  const holder = $('#dayMap');
+  if (!holder) return;
+  const g = google.maps;
+  if (!gmap1) {
+    gmapEl = document.createElement('div');
+    gmapEl.style.cssText = 'width:100%;height:100%';
+    holder.appendChild(gmapEl);
+    gmap1 = new g.Map(gmapEl, { disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative', clickableIcons: false,
+      styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+               { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }] });
+    gmapInfo = new g.InfoWindow();
+  } else {
+    holder.appendChild(gmapEl);
+  }
+  gmapPins.forEach(m => m.setMap(null));
+  gmapInfo.close();
+  const bounds = new g.LatLngBounds();
+  gmapPins = near.map(s => {
+    const pos = { lat: s.lat, lng: s.lon };
+    const m = new g.Marker({ position: pos, map: gmap1, title: s.zh,
+      label: { text: s.n, color: '#fff', fontWeight: '700', fontSize: s.hotel ? '15px' : '13px' },
+      icon: { path: g.SymbolPath.CIRCLE, scale: 14, fillColor: s.hotel ? '#0f9d8a' : '#e8590c', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2 } });
+    m.addListener('click', () => { gmapInfo.setContent(popup(s)); gmapInfo.open({ map: gmap1, anchor: m }); });
+    bounds.extend(pos);
+    return m;
+  });
+  refitMap = () => {
+    if (near.length > 1) gmap1.fitBounds(bounds, 36);
+    else { gmap1.setCenter(bounds.getCenter()); gmap1.setZoom(11); }
+  };
+  refitMap();
+}
+
+// keyless fallback: label-free basemap, so every visible label is our own Chinese pin/legend
+function drawLeaflet(near, popup) {
+  if (!window.L) { $('#dayMap').innerHTML = '<div class="pad small muted">地圖載入失敗</div>'; return; }
+  dayMap = L.map('dayMap', { scrollWheelZoom: false, zoomControl: false, attributionControl: true });
+  const dark = document.documentElement.dataset.theme === 'dark'
+    || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  L.tileLayer(`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark ? 'Dark' : 'Light'}_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
+    { maxZoom: 16, attribution: '© Esri' }).addTo(dayMap);
+  L.control.zoom({ position: 'bottomright', zoomInTitle: '放大', zoomOutTitle: '縮小' }).addTo(dayMap);
+  dayMap.attributionControl.setPrefix(false);
+  near.forEach(s => {
+    const icon = L.divIcon({ className: '', iconSize: [30, 30], iconAnchor: [15, 15],
+      html: `<div class="pin ${s.hotel ? 'h' : ''}">${s.n}</div>` });
+    L.marker([s.lat, s.lon], { icon }).addTo(dayMap).bindPopup(popup(s));
+  });
+  const lmap = dayMap;
+  refitMap = () => {
+    if (lmap !== dayMap) return;   // a delayed refit can land after the day changed
+    lmap.invalidateSize();
+    if (near.length > 1) lmap.fitBounds(near.map(s => [s.lat, s.lon]), { paddingTopLeft: [30, 30], paddingBottomRight: [56, 30] });
+    else lmap.setView([near[0].lat, near[0].lon], 11);
+  };
+  refitMap();
+}
+
+/* ---------------- flights & hotels tabs ---------------- */
+function renderFlights() { $('#flights').innerHTML = FLIGHTS.map(flightCard).join(''); }
+function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => hotelCard(k, false)).join(''); }
+
+/* ---------------- clocks ---------------- */
+const CLOCKS = [
+  { name:'🇹🇼 台北', tz:'Asia/Taipei' },
+  { name:'🇯🇵 日本', tz:'Asia/Tokyo' },
+];
+function tzOffsetMin(tz, at = new Date()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone:tz, hourCycle:'h23',
+    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).formatToParts(at).map(x => [x.type, x.value]));
+  return Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - at.getTime()) / 6e4);
+}
+function renderClocks() {
+  const at = now(), base = tzOffsetMin('Asia/Taipei', at);
+  $('#clocks').innerHTML = CLOCKS.map(c => {
+    const t = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(at);
+    const dt = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, month:'numeric', day:'numeric', weekday:'short' }).format(at);
+    const diff = (tzOffsetMin(c.tz, at) - base) / 60;
+    const label = diff === 0 ? '基準時間' : `比台灣${diff < 0 ? '慢' : '快'} ${Math.abs(diff)} 小時`;
+    return `<div class="clock"><div><div class="name">${c.name}</div><div class="diff">${label}</div></div>
+      <div><div class="time">${t}</div><div class="date">${dt}</div></div></div>`;
+  }).join('');
+}
+
+/* ---------------- currency ---------------- */
+// fallback only used when offline and nothing cached; TWD per 1 unit
+let fx = store.get('fx', null);
+if (!fx || !fx.JPY) fx = { JPY: 0.21, TWD: 1, at: null, fallback: true };
+const FX_KEYS = ['JPY','TWD'];
+const fmt = (v, cur) => isFinite(v) ? v.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '';
+const parse = s => parseFloat(String(s).replace(/,/g, ''));
+function convertFrom(src) {
+  const v = parse($('#fx-' + src).value);
+  FX_KEYS.forEach(k => { if (k !== src) $('#fx-' + k).value = isFinite(v) ? fmt(v * fx[src] / fx[k], k) : ''; });
+  store.set('fxLast', { src, v: $('#fx-' + src).value });
+}
+function fxInfo() {
+  $('#fxInfo').innerHTML = `參考匯率：¥1,000 日圓 ≈ NT$${(fx.JPY * 1000).toFixed(0)}・NT$1,000 ≈ ¥${Math.round(1000 / fx.JPY).toLocaleString('en-US')}`
+    + (fx.fallback ? '<br>⚠️ 目前離線，使用估計匯率' : '<br>實際刷卡匯率以銀行為準');
+}
+async function loadFx() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/TWD');
+    const d = await r.json();
+    if (d.result !== 'success') throw 0;
+    fx = { JPY: 1 / d.rates.JPY, TWD: 1, at: d.time_last_update_utc, fallback: false };
+    store.set('fx', fx);
+  } catch {}
+  fxInfo();
+  const last = store.get('fxLast', null);
+  if (last && last.v) { $('#fx-' + last.src).value = last.v; convertFrom(last.src); }
+}
+function initFx() {
+  FX_KEYS.forEach(k => $('#fx-' + k).addEventListener('input', () => convertFrom(k)));
+  const quick = [500, 1000, 3000, 5000, 8000, 10000, 30000];
+  $('#fxQuick').innerHTML = quick.map(v => `<button data-v="${v}">¥${v.toLocaleString()}</button>`).join('');
+  $('#fxQuick').querySelectorAll('button').forEach(b => b.onclick = () => {
+    $('#fx-JPY').value = (+b.dataset.v).toLocaleString('en-US'); convertFrom('JPY');
+  });
+  fxInfo();
+  loadFx();
+}
+
+/* ---------------- checklist ---------------- */
+// Packing list, grouped by occasion. `why` says when the item is needed; `opt` marks nice-to-haves.
+// Ticks are stored per item id so editing the list doesn't shuffle them.
+const CHECK = [
+  { group:'📌 待辦（還沒訂）', items:[
+    { id:'bus-airport', t:'接駁車：新千歲機場 → 新富良野王子', why:'1/9 14:05 落地。Resort Liner 等滑雪巴士常客滿，要先預約' },
+    { id:'bus-sapporo', t:'接駁車：富良野 → 札幌', why:'1/15 退房後移動，高速巴士、JR 或 Resort Liner' },
+    { id:'hotel-sapporo', t:'訂札幌飯店（1/15、1/16 兩晚）', why:'建議札幌站、大通或薄野一帶；1/17 要早上出發去機場' },
+    { id:'bus-kitanomine', t:'確認往返北之峰的接駁車', why:'王子飯店房客專用接駁車的時刻與搭乘方式' },
+    { id:'fiss', t:'確認 FISS 教練（1/11）', why:'集合時間、地點、費用、雪票和裝備要不要自己準備' },
+    { id:'skipass', t:'雪票：現場買或網路預購', why:'2026–27 季價格公布後比較；網路預購有時比較便宜' },
+    { id:'rental', t:'雪具、雪衣租借', why:'飯店旁有租借店，旺季可以先在網路預約' },
+  ]},
+  { group:'🛂 證件與錢', items:[
+    { id:'passport', t:'有效護照', why:'出入境必備；免稅購物也要出示' },
+    { id:'vjw', t:'Visit Japan Web 填好入境資料', why:'入境審查、海關申報的 QR Code，抵達前截圖存好' },
+    { id:'cash', t:'日圓現金（每人約 ¥30,000）', why:'小餐廳、巴士、市場攤位可能只收現金' },
+    { id:'cards', t:'信用卡 2 張＋手機 Suica', why:'大部分地方都能刷卡；Suica 搭地鐵、JR 和超商用' },
+    { id:'insurance', t:'旅平險＋海外醫療（含滑雪）', why:'有些旅平險不保滑雪等運動意外，投保前看清楚' },
+    { id:'esim', t:'日本 eSIM 或網卡', why:'查巴士、地圖、聯絡教練都需要' },
+  ]},
+  { group:'🎿 滑雪裝備', items:[
+    { id:'skiwear', t:'雪衣、雪褲（或租）', why:'防水透氣，富良野粉雪很乾但整天坐吊椅會濕' },
+    { id:'base', t:'排汗衣褲（不要純棉）', why:'流汗後純棉會變冷' },
+    { id:'mid', t:'刷毛／輕羽絨中層', why:'山頂常常 −15°C 以下，夜滑更冷' },
+    { id:'goggles', t:'雪鏡', why:'下雪、起霧和雪地反光都需要' },
+    { id:'gloves', t:'防水滑雪手套＋內層薄手套', why:'手指最容易凍；薄手套可以戴著滑手機' },
+    { id:'socks', t:'滑雪長襪 2–3 雙', why:'要高過雪鞋，一般短襪會磨腳' },
+    { id:'neck', t:'面罩／頸套', why:'坐吊椅時風很冷，保護臉不凍傷' },
+    { id:'helmet', t:'安全帽（或租）', why:'初學者強烈建議戴' },
+    { id:'sunscreen', t:'防曬、護唇膏', why:'雪地反射紫外線很強，又非常乾燥' },
+  ]},
+  { group:'🧥 雪地生活', items:[
+    { id:'boots', t:'防滑雪靴', why:'市區、札幌人行道都會結冰，一般球鞋很容易滑倒' },
+    { id:'cleats', t:'簡易冰爪', why:'套在鞋底防滑，札幌、小樽坡道很好用', opt:true },
+    { id:'jacket', t:'羽絨外套、毛帽', why:'逛街用；室內暖氣強，穿容易穿脫的' },
+    { id:'kairo', t:'暖暖包', why:'手套、口袋、鞋墊型都很好用（日本超商也買得到）' },
+    { id:'lotion', t:'乳液、保濕面膜', why:'飯店暖氣讓室內非常乾' },
+  ]},
+  { group:'✈️ 搭飛機', items:[
+    { id:'powerbank', t:'行動電源（≤ 100Wh）', why:'只能放隨身行李；低溫下手機很耗電' },
+    { id:'cables', t:'充電線、多孔充電器', why:'日本插座和台灣一樣，不用轉接頭' },
+    { id:'bag', t:'可折疊備用袋', why:'回程伴手禮很多' , opt:true },
+  ]},
+  { group:'🧴 盥洗與日常', items:[
+    { id:'meds', t:'常備藥＋慢性用藥', why:'感冒、腸胃、止痛、痠痛貼布（滑雪後很需要）' },
+    { id:'toiletries', t:'個人保養品', why:'日本飯店備品齊全，帶自己習慣的保養品就好' },
+  ]},
+];
+// Each group is a <details>: tap the header to fold it. Folded state is remembered per group;
+// a group starts folded once everything in it is ticked.
+function renderChecklist() {
+  const done = store.get('check2', {});
+  const folded = store.get('checkFold', null);
+  const total = CHECK.reduce((n, g) => n + g.items.length, 0);
+  const gDone = g => g.items.filter(it => done[it.id]).length;
+  $('#checklist').innerHTML = `<div class="check-sum"><span id="checkSum"></span>
+      <span class="check-all"><button data-act="open">全部展開</button><button data-act="close">全部收合</button></span></div>`
+    + CHECK.map((g, gi) => {
+      const isOpen = folded ? !folded[gi] : gDone(g) < g.items.length;
+      return `<details class="check-group" data-g="${gi}" ${isOpen ? 'open' : ''}>
+      <summary><span>${esc(g.group)}</span><span class="gcount" data-gc="${gi}">${gDone(g)}/${g.items.length}</span></summary>
+      ${g.items.map(it => `<label class="check ${done[it.id] ? 'done' : ''}">
+        <input type="checkbox" data-id="${it.id}" data-g="${gi}" ${done[it.id] ? 'checked' : ''}>
+        <span class="ct"><span class="t">${esc(it.t)}${it.opt ? '<em class="opt">可選</em>' : ''}</span>
+        <small class="why">${esc(it.why)}</small></span></label>`).join('')}
+    </details>`; }).join('');
+
+  const refresh = () => {
+    const st = store.get('check2', {});
+    $('#checkSum').textContent = `已準備 ${Object.values(st).filter(Boolean).length} / ${total} 項`;
+    CHECK.forEach((g, gi) => {
+      const n = g.items.filter(it => st[it.id]).length, el = $(`[data-gc="${gi}"]`);
+      el.textContent = `${n}/${g.items.length}`;
+      el.classList.toggle('full', n === g.items.length);
+    });
+  };
+  const saveFold = () => {
+    const f = {};
+    $('#checklist').querySelectorAll('details').forEach(d => { f[d.dataset.g] = !d.open; });
+    store.set('checkFold', f);
+  };
+  refresh();
+  $('#checklist').querySelectorAll('input').forEach(c => c.onchange = () => {
+    const st = store.get('check2', {}); st[c.dataset.id] = c.checked; store.set('check2', st);
+    c.closest('.check').classList.toggle('done', c.checked);
+    refresh();
+  });
+  $('#checklist').querySelectorAll('details').forEach(d => d.addEventListener('toggle', saveFold));
+  $('#checklist').querySelectorAll('[data-act]').forEach(btn => btn.onclick = () => {
+    $('#checklist').querySelectorAll('details').forEach(d => { d.open = btn.dataset.act === 'open'; });
+    saveFold();
+  });
+}
+
+/* ---------------- search ---------------- */
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/ð/g, 'd').replace(/þ/g, 'th').replace(/æ/g, 'ae').replace(/ø/g, 'o');
+const plain = s => String(s).replace(/<[^>]+>/g, '');
+const KINDS = { 行程:'k0', 景點:'k1', 航班:'k2', 住宿:'k3', 須知:'k4', 清單:'k0' };
+let searchIdx = null;
+
+function buildSearchIndex() {
+  const out = [];
+  const add = (kind, title, sub, body, go) => out.push({ kind, title, sub, body, go, nt: norm(title), nb: norm(sub + '　' + body) });
+  const nth = (sel, i) => () => document.querySelectorAll(sel)[i];
+
+  DAYS.forEach((d, i) => {
+    const day = `DAY ${i + 1}・${md(d.date)}（${wk(d.date)}）`;
+    add('行程', d.title, `${day}・${d.subtitle}`,
+      [d.plan, `早餐 ${d.meals.b}`, `午餐 ${d.meals.l}`, `晚餐 ${d.meals.d}`, ...d.notes.map(plain)].filter(Boolean).join('　'),
+      () => goDay(i, () => $('#day .day-head')));
+    d.places.forEach((p, j) => add('景點', p.zh, `${day}・${p.en}`,
+      [p.desc, ...(p.tags || []), ...(p.story || []).map(b => typeof b === 'string' ? b : b.cap), ...(p.tips || []).map(plain)].join('　'),
+      () => goDay(i, nth('#day article.place', j))));
+  });
+  FLIGHTS.forEach((f, k) => add('航班', `${f.no} ${f.fromCity} → ${f.toCity}`,
+    `${md(f.date)}（${wk(f.date)}）${f.dep} – ${f.arr}・${f.airline}`, `${f.from} ${f.to} ${f.dur}`,
+    () => goTo('flights', nth('#flights .card.flight', k))));
+  Object.keys(HOTELS).forEach((key, k) => {
+    const h = HOTELS[key];
+    const days = DAYS.map((d, i) => d.hotel === key ? `DAY ${i + 1}` : '').filter(Boolean).join('、');
+    add('住宿', h.name, `${h.zh}・${h.city}・${h.nights.join('、')} 入住`, `${h.addr}　電話 ${h.telShow}　${days}　飯店　${plain((h.tips || []).join('　'))}`,
+      () => goTo('hotels', nth('#hotels .card.hotel', k)));
+  });
+
+  // static notes in the 須知 / 航班 tabs: one entry per table row, list item or note
+  [['info', '須知'], ['flights', '航班']].forEach(([view, kind]) => {
+    $(`#v-${view} .wrap`).querySelectorAll(':scope > .card').forEach(card => {
+      let h2 = card.previousElementSibling;
+      while (h2 && h2.tagName !== 'H2') h2 = h2.previousElementSibling;
+      const sec = h2 ? h2.textContent : '';
+      const units = card.querySelectorAll('tr, li, .note');
+      const heading = el => {
+        const hs = [...card.querySelectorAll('h3')].filter(h => h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+        return hs.length ? hs[hs.length - 1].textContent : sec;
+      };
+      if (card.querySelector('a[href^="tel:+886"]')) add(kind, '領隊 ' + card.querySelector('h3').textContent, sec, card.querySelector('.hdr').textContent, () => goTo(view, () => card));
+      units.forEach(el => {
+        const th = el.tagName === 'TR' && el.querySelector('th');
+        const title = th ? `${heading(el)}・${th.textContent}` : heading(el);
+        const body = th ? el.querySelector('td').textContent : el.textContent;
+        add(kind, title, '', body, () => goTo(view, () => el));
+      });
+      if (!units.length) add(kind, sec || card.textContent.slice(0, 12), '', card.textContent, () => goTo(view, () => card));
+    });
+  });
+
+  CHECK.forEach(g => g.items.forEach(it => add('清單', it.t, `行前清單・${g.group}`, it.why, () => goTo('info', () => {
+    const inp = $(`#checklist input[data-id="${it.id}"]`);
+    if (!inp) return null;
+    inp.closest('details').open = true;
+    return inp.closest('.check');
+  }))));
+  return out;
+}
+
+function goTo(view, getEl) {
+  closeSearch();
+  showView(view);
+  const el = getEl && getEl();
+  if (!el) return;
+  const off = view === 'days' ? $('.chips').offsetHeight + 8 : 12;
+  window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - off });
+  document.querySelectorAll('.hit').forEach(e => e.classList.remove('hit'));
+  void el.offsetWidth; el.classList.add('hit');
+  el.addEventListener('animationend', () => el.classList.remove('hit'), { once: true });
+}
+function goDay(i, getEl) {
+  closeSearch();
+  showView('days');
+  if (current !== i) selectDay(i, false);
+  goTo('days', getEl);
+}
+
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function mark(text, terms) {
+  let h = esc(text);
+  terms.forEach(t => { h = h.replace(new RegExp(`(${reEsc(esc(t))})`, 'gi'), '\u0001$1\u0002'); });
+  return h.replace(/\u0001/g, '<mark>').replace(/\u0002/g, '</mark>');
+}
+function snippet(r, terms) {
+  const n = norm(r.body), t = terms.find(t => n.includes(t));
+  if (!t) return r.body;
+  const at = n.indexOf(t), start = Math.max(0, at - 24);
+  return (start ? '…' : '') + r.body.slice(start, start + 80);
+}
+
+const SUGG = ['雪票', 'FISS', '接駁', '北之峰', '咖哩', '拉麵', '溫泉', '免稅', '企鵝', '小樽', '烤羊肉', '宅急便'];
+function renderSearch() {
+  const q = $('#sq').value.trim();
+  $('#sclear').hidden = !q;
+  if (!q) {
+    $('#sres').innerHTML = `<div class="meta">可以搜尋行程、景點、航班、飯店、須知和行前清單</div>
+      <div class="sugg">${SUGG.map(w => `<button data-w="${w}">${w}</button>`).join('')}</div>`;
+    $('#sres').querySelectorAll('[data-w]').forEach(b => b.onclick = () => { $('#sq').value = b.dataset.w; renderSearch(); });
+    return;
+  }
+  const terms = norm(q).split(/\s+/).filter(Boolean);
+  const hits = searchIdx.map(r => {
+    let s = 0;
+    for (const t of terms) {
+      if (r.nt.includes(t)) s += r.nt.startsWith(t) ? 3 : 2;
+      else if (r.nb.includes(t)) s += 1;
+      else return null;
+    }
+    return { r, s };
+  }).filter(Boolean).sort((a, b) => b.s - a.s);
+  if (!hits.length) { $('#sres').innerHTML = `<div class="meta">找不到「${esc(q)}」，換個關鍵字試試</div>`; return; }
+  $('#sres').innerHTML = `<div class="meta">找到 ${hits.length} 筆</div>` + hits.map(({ r }, n) => `<button class="sr" data-n="${n}">
+      <span class="sk ${KINDS[r.kind]}">${r.kind}</span><span class="st">${mark(r.title, terms)}</span>
+      ${r.sub ? `<span class="ss">${mark(r.sub, terms)}</span>` : ''}
+      ${r.body ? `<span class="sb">${mark(snippet(r, terms), terms)}</span>` : ''}</button>`).join('');
+  $('#sres').querySelectorAll('.sr').forEach(b => b.onclick = () => { $('#sq').blur(); hits[+b.dataset.n].r.go(); });
+}
+
+function openSearch() {
+  if (!searchIdx) searchIdx = buildSearchIndex();
+  $('#search').hidden = false;
+  document.body.style.overflow = 'hidden';
+  renderSearch();
+  $('#sq').focus();
+}
+function closeSearch() {
+  if ($('#search').hidden) return;
+  $('#search').hidden = true;
+  document.body.style.overflow = '';
+}
+$('#searchBtn').onclick = openSearch;
+$('#searchFab').onclick = openSearch;
+$('#sx').onclick = closeSearch;
+$('#sclear').onclick = () => { $('#sq').value = ''; renderSearch(); $('#sq').focus(); };
+$('#sq').addEventListener('input', renderSearch);
+$('#sq').addEventListener('keydown', e => { if (e.key === 'Enter') $('#sq').blur(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSearch();
+  else if (e.key === '/' && $('#search').hidden && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
+});
+addEventListener('scroll', () => $('#searchFab').classList.toggle('on', scrollY > $('.hero').offsetHeight), { passive: true });
+
+/* ---------------- tabs & theme ---------------- */
+function showView(v) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v === 'days' && dayMap && dayMap.invalidateSize) setTimeout(() => dayMap.invalidateSize(), 50);
+  if (v === 'tools') renderWxList();
+  window.scrollTo({ top: v === 'days' ? 0 : $('.hero').offsetHeight - 8 });
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => showView(b.dataset.v));
+
+const themeOrder = ['auto','light','dark'];
+function applyTheme(t) {
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+}
+let theme = store.get('theme', 'auto'); applyTheme(theme);
+$('#themeBtn').onclick = () => { theme = themeOrder[(themeOrder.indexOf(theme) + 1) % 3]; store.set('theme', theme); applyTheme(theme); };
+
+/* ---------------- lightbox ---------------- */
+// Photo viewer: pinch / double-tap zoom, drag to pan, swipe down/up to close,
+// swipe left/right through the other photos of the same place.
+const lb = $('#lightbox'), lbStage = lb.querySelector('.stage'), lbImg = lbStage.querySelector('img');
+let lbList = [], lbIdx = 0, z = { s: 1, x: 0, y: 0 }, lbBase = null;
+const ptrs = new Map();
+let gesture = null, lastTap = 0;
+
+function lbShow(i) {
+  lbIdx = (i + lbList.length) % lbList.length;
+  const t = lbList[lbIdx];
+  lbImg.src = t.dataset.full;
+  lb.querySelector('.txt').textContent = t.alt || t.closest('.place')?.querySelector('h3')?.textContent || '';
+  lb.querySelector('.count').textContent = lbList.length > 1 ? `${lbIdx + 1} / ${lbList.length}` : '';
+  zReset(false);
+}
+function lbOpen(t) {
+  const scope = t.closest('.place') || document;
+  lbList = [...scope.querySelectorAll('[data-full]')];
+  lb.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  lbShow(lbList.indexOf(t));
+}
+function lbClose() {
+  lb.classList.remove('on');
+  document.body.style.overflow = $('#mapBox.full') ? 'hidden' : '';
+  ptrs.clear(); gesture = null;
+}
+// the image's untransformed box, used to keep panning inside its edges
+function baseBox() {
+  const r = lbStage.getBoundingClientRect(), w = lbImg.offsetWidth, h = lbImg.offsetHeight;
+  return { left: (r.width - w) / 2, top: (r.height - h) / 2, w, h, W: r.width, H: r.height };
+}
+function zApply(anim, dimFor) {
+  lbStage.classList.toggle('anim', !!anim);
+  const b = lbBase || (lbBase = baseBox());
+  lbImg.style.transform = `translate(${z.x}px,${z.y}px) scale(${z.s})`;
+  lbImg.style.marginLeft = lbImg.style.marginTop = '0';
+  const fade = dimFor == null ? 1 : Math.max(0.2, 1 - Math.abs(dimFor) / 400);
+  lb.querySelector('.bg').style.opacity = fade;
+  lb.querySelector('.top').style.opacity = lb.querySelector('.cap').style.opacity = z.s > 1.01 || dimFor ? 0 : 1;
+}
+function zReset(anim) { z = { s: 1, x: 0, y: 0 }; lbBase = null; zApply(anim); }
+function clampPan() {
+  const b = lbBase, w = b.w * z.s, h = b.h * z.s;
+  // transform origin is the image's top-left, so x/y are offsets from that corner
+  const minX = Math.min(0, b.W - w - b.left) , maxX = Math.max(0, -b.left);
+  const minY = Math.min(0, b.H - h - b.top), maxY = Math.max(0, -b.top);
+  if (w <= b.W) z.x = (b.W - w) / 2 - b.left; else z.x = Math.min(maxX, Math.max(minX, z.x));
+  if (h <= b.H) z.y = (b.H - h) / 2 - b.top; else z.y = Math.min(maxY, Math.max(minY, z.y));
+}
+function zoomAt(px, py, ns) {
+  const b = lbBase || (lbBase = baseBox());
+  ns = Math.min(5, Math.max(1, ns));
+  // keep the point under the finger fixed: p = left + x + s*u
+  const ux = (px - b.left - z.x) / z.s, uy = (py - b.top - z.y) / z.s;
+  z.x = px - b.left - ns * ux; z.y = py - b.top - ns * uy; z.s = ns;
+}
+const mid = () => { const [a, c] = [...ptrs.values()]; return { x: (a.x + c.x) / 2, y: (a.y + c.y) / 2, d: Math.hypot(a.x - c.x, a.y - c.y) }; };
+
+lbStage.addEventListener('pointerdown', e => {
+  try { lbStage.setPointerCapture(e.pointerId); } catch {}
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  lbBase = lbBase || baseBox();
+  if (ptrs.size === 2) { const m = mid(); gesture = { type: 'pinch', d: m.d, s: z.s, mx: m.x, my: m.y }; }
+  else if (ptrs.size === 1) gesture = { type: 'drag', sx: e.clientX, sy: e.clientY, x: z.x, y: z.y, t: Date.now(), moved: false };
+});
+lbStage.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId) || !gesture) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture.type === 'pinch' && ptrs.size === 2) {
+    const m = mid();
+    zoomAt(m.x, m.y, gesture.s * m.d / gesture.d);
+    z.x += m.x - gesture.mx; z.y += m.y - gesture.my; gesture.mx = m.x; gesture.my = m.y;
+    zApply(false);
+  } else if (gesture.type === 'drag') {
+    const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+    if (Math.hypot(dx, dy) > 6) gesture.moved = true;
+    if (z.s > 1.01) { z.x = gesture.x + dx; z.y = gesture.y + dy; clampPan(); zApply(false); }
+    else {
+      // not zoomed: vertical = dismiss preview, horizontal = gallery swipe preview
+      gesture.axis = gesture.axis || (Math.abs(dy) > Math.abs(dx) ? 'y' : 'x');
+      if (gesture.axis === 'y') { z.x = 0; z.y = dy; zApply(false, dy); }
+      else { z.x = dx; z.y = 0; zApply(false); }
+    }
+  }
+});
+function pointerEnd(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  const g = gesture;
+  if (g && g.type === 'pinch') {
+    if (ptrs.size === 1) { const [p] = [...ptrs.values()]; gesture = { type: 'drag', sx: p.x, sy: p.y, x: z.x, y: z.y, moved: true }; }
+    if (z.s <= 1.01) zReset(true); else { clampPan(); zApply(true); }
+    return;
+  }
+  if (!g || ptrs.size) return;
+  gesture = null;
+  const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+  if (!g.moved) {
+    // double tap toggles zoom around the tap point
+    const now = Date.now();
+    if (now - lastTap < 300) { lastTap = 0; if (z.s > 1.01) zReset(true); else { zoomAt(e.clientX, e.clientY, 2.5); clampPan(); zApply(true); } }
+    else lastTap = now;
+    return;
+  }
+  if (z.s > 1.01) return;
+  if (g.axis === 'y' && Math.abs(dy) > 90) return lbClose();
+  if (g.axis === 'x' && Math.abs(dx) > 60 && lbList.length > 1) return lbShow(lbIdx + (dx < 0 ? 1 : -1));
+  zReset(true);
+}
+lbStage.addEventListener('pointerup', pointerEnd);
+lbStage.addEventListener('pointercancel', pointerEnd);
+lb.querySelector('.x').onclick = lbClose;
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('on')) return;
+  if (e.key === 'Escape') lbClose();
+  if (e.key === 'ArrowRight') lbShow(lbIdx + 1);
+  if (e.key === 'ArrowLeft') lbShow(lbIdx - 1);
+});
+window.addEventListener('resize', () => { if (lb.classList.contains('on')) zReset(false); });
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-full]');
+  if (t && !lb.contains(t)) lbOpen(t);
+});
+// iOS Safari ignores user-scalable=no; block its page pinch-zoom gesture directly
+['gesturestart', 'gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+
+/* ---------------- init ---------------- */
+const ti = todayIndex();
+current = ti >= 0 ? ti : Math.min(store.get('day', 0), DAYS.length - 1);
+renderCountdown();
+initChipScroll();
+renderChips();
+renderDay();
+renderFlights();
+renderHotels();
+renderClocks(); setInterval(renderClocks, 15000);
+initFx();
+renderChecklist();
+// before departure the packing list leads the info tab; once we've left it moves to the bottom
+const DEPART_AT = Date.parse('2027-01-09T07:00:00+08:00');
+function placeChecklist() {
+  const sec = $('#checklistSec'), departed = now().getTime() >= DEPART_AT;
+  (departed ? $('#checklistEnd') : $('#checklistHome')).before(sec);
+}
+placeChecklist();
+
+// Keep "today" current while the page stays open (midnight passes, phone wakes up, new time zone).
+let lastToday = ti;
+function checkToday() {
+  placeChecklist();
+  const t = todayIndex();
+  if (t === lastToday) return;
+  renderCountdown();
+  // follow the new day only if the viewer was looking at the old "today" (or none yet)
+  if (t >= 0 && (lastToday < 0 || current === lastToday)) selectDay(t, false);
+  else renderChips();
+  lastToday = t;
+}
+setInterval(checkToday, 60000);
+// refresh weather when the phone wakes up or the connection comes back (failed fetches aren't cached)
+function refreshWx() {
+  renderDayWx(DAYS[current], $('#dayWx'));
+  if ($('#wxList').offsetParent) renderWxList();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkToday(); refreshWx(); } });
+window.addEventListener('online', refreshWx);
+</script>
+</body>
+</html>

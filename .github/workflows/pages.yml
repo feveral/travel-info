@@ -29,7 +29,12 @@ jobs:
           GMAPS_KEY: ${{ secrets.GMAPS_KEY }}
         run: |
           mkdir -p _site
-          sed "s/__GMAPS_KEY__/${GMAPS_KEY}/g" index.html > _site/index.html
+          # home page + one folder per trip (e.g. furano-2027/index.html)
+          for f in index.html */index.html; do
+            case "$f" in app-example-images/*|_site/*) continue ;; esac
+            mkdir -p "_site/$(dirname "$f")"
+            sed "s/__GMAPS_KEY__/${GMAPS_KEY}/g" "$f" > "_site/$f"
+          done
           cp -r assets _site/
 
       - uses: actions/configure-pages@v5
