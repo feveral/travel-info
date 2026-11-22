@@ -113,6 +113,7 @@ h3{font-size:18px;margin:0}
 .place .img{aspect-ratio:16/9;background:var(--surface-2) center/cover no-repeat;position:relative}
 .place .img .num{position:absolute;left:12px;top:12px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);
   color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center}
+.place .img .icap{position:absolute;right:8px;bottom:8px;font-size:11px;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:1px 7px}
 .place .img .noimg{position:absolute;inset:0;display:grid;place-items:center;font-size:44px}
 .place .en{font-size:13px;color:var(--muted)}
 .place p{margin:8px 0 0;font-size:15px}
@@ -529,9 +530,10 @@ const DAYS = [
     wx:SKI, hotel:'shinfurano', flight:'BR116',
     meals:{ b:'自理', l:'機上（長榮）', d:'飯店內餐廳或 Ningle Terrace 附近（待定）' },
     places:[
-      { zh:'桃園國際機場 第二航廈', en:'Taoyuan International Airport T2', img:null, emoji:'🛫',
+      { zh:'桃園國際機場 第二航廈', en:'Taoyuan International Airport T2', img:'e/e7/Taiwan_Taoyuan_International_Airport_Terminal_2_Check-in_Hall_20200815.jpg',
         lat:25.0777, lon:121.2328, q:'Taoyuan International Airport Terminal 2',
         desc:'長榮航空 BR116 09:30 起飛，建議 07:00 前到機場報到。飛行約 3.5 小時，日本比台灣快 1 小時。', tags:['09:30 起飛','第二航廈'],
+        story:[{ img:'a/ae/EVA_Air_Boeing_787-10_B-17807_taxiing_at_Taoyuan_May_2026.jpg', cap:'去程搭的長榮波音 787-10' }],
         tips:['如果自備雪板、雪鞋，先查長榮的運動用品托運規定','行動電源只能放隨身行李','出發前在 <b>Visit Japan Web</b> 填好入境與海關資料，入境時出示 QR Code 比較快'] },
       { zh:'新千歲機場', en:'New Chitose Airport', img:'8/87/Hokkaido_New_Chitose_Airport13n4272.jpg',
         lat:42.7868, lon:141.6830, q:'New Chitose Airport',
@@ -542,7 +544,7 @@ const DAYS = [
           '去程先別急著買伴手禮，回程 1/17 還會經過這裡；先在超商買水和零食帶去飯店。',
         ],
         tips:['國際線和國內線航廈之間有室內連通道，走路約 10 分鐘','1 月北海道白天約 −5°C，羽絨外套放隨身行李，下飛機就穿'] },
-      { zh:'前往富良野', en:'New Chitose → Furano（約 3 小時）', img:null, emoji:'🚌',
+      { zh:'前往富良野', en:'New Chitose → Furano（約 3 小時）', img:'f/f9/Shin-furano-price-hotel-2020-01.jpg', imgCap:'冬天的新富良野王子大飯店',
         lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
         desc:'從機場到新富良野王子大飯店約 3 小時車程。⚠️ 接駁方式還沒決定（試算表待辦）。', tags:['⚠️ 待預訂','約 3 小時'],
         tips:['<b>北海道 Resort Liner</b>：滑雪季的機場 ⇄ 富良野直達巴士，停新富良野王子門口。2025–26 季從國內線航廈出發，<b>要事先預約</b>，常常客滿','<b>JR</b>：新千歲機場 → 札幌 → 瀧川轉車 → 富良野站，再搭計程車約 10 分鐘到飯店；轉車多、帶行李辛苦','<b>包車</b>：人數多、行李和雪具多時最省事，可在 Klook、KKday 預訂','14:05 落地、入境約 1 小時，巴士到飯店大概 18:30 以後；北海道 16:20 左右就天黑'] },
@@ -579,11 +581,11 @@ const DAYS = [
         lat:43.3424, lon:142.3866, q:'Furano Marche',
         desc:'富良野車站一帶是市區，有 Furano Marché（富良野物產、甜點、麵包）、超市和藥妝店。從飯店搭計程車約 10 分鐘。', tags:['購物'],
         tips:['超市買水、零食、啤酒比飯店便宜很多','<b>薰衣草巴士</b>：富良野站 ⇄ 新富良野王子，冬季每天行駛','晚上有「Evening Shuttle Bus」往返飯店和市區餐廳，2025–26 季單程 ¥500','人行道結冰很滑，走路小步、鞋底要防滑'] },
-      { zh:'唯我獨尊', en:'Yuigadokuson・香腸咖哩', img:null, emoji:'🍛',
+      { zh:'唯我獨尊', en:'Yuigadokuson・香腸咖哩', img:'5/58/Sausage_curry_rice_by_shibainu_in_Hatsudai%2C_Tokyo.jpg', imgCap:'香腸咖哩示意圖',
         lat:43.3449, lon:142.3895, q:'唯我独尊 富良野',
         desc:'富良野最有名的咖哩店，木屋裡掛滿客人留下的名片。招牌是自家煙燻香腸咖哩，醬汁用炒到焦香的富良野蔬菜加 29 種香料熬成。', tags:['午餐','咖哩百名店'],
         tips:['入選 2026 Tabelog「咖哩百名店」，開店前就排隊，建議一開門就到','公休日、營業時間出發前到 Tabelog 確認'] },
-      { zh:'くまげら Kumagera', en:'富良野鄉土料理', img:null, emoji:'🍲',
+      { zh:'くまげら Kumagera', en:'富良野鄉土料理', img:'3/32/Sukiyaki_01.jpg', imgCap:'壽喜燒示意圖',
         lat:43.3462, lon:142.3888, q:'くまげら 富良野',
         desc:'富良野車站旁的老字號，招牌是放了鴨、雞、鹿肉的「山賊鍋」，還有富良野和牛壽喜燒、和牛丼。2017 年獲北海道米其林必比登推介。', tags:['晚餐','米其林必比登'],
         tips:['地址：富良野市日の出町 3-22，11:30 開始營業，<b>週三公休</b>','滑雪季晚餐非常熱門，<b>一定要先訂位</b>'] },
@@ -602,11 +604,12 @@ const DAYS = [
           '初學者通常從飯店旁有「雪上手扶梯」的平緩區開始練習。',
         ],
         tips:['聯絡方式（王子飯店網站提供）：<a href="tel:+818029513216">+81 80-2951-3216</a>・<a href="mailto:mail@fiss.jp">mail@fiss.jp</a>','提早 10 分鐘到，雪衣、雪鞋、板子都穿好','問清楚：課程時間、雪票是否自己買、可不可以租裝備','1/11 是日本「成人之日」國定假日（三連休最後一天），雪場人會比較多'] },
-      { zh:'森之時計 咖啡', en:'Mori no Tokei Café', img:null, emoji:'☕',
+      { zh:'森之時計 咖啡', en:'Mori no Tokei Café', img:'f/f6/Mori-no-tokei_Furano_Hokkaido_Japan01n.jpg',
         lat:43.3240, lon:142.3570, q:'森の時計 富良野',
         desc:'飯店森林深處的咖啡館，日劇《溫柔時光》的拍攝場景。坐在吧台可以自己磨咖啡豆，窗外就是雪林。', tags:['飯店內','日劇場景'],
+        story:[{ img:'0/08/Mori-no-tokei_Furano_Hokkaido_Japan02n.jpg', cap:'店內吧台，窗外就是森林' }],
         tips:['很熱門，下課後去可能要排一下','營業時間以飯店公告為準'] },
-      { zh:'溫泉放鬆', en:'Onsen after skiing', img:null, emoji:'♨️',
+      { zh:'溫泉放鬆', en:'Onsen after skiing', img:'c/ca/Tsurunoyu_onsen_rotenburo.JPG', imgCap:'雪見露天溫泉示意圖',
         lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
         desc:'新富良野王子大飯店有天然溫泉大浴場，上完課泡一下，腳比較不會痠。', tags:['飯店內'],
         tips:['日本溫泉要全裸入池，先在洗身處洗乾淨','大毛巾不能放進池子裡','有刺青的話先問飯店規定'] },
@@ -649,7 +652,7 @@ const DAYS = [
           '還有北極熊館、海豹的垂直水管、雪豹，都可以近距離看到。',
         ],
         tips:['富良野 → 旭川：JR 富良野線約 1 小時 10 分，或薰衣草巴士約 1.5 小時；旭川站前再搭巴士約 40 分到動物園','企鵝散步的日期、時間以動物園公告為準','冬季開園時間短（約 10:30–15:30），早點出發'] },
-      { zh:'旭川拉麵', en:'Asahikawa Ramen', img:null, emoji:'🍜',
+      { zh:'旭川拉麵', en:'Asahikawa Ramen', img:'2/28/Asahikawa_ramen_by_orangeobject_in_Asahikawa%2C_Hokkaido.jpg',
         lat:43.7633, lon:142.3580, q:'旭川ラーメン村',
         desc:'旭川是北海道三大拉麵之一，以豬骨＋海鮮雙湯頭的醬油拉麵為主，表面一層豬油保溫，冬天吃最暖。', tags:['建議','午餐'],
         tips:['車站附近有很多名店；郊區有「旭川拉麵村」一次集合 8 家','回程順路逛旭川站前的 AEON 購物中心'] },
@@ -671,7 +674,7 @@ const DAYS = [
           { img:'f/f7/Furano_Omu-Curry_2.jpg', cap:'每家店的擺盤都不一樣，蛋上插著小旗子' },
           '規定一定要插「富良野歐姆蛋咖哩」的小旗子、附富良野牛奶，市區有十多家店參加。',
         ] },
-      { zh:'打包・寄行李', en:'Prepare for Sapporo', img:null, emoji:'🧳',
+      { zh:'打包・寄行李', en:'Prepare for Sapporo', img:'a/a6/Kuroneko_Yamato_Cool_Takkyubin_20160814.jpg', imgCap:'黑貓宅急便',
         lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
         desc:'明天要移動到札幌。雪具、大行李可以在飯店櫃台用「宅急便」寄到札幌飯店或新千歲機場，移動時輕鬆很多。', tags:['實用'],
         tips:['宅急便通常隔天或後天送到，寄到機場的話要寫航班日期','租的雪具記得今天歸還'] },
@@ -682,9 +685,10 @@ const DAYS = [
     wx:SAPPORO, hotel:'sapporo',
     meals:{ b:'飯店', l:'途中或抵達後', d:'建議：成吉思汗烤羊肉（だるま）' },
     places:[
-      { zh:'前往札幌', en:'Furano → Sapporo（約 2–2.5 小時）', img:null, emoji:'🚌',
+      { zh:'前往札幌', en:'Furano → Sapporo（約 2–2.5 小時）', img:'6/6b/Furano-gou_at_Furano_sta.jpg', imgCap:'富良野站前的高速巴士「ふらの号」',
         lat:43.0687, lon:141.3508, q:'Sapporo Station',
         desc:'⚠️ 交通方式還沒決定（試算表待辦）。巴士或 JR 都約 2–2.5 小時。', tags:['⚠️ 待預訂'],
+        story:[{ img:'7/74/Furano_Terminal.jpg', cap:'富良野站旁的巴士總站' }],
         tips:['<b>高速巴士</b>：北海道中央巴士 富良野 ⇄ 札幌，約 2.5 小時，可在富良野巴士站買票或車上付現／IC 卡','<b>JR</b>：富良野 → 瀧川轉車 → 札幌，約 2 小時（夏天才有直達的薰衣草特急）','<b>北海道 Resort Liner</b>：滑雪季有富良野 ⇄ 札幌市區的路線，要預約','大行李前一天用宅急便先寄，移動輕鬆很多'] },
       { zh:'大通公園・札幌電視塔', en:'Odori Park & Sapporo TV Tower', img:'0/0d/Hokkaido_Sapporo_Odori_Park.jpg',
         lat:43.0611, lon:141.3564, q:'Sapporo TV Tower',
@@ -944,7 +948,7 @@ let current = 0;
 
 function placeCard(p, n) {
   const img = p.img
-    ? `<div class="img" style="background-image:url('${W(p.img)}')" data-full="${W(p.img, 1280)}"><span class="num">${n}</span></div>`
+    ? `<div class="img" style="background-image:url('${W(p.img)}')" data-full="${W(p.img, 1280)}"><span class="num">${n}</span>${p.imgCap ? `<span class="icap">${esc(p.imgCap)}</span>` : ''}</div>`
     : `<div class="img"><div class="noimg">${p.emoji || '📍'}</div><span class="num">${n}</span></div>`;
   const tags = (p.tags || []).map(t => `<span class="tag ${t.startsWith('★') ? 'star' : t.startsWith('⚠️') ? 'warn' : ''}">${esc(t)}</span>`).join('');
   const story = (p.story || []).map(b => typeof b === 'string'
