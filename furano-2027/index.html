@@ -178,24 +178,6 @@ html{touch-action:manipulation}
 .kv span:nth-child(odd){color:var(--muted)}
 
 /* tools */
-.clock{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
-.clock:first-child{border-top:0}
-.clock .name{font-weight:600}
-.clock .diff{font-size:12px;color:var(--muted)}
-.clock .time{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
-.clock .date{font-size:12px;color:var(--muted);text-align:right}
-.fx-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line)}
-.fx-row:first-of-type{border-top:0}
-.fx-row label{width:96px;flex:0 0 auto}
-.fx-row label > b{display:block;font-size:16px}
-.fx-row .sym{font-size:13px;color:var(--text)}
-.fx-in{flex:1;min-width:0;position:relative}
-.fx-in .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;font-size:16px;pointer-events:none}
-.fx-row label small{color:var(--muted);font-size:12px}
-.fx-row input{width:100%;padding-left:48px !important;font:inherit;font-size:22px;font-weight:700;text-align:right;border:1px solid var(--line);
-  background:var(--surface-2);color:var(--text);border-radius:12px;padding:8px 12px}
-.quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px}
-.quick button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:4px 12px;cursor:pointer}
 .wx-list .row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
 .wx-list .row:first-child{border-top:0}
 .wx-list .ic{font-size:28px;width:36px;text-align:center}
@@ -232,6 +214,7 @@ html{touch-action:manipulation}
 table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 table.tbl th,table.tbl td{text-align:left;padding:8px 0;border-top:1px solid var(--line);vertical-align:top}
 table.tbl th{color:var(--muted);font-weight:500;width:92px}
+table.tbl.tl th{width:56px;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700}
 
 /* bottom nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);
@@ -370,18 +353,6 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 <!-- ============ 工具 ============ -->
 <section class="view" id="v-tools">
   <div class="wrap">
-    <h2>時區</h2>
-    <div class="card" id="clocks"></div>
-    <p class="small muted">日本比台灣快 1 小時，沒有夏令時間。</p>
-
-    <h2>匯率換算</h2>
-    <div class="card">
-      <div class="fx-row"><label for="fx-JPY"><b>🇯🇵 日圓</b><small>符號 <b class="sym">¥</b>・JPY</small></label><div class="fx-in"><span class="pre">¥</span><input inputmode="decimal" id="fx-JPY" autocomplete="off"></div></div>
-      <div class="fx-row"><label for="fx-TWD"><b>🇹🇼 新台幣</b><small>符號 <b class="sym">NT$</b>・TWD</small></label><div class="fx-in"><span class="pre">NT$</span><input inputmode="decimal" id="fx-TWD" autocomplete="off"></div></div>
-      <div class="quick" id="fxQuick"></div>
-      <div class="pad small muted" style="padding-top:0" id="fxInfo">讀取匯率中…</div>
-    </div>
-
     <h2>各地天氣</h2>
     <div class="card wx-list" id="wxList"><div class="pad muted">讀取天氣中…</div></div>
     <p class="small muted">資料來源：Open-Meteo。雪場山頂比山下冷很多（常低 5–10°C）；雪況可看 <a href="https://www.princehotels.co.jp/ski/furano/" target="_blank" rel="noopener">富良野滑雪場官網 ↗</a></p>
@@ -401,8 +372,9 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
     <div class="card pad small">
       <table class="tbl">
         <tr><th>雪場</th><td><b>富良野滑雪場</b>，分「富良野區」（新富良野王子旁）和「北之峰區」，一張雪票通用，山上雪道相連</td></tr>
-        <tr><th>雪票</th><td>1 日券 2025–26 季約 <b>¥8,000</b>、夜間券約 ¥3,100（平日）；2026–27 季（12/5 – 3/22）價格以 <a href="https://www.princehotels.co.jp/ski/furano/winter/lift/" target="_blank" rel="noopener">官網 ↗</a> 為準。12 歲以下免費</td></tr>
-        <tr><th>營業時間</th><td>約 8:30 – 16:00，富良野區另有夜滑</td></tr>
+        <tr><th>雪票</th><td>1 日券 2025–26 季約 <b>¥8,000</b>；2026–27 季（12/5 – 3/22）價格以 <a href="https://www.princehotels.co.jp/ski/furano/winter/lift/" target="_blank" rel="noopener">官網 ↗</a> 為準。12 歲以下免費</td></tr>
+        <tr><th>營業時間</th><td>8:30 – 16:00（或日落）</td></tr>
+        <tr><th>夜滑</th><td>富良野區、北之峰區都有（12 月中下旬 – 3/21）：<b>平日 16:00–18:00</b>；週末、國定假日、年末年始 16:00–19:30。<a href="https://www.princehotels.co.jp/ski/furano/winter/lift/pdf/season2026.pdf" target="_blank" rel="noopener">2026–27 季官方資料 ↗</a></td></tr>
         <tr><th>滑雪學校</th><td><b>FISS</b>（Furano International Snow Sports）<br><a href="tel:+818029513216">+81 80-2951-3216</a>・<a href="mailto:mail@fiss.jp">mail@fiss.jp</a></td></tr>
         <tr><th>天黑</th><td>1 月約 <b>16:20</b> 日落，下午 3 點後光線變暗、雪面看不清楚</td></tr>
       </table>
@@ -412,8 +384,8 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
     <div class="card pad small">
       <table class="tbl">
         <tr><th>機場 → 富良野</th><td>✅ <b>已訂</b>：1/9 18:10 新千歲機場 23 號乘車處 → 21:05 新富良野王子（バスゴリライナーふらの，2 人 ¥10,000）。<b>確認信印出來給司機看</b></td></tr>
-        <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店房客專用接駁車（2025–26 季免費），時刻表在櫃台；也可以在山上滑過去</td></tr>
-        <tr><th>飯店 ⇄ 市區</th><td>薰衣草巴士（富良野站 ⇄ 新富良野王子）；晚上的 Evening Shuttle Bus 單程 ¥500（2025–26 季）；計程車約 10 分鐘</td></tr>
+        <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店<b>房客專用接駁車</b>（免費）。2025–26 季：飯店 → 北之峰 8:55；北之峰 → 飯店 9:05、10:05、13:05、16:00、17:20、18:20、19:20（19:20 只有週末、假日）。白天也可以在山上滑過去。<a href="https://www.princehotels.co.jp/file.jsp?id=503910" target="_blank" rel="noopener">房客接駁車時刻表（2025–26）↗</a></td></tr>
+        <tr><th>飯店 ⇄ 市區</th><td><b>薰衣草巴士</b>約 20 分。<br>飯店 → 富良野站：9:05、10:30、11:30、12:20、13:20、15:55；晚上 <b>Evening Shuttle Bus</b> 17:00、18:00、19:00（¥500）<br>富良野站 → 飯店：11:38、12:38、14:13、15:38、17:28、18:28、<b>21:03（末班）</b><br>都是 2025–26 季時刻。<a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表（2025–26）↗</a></td></tr>
         <tr><th>富良野 → 札幌</th><td>中央巴士高速巴士約 2.5 小時，或 JR 經瀧川約 2 小時（⚠️ 待預訂）</td></tr>
         <tr><th>札幌 → 機場</th><td>JR 快速 Airport 約 37 分鐘，可刷 IC 卡</td></tr>
       </table>
@@ -462,7 +434,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
       </ul>
     </div>
     <div id="checklistEnd"></div>
-    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo・匯率：ExchangeRate-API</div>
+    <div class="footer">照片：Wikimedia Commons（各作者，CC 授權）・天氣：Open-Meteo</div>
   </div>
 </section>
 
@@ -470,7 +442,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   <button data-v="days" class="on"><span class="i"><img src="../assets/icons/days.png" alt="" width="30" height="30"></span>行程</button>
   <button data-v="flights"><span class="i"><img src="../assets/icons/flights.png" alt="" width="30" height="30"></span>航班</button>
   <button data-v="hotels"><span class="i"><img src="../assets/icons/hotels.png" alt="" width="30" height="30"></span>住宿</button>
-  <button data-v="tools"><span class="i"><img src="../assets/icons/tools.png" alt="" width="30" height="30"></span>工具</button>
+  <button data-v="tools"><span class="i"><img src="../assets/icons/tools.png" alt="" width="30" height="30"></span>天氣</button>
   <button data-v="info"><span class="i"><img src="../assets/icons/info.png" alt="" width="30" height="30"></span>須知</button>
 </div></nav>
 
@@ -555,10 +527,27 @@ const DAYS = [
     ],
     notes:['<b>巴士確認信請印出來帶著</b>，上車要給司機看。','21:05 才到飯店，Ningle Terrace（20:45 關）今晚來不及，改到 1/11 晚上去。','入住後先到飯店櫃台問清楚：往北之峰的接駁車時刻、雪具寄放處、溫泉時間。'] },
 
-  { date:'2027-01-10', title:'自由滑雪・富良野市區・北之峰', subtitle:'自己滑，順便去市區採買、北之峰區走走', plan:'細節還沒安排',
+  { date:'2027-01-10', title:'富良野市區・北之峰滑雪・夜滑', subtitle:'早上搭巴士去市區，下午滑到北之峰，夜滑後搭房客接駁車回飯店', plan:'草案：時刻用 2025–26 季時刻表',
     wx:SKI, hotel:'shinfurano',
-    meals:{ b:'飯店', l:'建議：唯我獨尊 香腸咖哩', d:'建議：くまげら 鄉土料理（先訂位）' },
+    meals:{ b:'飯店', l:'唯我獨尊 香腸咖哩', d:'北之峰山腳（夜滑前或中間吃）' },
+    timeline:[
+      ['10:30','新富良野王子 搭<b>薰衣草巴士</b>（先不帶雪具）→ 10:50 JR 富良野站前'],
+      ['11:00','<b>唯我獨尊</b> 午餐（開店前就排隊），之後逛 Furano Marché、超市採買'],
+      ['12:38','JR 富良野站前 搭薰衣草巴士 → 12:55 新富良野王子（下一班 14:13 → 14:30）'],
+      ['13:30','換好雪衣，從富良野區搭纜車／吊椅上山，<b>在山上滑到北之峰區</b>'],
+      ['16:00','北之峰區<b>夜滑</b>開始，週日滑到 19:30；晚餐在北之峰山腳的店吃'],
+      ['19:20','北之峰纜車售票中心 搭<b>王子飯店房客接駁車</b>（7 便）→ 19:30 新富良野王子'],
+    ],
+    tlNotes:['兩區之間的連接吊椅傍晚就停了，夜滑完不能滑回富良野區，<b>一定要搭接駁車或計程車</b>回飯店','接駁車是<b>新富良野王子房客專用、免費</b>，上車可能要出示房卡','<b>19:20 那班（7 便）只在週末、國定假日開</b>，2025–26 季 1/10 有開；1/10/2027 是週日，應該也有，到了跟櫃台確認','保險一點可以搭 <b>18:20</b>（6 便）→ 18:30 到飯店，再在富良野區夜滑到 19:30（飯店門口）','錯過接駁車：請北之峰的店家叫計程車，到飯店約 10 分鐘','時刻來源：<a href="https://www.princehotels.co.jp/file.jsp?id=503910" target="_blank" rel="noopener">房客接駁車時刻表（2025–26）↗</a>・<a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表（2025–26）↗</a>；2026–27 季時刻表還沒公布，出發前再對一次'],
     places:[
+      { zh:'富良野市區採買', en:'Furano Station & Furano Marché', img:'6/62/JRH_Furano_Station_20100908.jpg',
+        lat:43.3424, lon:142.3866, q:'Furano Marche',
+        desc:'富良野車站一帶是市區，有 Furano Marché（富良野物產、甜點、麵包）、超市和藥妝店。從飯店搭薰衣草巴士約 20 分鐘。', tags:['購物','早上去'],
+        tips:['<b>去</b>：新富良野王子 → JR 富良野站前，薰衣草巴士 9:05、10:30、11:30、12:20、13:20…，約 20 分','<b>回</b>：JR 富良野站前 → 新富良野王子，11:38、12:38、14:13、15:38、17:28、18:28、21:03，約 17 分（2025–26 季時刻）','超市買水、零食、啤酒比飯店便宜很多','晚上有「Evening Shuttle Bus」往返飯店和市區餐廳，2025–26 季單程 ¥500','人行道結冰很滑，走路小步、鞋底要防滑'] },
+      { zh:'唯我獨尊', en:'Yuigadokuson・香腸咖哩', img:'5/58/Sausage_curry_rice_by_shibainu_in_Hatsudai%2C_Tokyo.jpg', imgCap:'香腸咖哩示意圖',
+        lat:43.3449, lon:142.3895, q:'唯我独尊 富良野',
+        desc:'富良野最有名的咖哩店，木屋裡掛滿客人留下的名片。招牌是自家煙燻香腸咖哩，醬汁用炒到焦香的富良野蔬菜加 29 種香料熬成。', tags:['午餐','咖哩百名店'],
+        tips:['<b>交通</b>：在富良野站旁，從飯店搭薰衣草巴士到富良野站走路約 5 分，或計程車約 10 分','入選 2026 Tabelog「咖哩百名店」，開店前就排隊，建議一開門就到','公休日、營業時間出發前到 Tabelog 確認'] },
       { zh:'富良野滑雪場・富良野區', en:'Furano Ski Resort – Furano Zone', img:'e/ed/Furano_Snow_Resort_view2.JPG',
         lat:43.3266, lon:142.3394, q:'Furano Ropeway',
         desc:'富良野滑雪場分成「富良野區」和「北之峰區」，一張雪票兩區通用，山上雪道相連。富良野區就在飯店門口。', tags:['★滑雪','雪票兩區通用'],
@@ -570,22 +559,11 @@ const DAYS = [
         tips:['雪票 1 日券 2025–26 季約 ¥8,000，2026–27 季價格以官網為準；12 歲以下兒童免費','纜車、吊椅約 8:30 開始；1 月下午 4 點多就暗了','山頂常常 −15°C 以下，臉、手指要包好'] },
       { zh:'北之峰區', en:'Kitanomine Zone', img:'f/f7/Furano_Snow_Resort_view3.JPG',
         lat:43.3441, lon:142.3661, q:'Kitanomine Gondola Furano',
-        desc:'山的另一側，坐北之峰纜車上山。山腳就是北之峰小鎮，有餐廳、居酒屋和雪具店。', tags:['可滑過去'],
-        tips:['從富良野區可以在山上滑過去，回程記得留時間滑回來（或搭接駁車）','新富良野王子 ⇄ 北之峰有<b>王子飯店房客專用接駁車</b>（2025–26 季免費），時刻以櫃台公告為準','新富良野王子在北之峰也有拉麵店，富良野名店「とみ川」的新品牌就開在這裡'] },
-      { zh:'富良野市區採買', en:'Furano Station & Furano Marché', img:'6/62/JRH_Furano_Station_20100908.jpg',
-        lat:43.3424, lon:142.3866, q:'Furano Marche',
-        desc:'富良野車站一帶是市區，有 Furano Marché（富良野物產、甜點、麵包）、超市和藥妝店。從飯店搭計程車約 10 分鐘。', tags:['購物'],
-        tips:['超市買水、零食、啤酒比飯店便宜很多','<b>薰衣草巴士</b>：富良野站 ⇄ 新富良野王子，冬季每天行駛','晚上有「Evening Shuttle Bus」往返飯店和市區餐廳，2025–26 季單程 ¥500','人行道結冰很滑，走路小步、鞋底要防滑'] },
-      { zh:'唯我獨尊', en:'Yuigadokuson・香腸咖哩', img:'5/58/Sausage_curry_rice_by_shibainu_in_Hatsudai%2C_Tokyo.jpg', imgCap:'香腸咖哩示意圖',
-        lat:43.3449, lon:142.3895, q:'唯我独尊 富良野',
-        desc:'富良野最有名的咖哩店，木屋裡掛滿客人留下的名片。招牌是自家煙燻香腸咖哩，醬汁用炒到焦香的富良野蔬菜加 29 種香料熬成。', tags:['午餐','咖哩百名店'],
-        tips:['入選 2026 Tabelog「咖哩百名店」，開店前就排隊，建議一開門就到','公休日、營業時間出發前到 Tabelog 確認'] },
-      { zh:'くまげら Kumagera', en:'富良野鄉土料理', img:'3/32/Sukiyaki_01.jpg', imgCap:'壽喜燒示意圖',
-        lat:43.3462, lon:142.3888, q:'くまげら 富良野',
-        desc:'富良野車站旁的老字號，招牌是放了鴨、雞、鹿肉的「山賊鍋」，還有富良野和牛壽喜燒、和牛丼。2017 年獲北海道米其林必比登推介。', tags:['晚餐','米其林必比登'],
-        tips:['地址：富良野市日の出町 3-22，11:30 開始營業，<b>週三公休</b>','滑雪季晚餐非常熱門，<b>一定要先訂位</b>'] },
+        desc:'山的另一側，坐北之峰纜車上山。山腳就是北之峰小鎮，有餐廳、居酒屋和雪具店。今天傍晚在這裡夜滑。',
+        tags:['可滑過去','夜滑到 19:30（週日）'],
+        tips:['<b>北之峰 → 新富良野王子 房客接駁車</b>（2025–26 季，免費）：17:20、18:20、19:20（19:20 只有週末、假日），從北之峰纜車售票中心出發，10 分鐘到','從富良野區可以在山上滑過去；回程傍晚連接吊椅停了以後就要搭接駁車','新富良野王子在北之峰也有拉麵店，富良野名店「とみ川」的新品牌就開在這裡'] },
     ],
-    notes:['這天還沒排定，以上是順路的建議。'] },
+    notes:[] },
 
   { date:'2027-01-11', title:'FISS 滑雪課', subtitle:'在新富良野王子前集合（教練詢問中）', plan:'教練還在確認',
     wx:SKI, hotel:'shinfurano',
@@ -604,10 +582,10 @@ const DAYS = [
         desc:'飯店森林深處的咖啡館，日劇《溫柔時光》的拍攝場景。坐在吧台可以自己磨咖啡豆，窗外就是雪林。', tags:['飯店內','日劇場景'],
         story:[{ img:'0/08/Mori-no-tokei_Furano_Hokkaido_Japan02n.jpg', cap:'店內吧台，窗外就是森林' }],
         tips:['很熱門，下課後去可能要排一下','營業時間以飯店公告為準'] },
-      { zh:'溫泉放鬆', en:'Onsen after skiing', img:'c/ca/Tsurunoyu_onsen_rotenburo.JPG', imgCap:'雪見露天溫泉示意圖',
+      { zh:'富良野溫泉「紫彩之湯」', en:'Furano Onsen Shisai no Yu', img:'c/ca/Tsurunoyu_onsen_rotenburo.JPG', imgCap:'雪見露天溫泉示意圖',
         lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
-        desc:'新富良野王子大飯店有天然溫泉大浴場，上完課泡一下，腳比較不會痠。', tags:['飯店內'],
-        tips:['日本溫泉要全裸入池，先在洗身處洗乾淨','大毛巾不能放進池子裡','有刺青的話先問飯店規定'] },
+        desc:'新富良野王子大飯店的天然溫泉，走路就到。上完課泡一下，腳比較不會痠。', tags:['飯店內','13:00–23:30'],
+        tips:['雪場官方資料寫的時間是 13:00–23:30（最後入場），住客是否免費問櫃台','日本溫泉要全裸入池，先在洗身處洗乾淨','大毛巾不能放進池子裡','有刺青的話先問飯店規定'] },
       { zh:'Ningle Terrace 森林小木屋', en:'Ningle Terrace', img:'e/e8/130503_Ningle_Terrace_Furano_Hokkaido_Japan03s.jpg',
         lat:43.3234, lon:142.3563, q:'Ningle Terrace Furano',
         desc:'飯店旁森林裡的 15 間小木屋商店，冬天晚上點燈、木棧道積滿雪，像童話裡的小村子。', tags:['飯店旁','夜間點燈'],
@@ -629,19 +607,19 @@ const DAYS = [
         desc:'美瑛的青池因水中的鋁成分呈現夢幻藍色。冬天池面結冰積雪，晚上會打燈，枯樹在雪中發光非常漂亮。', tags:['建議','冬季點燈'],
         story:[
           { img:'d/d4/Biei_Blue-pond.jpg', cap:'沒有結冰的季節，池水是這樣的藍' },
-          '從富良野開車約 1 小時。冬季點燈的日期、時間每年由美瑛町公告，出發前查一下。',
+          '2026–27 季點燈期間是 2026/10/22 – 2027/4/21，每天天黑後打燈，免費、不用預約。冬天看到的是雪地和燈光，不是藍色池水，繞一圈約 15 分鐘。',
         ],
-        tips:['沒有租車的話，可以找富良野、旭川出發的「冬季美瑛一日遊」或包車','晚上非常冷，暖暖包、手套、毛帽都帶上'] },
+        tips:['<b>去程</b>：飯店 → 富良野站（薰衣草巴士或計程車約 10 分）→ JR 富良野線到<b>美瑛站</b>（約 40 分，班次少，先查時刻）→ 美瑛站前搭<b>道北巴士</b>（往白金溫泉）到「白金青い池」站，約 20 分、¥800','<b>回程</b>：網路資料說點燈期間從青池回美瑛的末班巴士約 <b>18:05</b>（只有一個來源，出發前一定要再查）。1 月 16:20 左右日落，看完點燈剛好搭末班車，再從美瑛搭 JR 回富良野','<b>懶人選項</b>：美瑛觀光協會冬季有「點燈觀光巴士」從美瑛站出發，繞青池、白鬚瀑布；上一季主要在週五、六和假日開，1/12 是週二要先確認有沒有開','晚上非常冷，暖暖包、手套、毛帽都帶上'] },
       { zh:'白鬚瀑布', en:'Shirahige Falls', img:'e/e1/Shirahige_Falls%2C_Biei_River%2C_Hokkaido%2C_Japan.jpg',
         lat:43.4746, lon:142.6392, q:'Shirahige Falls',
         desc:'在青池附近的白金溫泉，地下水從岩壁縫隙流出，像老人的白鬍子。冬天河水不結冰，藍色河水配白雪。', tags:['建議'],
-        tips:['從「白金溫泉」的橋上看，照片中是夏天的樣子','和青池一起排成半日遊剛好'] },
+        tips:['<b>交通</b>：和青池同一條道北巴士，青池再往前約 10 分鐘到「白金溫泉」站，下車走到橋上就看得到','可以先看白鬚瀑布（白天），再坐回青池等點燈','照片是夏天的樣子'] },
       { zh:'富良野起司工房', en:'Furano Cheese Factory', img:'5/52/Wine_Cheddar_Brand_of_Furano_Cheese_-_Cheese_Factory_-_Furano_-_Hokkaido_-_Japan_%2848012225498%29.jpg',
         lat:43.3207, lon:142.3772, q:'Furano Cheese Factory',
         desc:'離飯店很近的起司工廠，可以試吃起司、喝牛奶、吃起司冰淇淋，隔壁的披薩工房用富良野起司烤披薩。', tags:['建議','離飯店近'],
-        tips:['有手作奶油、冰淇淋體驗（要預約），冬季營業時間以官網為準'] },
+        tips:['<b>交通</b>：離飯店約 2.5 公里，沒有公車，搭計程車約 5 分鐘（請飯店櫃台叫車），回程請店家幫忙叫車','有手作奶油、冰淇淋體驗（要預約），冬季營業時間以官網為準'] },
     ],
-    notes:['如果想多滑一天，這天就留在雪場；景點可以挪到 1/13 或 1/14。'] },
+    notes:['我們沒開車：美瑛要 JR＋巴士轉乘，單程約 1.5–2 小時，回程班次少，出發前把時刻表查好、截圖。','如果想多滑一天，這天就留在雪場；景點可以挪到 1/13 或 1/14。'] },
 
   { date:'2027-01-13', title:'旭山動物園企鵝散步・旭川拉麵', subtitle:'還沒安排：可以排一天去旭川', plan:'待安排',
     wx:{ name:'旭川', lat:43.7706, lon:142.365 }, hotel:'shinfurano',
@@ -655,22 +633,22 @@ const DAYS = [
           { img:'c/c6/Asahiyama_zoo_Penguin_02.jpg', cap:'在雪地上散步的國王企鵝' },
           '還有北極熊館、海豹的垂直水管、雪豹，都可以近距離看到。',
         ],
-        tips:['富良野 → 旭川：JR 富良野線約 1 小時 10 分，或薰衣草巴士約 1.5 小時；旭川站前再搭巴士約 40 分到動物園','企鵝散步的日期、時間以動物園公告為準','冬季開園時間短（約 10:30–15:30），早點出發'] },
+        tips:['<b>交通</b>：飯店 → 富良野站（薰衣草巴士或計程車約 10 分）→ JR 富良野線到<b>旭川站</b>（約 1 小時 10 分）→ 旭川站前<b>6 號乘車處</b>搭旭川電氣軌道 <b>41 號</b>巴士，約 40 分到「旭山動物園」站','也可以搭薰衣草巴士從新富良野王子直接到旭川站（約 1.5 小時，2025–26 季冬天每天行駛），免轉乘','企鵝散步的日期、時間以動物園公告為準','冬季開園時間短，以官網為準；12/30–1/1 休園，1/13 有開','企鵝散步在上午，建議 08:00 左右從飯店出發'] },
       { zh:'旭川拉麵', en:'Asahikawa Ramen', img:'2/28/Asahikawa_ramen_by_orangeobject_in_Asahikawa%2C_Hokkaido.jpg',
         lat:43.7633, lon:142.3580, q:'旭川ラーメン村',
         desc:'旭川是北海道三大拉麵之一，以豬骨＋海鮮雙湯頭的醬油拉麵為主，表面一層豬油保溫，冬天吃最暖。', tags:['建議','午餐'],
-        tips:['車站附近有很多名店；郊區有「旭川拉麵村」一次集合 8 家','回程順路逛旭川站前的 AEON 購物中心'] },
+        tips:['旭川站附近走路就有很多名店，從動物園搭 41 號巴士回旭川站吃最順；「旭川拉麵村」在郊區，要再轉車','回程順路逛旭川站前的 AEON 購物中心'] },
     ],
     notes:['旭川比富良野更冷，1 月白天常在 −5°C 以下。'] },
 
   { date:'2027-01-14', title:'最後一天滑雪・夜滑', subtitle:'還沒安排：把握富良野最後一天', plan:'待安排',
     wx:SKI, hotel:'shinfurano',
-    meals:{ b:'飯店', l:'建議：富良野歐姆蛋咖哩', d:'待定' },
+    meals:{ b:'飯店', l:'建議：富良野歐姆蛋咖哩', d:'建議：くまげら（先訂位）' },
     places:[
       { zh:'夜間滑雪', en:'Night Skiing', img:'f/f7/Furano_Snow_Resort_view3.JPG',
         lat:43.3240, lon:142.3500, q:'Furano Ski Resort',
-        desc:'富良野區晚上有夜滑，雪道打燈，人少、雪況穩定，看著山下富良野市區的燈光滑下來。', tags:['建議'],
-        tips:['夜間券約 ¥3,100（平日），以官網為準；一般日券通常也能接著滑夜場','晚上更冷，加一層中層保暖衣'] },
+        desc:'富良野區晚上有夜滑，雪道打燈，看著山下富良野市區的燈光滑下來。1/14 是週四（平日），夜滑只到 18:00。', tags:['建議','平日 16:00–18:00'],
+        tips:['<b>2026–27 季夜滑</b>（12 月中旬 – 3/21）：平日 16:00–18:00；週末、國定假日、年末年始（12/26–1/3）16:00–19:30。<a href="https://www.princehotels.co.jp/ski/furano/winter/lift/pdf/season2026.pdf" target="_blank" rel="noopener">2026–27 季官方資料 ↗</a>','所以這趟 1/10（日）、1/11（成人之日）可以滑到 19:30，1/12–1/14 平日只到 18:00','夜滑票價、日券能不能接著滑夜場，到售票處確認','晚上更冷，加一層中層保暖衣'] },
       { zh:'富良野歐姆蛋咖哩', en:'Furano Omu-Curry', img:'2/24/Furano_Omu-Curry_3.jpg',
         lat:43.3424, lon:142.3866, q:'富良野オムカレー',
         desc:'富良野的在地美食，用富良野的米、蛋、蔬菜和起司做成，每家店口味不同，套餐會附一瓶富良野牛奶。', tags:['在地美食'],
@@ -678,10 +656,10 @@ const DAYS = [
           { img:'f/f7/Furano_Omu-Curry_2.jpg', cap:'每家店的擺盤都不一樣，蛋上插著小旗子' },
           '規定一定要插「富良野歐姆蛋咖哩」的小旗子、附富良野牛奶，市區有十多家店參加。',
         ] },
-      { zh:'打包・寄行李', en:'Prepare for Sapporo', img:'a/a6/Kuroneko_Yamato_Cool_Takkyubin_20160814.jpg', imgCap:'黑貓宅急便',
-        lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
-        desc:'明天要移動到札幌。雪具、大行李可以在飯店櫃台用「宅急便」寄到札幌飯店或新千歲機場，移動時輕鬆很多。', tags:['實用'],
-        tips:['宅急便通常隔天或後天送到，寄到機場的話要寫航班日期','租的雪具記得今天歸還'] },
+      { zh:'くまげら Kumagera', en:'富良野鄉土料理', img:'3/32/Sukiyaki_01.jpg', imgCap:'壽喜燒示意圖',
+        lat:43.3462, lon:142.3888, q:'くまげら 富良野',
+        desc:'富良野車站旁的老字號，招牌是放了鴨、雞、鹿肉的「山賊鍋」，還有富良野和牛壽喜燒、和牛丼。2017 年獲北海道米其林必比登推介。', tags:['晚餐','米其林必比登','週四有開'],
+        tips:['<b>交通</b>：新富良野王子 17:00 或 18:00 搭 <b>Evening Shuttle Bus</b>（¥500）→ 17:20／18:20 JR 富良野站前，走路約 3 分；回程搭薰衣草巴士 <b>21:03</b> 富良野站前 → 21:20 飯店（末班），或請店家叫計程車','地址：富良野市日の出町 3-22，11:30 開始營業，<b>週三公休</b>','滑雪季晚餐非常熱門，<b>一定要先訂位</b>'] },
     ],
     notes:[] },
 
@@ -691,9 +669,9 @@ const DAYS = [
     places:[
       { zh:'前往札幌', en:'Furano → Sapporo（約 2–2.5 小時）', img:'6/6b/Furano-gou_at_Furano_sta.jpg', imgCap:'富良野站前的高速巴士「ふらの号」',
         lat:43.0687, lon:141.3508, q:'Sapporo Station',
-        desc:'⚠️ 交通方式還沒決定（試算表待辦）。巴士或 JR 都約 2–2.5 小時。', tags:['⚠️ 待預訂'],
+        desc:'⚠️ 預計搭接駁巴士，還沒訂（試算表待辦）。車程約 2.5 小時。', tags:['⚠️ 待預訂'],
         story:[{ img:'7/74/Furano_Terminal.jpg', cap:'富良野站旁的巴士總站' }],
-        tips:['<b>高速巴士</b>：北海道中央巴士 富良野 ⇄ 札幌，約 2.5 小時，可在富良野巴士站買票或車上付現／IC 卡','<b>JR</b>：富良野 → 瀧川轉車 → 札幌，約 2 小時（夏天才有直達的薰衣草特急）','<b>北海道 Resort Liner</b>：滑雪季有富良野 ⇄ 札幌市區的路線，要預約','大行李前一天用宅急便先寄，移動輕鬆很多'] },
+        tips:['<b>高速巴士</b>：北海道中央巴士 富良野 ⇄ 札幌，約 2.5 小時，可在富良野巴士站買票或車上付現／IC 卡','<b>JR</b>：富良野 → 瀧川轉車 → 札幌，約 2 小時（夏天才有直達的薰衣草特急）','<b>北海道 Resort Liner</b>：滑雪季有富良野 ⇄ 札幌市區的路線，要預約','行李和雪具要一起帶上車，訂票時確認大件行李規定'] },
       { zh:'大通公園・札幌電視塔', en:'Odori Park & Sapporo TV Tower', img:'0/0d/Hokkaido_Sapporo_Odori_Park.jpg',
         lat:43.0611, lon:141.3564, q:'Sapporo TV Tower',
         desc:'貫穿札幌市中心的公園，2 月的雪祭就在這裡。東端的電視塔展望台可以看整條大通公園的夜景。', tags:['建議','夜景'],
@@ -754,7 +732,8 @@ const DAYS = [
         tips:['從市區搭路面電車到「ロープウェイ入口」，再走路或搭免費接駁車到纜車站','山頂風大很冷，穿最厚的外套'] },
       { zh:'札幌啤酒博物館', en:'Sapporo Beer Museum', img:'a/a6/Sapporo_Beer_Museum.jpg',
         lat:43.0714, lon:141.3690, q:'Sapporo Beer Museum',
-        desc:'紅磚建築是以前的製糖工廠，介紹日本啤酒的歷史，最後可以付費試喝。旁邊的啤酒園可以吃成吉思汗烤羊肉配生啤酒。', tags:['建議'] },
+        desc:'紅磚建築是以前的製糖工廠，介紹日本啤酒的歷史，最後可以付費試喝。旁邊的啤酒園可以吃成吉思汗烤羊肉配生啤酒。', tags:['建議'],
+        tips:['<b>交通</b>：從札幌站搭中央巴士「札幌啤酒園線」約 10 分，或計程車約 10 分鐘'] },
     ],
     notes:['1/16 是週六，熱門餐廳建議先訂位。'] },
 
@@ -1056,6 +1035,9 @@ function renderDay() {
       ${d.plan ? `<span class="plan-tag">🗓️ ${esc(d.plan)}</span>` : ''}
     </div>
     <div class="card pad" id="dayWx"><div class="small muted">讀取天氣中…</div></div>
+    ${d.timeline ? `<div class="card pad"><h3>🕒 今日流程</h3>
+      <table class="tbl tl" style="margin-top:8px">${d.timeline.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${x}</td></tr>`).join('')}</table>
+      ${(d.tlNotes || []).length ? `<ul class="tips">${d.tlNotes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}</div>` : ''}
     <div class="card">
       <div class="mapbox" id="mapBox">
         <div class="map" id="dayMap"></div>
@@ -1254,67 +1236,6 @@ function drawLeaflet(near, popup) {
 function renderFlights() { $('#flights').innerHTML = FLIGHTS.map(flightCard).join(''); }
 function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => hotelCard(k, false)).join(''); }
 
-/* ---------------- clocks ---------------- */
-const CLOCKS = [
-  { name:'🇹🇼 台北', tz:'Asia/Taipei' },
-  { name:'🇯🇵 日本', tz:'Asia/Tokyo' },
-];
-function tzOffsetMin(tz, at = new Date()) {
-  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone:tz, hourCycle:'h23',
-    year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).formatToParts(at).map(x => [x.type, x.value]));
-  return Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - at.getTime()) / 6e4);
-}
-function renderClocks() {
-  const at = now(), base = tzOffsetMin('Asia/Taipei', at);
-  $('#clocks').innerHTML = CLOCKS.map(c => {
-    const t = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, hour:'2-digit', minute:'2-digit', hourCycle:'h23' }).format(at);
-    const dt = new Intl.DateTimeFormat('zh-TW', { timeZone:c.tz, month:'numeric', day:'numeric', weekday:'short' }).format(at);
-    const diff = (tzOffsetMin(c.tz, at) - base) / 60;
-    const label = diff === 0 ? '基準時間' : `比台灣${diff < 0 ? '慢' : '快'} ${Math.abs(diff)} 小時`;
-    return `<div class="clock"><div><div class="name">${c.name}</div><div class="diff">${label}</div></div>
-      <div><div class="time">${t}</div><div class="date">${dt}</div></div></div>`;
-  }).join('');
-}
-
-/* ---------------- currency ---------------- */
-// fallback only used when offline and nothing cached; TWD per 1 unit
-let fx = store.get('fx', null);
-if (!fx || !fx.JPY) fx = { JPY: 0.21, TWD: 1, at: null, fallback: true };
-const FX_KEYS = ['JPY','TWD'];
-const fmt = (v, cur) => isFinite(v) ? v.toLocaleString('en-US', { maximumFractionDigits: 0 }) : '';
-const parse = s => parseFloat(String(s).replace(/,/g, ''));
-function convertFrom(src) {
-  const v = parse($('#fx-' + src).value);
-  FX_KEYS.forEach(k => { if (k !== src) $('#fx-' + k).value = isFinite(v) ? fmt(v * fx[src] / fx[k], k) : ''; });
-  store.set('fxLast', { src, v: $('#fx-' + src).value });
-}
-function fxInfo() {
-  $('#fxInfo').innerHTML = `參考匯率：¥1,000 日圓 ≈ NT$${(fx.JPY * 1000).toFixed(0)}・NT$1,000 ≈ ¥${Math.round(1000 / fx.JPY).toLocaleString('en-US')}`
-    + (fx.fallback ? '<br>⚠️ 目前離線，使用估計匯率' : '<br>實際刷卡匯率以銀行為準');
-}
-async function loadFx() {
-  try {
-    const r = await fetch('https://open.er-api.com/v6/latest/TWD');
-    const d = await r.json();
-    if (d.result !== 'success') throw 0;
-    fx = { JPY: 1 / d.rates.JPY, TWD: 1, at: d.time_last_update_utc, fallback: false };
-    store.set('fx', fx);
-  } catch {}
-  fxInfo();
-  const last = store.get('fxLast', null);
-  if (last && last.v) { $('#fx-' + last.src).value = last.v; convertFrom(last.src); }
-}
-function initFx() {
-  FX_KEYS.forEach(k => $('#fx-' + k).addEventListener('input', () => convertFrom(k)));
-  const quick = [500, 1000, 3000, 5000, 8000, 10000, 30000];
-  $('#fxQuick').innerHTML = quick.map(v => `<button data-v="${v}">¥${v.toLocaleString()}</button>`).join('');
-  $('#fxQuick').querySelectorAll('button').forEach(b => b.onclick = () => {
-    $('#fx-JPY').value = (+b.dataset.v).toLocaleString('en-US'); convertFrom('JPY');
-  });
-  fxInfo();
-  loadFx();
-}
-
 /* ---------------- checklist ---------------- */
 // Packing list, grouped by occasion. `why` says when the item is needed; `opt` marks nice-to-haves.
 // Ticks are stored per item id so editing the list doesn't shuffle them.
@@ -1425,7 +1346,7 @@ function buildSearchIndex() {
   DAYS.forEach((d, i) => {
     const day = `DAY ${i + 1}・${md(d.date)}（${wk(d.date)}）`;
     add('行程', d.title, `${day}・${d.subtitle}`,
-      [d.plan, `早餐 ${d.meals.b}`, `午餐 ${d.meals.l}`, `晚餐 ${d.meals.d}`, ...d.notes.map(plain)].filter(Boolean).join('　'),
+      [d.plan, ...(d.timeline || []).map(r => plain(r.join(' '))), ...(d.tlNotes || []).map(plain), `早餐 ${d.meals.b}`, `午餐 ${d.meals.l}`, `晚餐 ${d.meals.d}`, ...d.notes.map(plain)].filter(Boolean).join('　'),
       () => goDay(i, () => $('#day .day-head')));
     d.places.forEach((p, j) => add('景點', p.zh, `${day}・${p.en}`,
       [p.desc, ...(p.tags || []), ...(p.story || []).map(b => typeof b === 'string' ? b : b.cap), ...(p.tips || []).map(plain)].join('　'),
@@ -1503,7 +1424,7 @@ function snippet(r, terms) {
   return (start ? '…' : '') + r.body.slice(start, start + 80);
 }
 
-const SUGG = ['雪票', 'FISS', '接駁', '北之峰', '咖哩', '拉麵', '溫泉', '免稅', '企鵝', '小樽', '烤羊肉', '宅急便'];
+const SUGG = ['雪票', 'FISS', '接駁', '北之峰', '咖哩', '拉麵', '溫泉', '免稅', '企鵝', '小樽', '烤羊肉', '夜滑'];
 function renderSearch() {
   const q = $('#sq').value.trim();
   $('#sclear').hidden = !q;
@@ -1710,8 +1631,6 @@ renderChips();
 renderDay();
 renderFlights();
 renderHotels();
-renderClocks(); setInterval(renderClocks, 15000);
-initFx();
 renderChecklist();
 // before departure the packing list leads the info tab; once we've left it moves to the bottom
 const DEPART_AT = Date.parse('2027-01-09T07:00:00+08:00');
