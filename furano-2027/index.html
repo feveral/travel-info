@@ -411,7 +411,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
     <h2>交通</h2>
     <div class="card pad small">
       <table class="tbl">
-        <tr><th>機場 → 富良野</th><td><b>北海道 Resort Liner</b> 直達新富良野王子（約 3 小時，要預約），或 JR 經札幌、瀧川到富良野站（⚠️ 待預訂）</td></tr>
+        <tr><th>機場 → 富良野</th><td>✅ <b>已訂</b>：1/9 18:10 新千歲機場 23 號乘車處 → 21:05 新富良野王子（バスゴリライナーふらの，2 人 ¥10,000）。<b>確認信印出來給司機看</b></td></tr>
         <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店房客專用接駁車（2025–26 季免費），時刻表在櫃台；也可以在山上滑過去</td></tr>
         <tr><th>飯店 ⇄ 市區</th><td>薰衣草巴士（富良野站 ⇄ 新富良野王子）；晚上的 Evening Shuttle Bus 單程 ¥500（2025–26 季）；計程車約 10 分鐘</td></tr>
         <tr><th>富良野 → 札幌</th><td>中央巴士高速巴士約 2.5 小時，或 JR 經瀧川約 2 小時（⚠️ 待預訂）</td></tr>
@@ -526,9 +526,9 @@ const SKI = { name:'富良野滑雪場', lat:43.3233, lon:142.3541 };
 const SAPPORO = { name:'札幌', lat:43.0618, lon:141.3545 };
 
 const DAYS = [
-  { date:'2027-01-09', title:'桃園 ✈ 新千歲 → 富良野', subtitle:'長榮 BR116 下午抵達北海道，搭巴士到富良野入住',
+  { date:'2027-01-09', title:'桃園 ✈ 新千歲 → 富良野', subtitle:'BR116 14:05 抵達，18:10 搭巴士，21:05 到富良野入住',
     wx:SKI, hotel:'shinfurano', flight:'BR116',
-    meals:{ b:'自理', l:'機上（長榮）', d:'飯店內餐廳或 Ningle Terrace 附近（待定）' },
+    meals:{ b:'自理', l:'機上（長榮）', d:'新千歲機場（18:10 上車前吃，例如拉麵道場）' },
     places:[
       { zh:'桃園國際機場 第二航廈', en:'Taoyuan International Airport T2', img:'e/e7/Taiwan_Taoyuan_International_Airport_Terminal_2_Check-in_Hall_20200815.jpg',
         lat:25.0777, lon:121.2328, q:'Taoyuan International Airport Terminal 2',
@@ -537,28 +537,23 @@ const DAYS = [
         tips:['如果自備雪板、雪鞋，先查長榮的運動用品托運規定','行動電源只能放隨身行李','出發前在 <b>Visit Japan Web</b> 填好入境與海關資料，入境時出示 QR Code 比較快'] },
       { zh:'新千歲機場', en:'New Chitose Airport', img:'8/87/Hokkaido_New_Chitose_Airport13n4272.jpg',
         lat:42.7868, lon:141.6830, q:'New Chitose Airport',
-        desc:'當地時間 14:05 抵達國際線航廈。入境、領行李後走到國內線航廈，這邊有比較多吃的和巴士站。', tags:['14:05 抵達'],
+        desc:'當地時間 14:05 抵達國際線航廈。巴士 18:10 才開，入境、領行李後有大約 3 小時可以在機場吃晚餐、逛逛。', tags:['14:05 抵達','約 3 小時空檔'],
         story:[
           '國內線航廈 3 樓有「北海道拉麵道場」，集合了北海道各地的拉麵名店；2 樓是伴手禮區，ROYCE\' 巧克力、白色戀人、六花亭、LeTAO 都買得到。',
           { img:'c/c7/Niku_udon_in_New_Chitose_Airport_%28extended%29.jpg', cap:'機場美食街的烏龍麵' },
-          '去程先別急著買伴手禮，回程 1/17 還會經過這裡；先在超商買水和零食帶去飯店。',
+          '21:05 才到飯店，晚餐建議在機場吃完再上車；也先在超商買水和零食，飯店附近晚上沒什麼店。伴手禮等回程 1/17 再買。',
         ],
         tips:['國際線和國內線航廈之間有室內連通道，走路約 10 分鐘','1 月北海道白天約 −5°C，羽絨外套放隨身行李，下飛機就穿'] },
-      { zh:'前往富良野', en:'New Chitose → Furano（約 3 小時）', img:'f/f9/Shin-furano-price-hotel-2020-01.jpg', imgCap:'冬天的新富良野王子大飯店',
-        lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
-        desc:'從機場到新富良野王子大飯店約 3 小時車程。⚠️ 接駁方式還沒決定（試算表待辦）。', tags:['⚠️ 待預訂','約 3 小時'],
-        tips:['<b>北海道 Resort Liner</b>：滑雪季的機場 ⇄ 富良野直達巴士，停新富良野王子門口。2025–26 季從國內線航廈出發，<b>要事先預約</b>，常常客滿','<b>JR</b>：新千歲機場 → 札幌 → 瀧川轉車 → 富良野站，再搭計程車約 10 分鐘到飯店；轉車多、帶行李辛苦','<b>包車</b>：人數多、行李和雪具多時最省事，可在 Klook、KKday 預訂','14:05 落地、入境約 1 小時，巴士到飯店大概 18:30 以後；北海道 16:20 左右就天黑'] },
-      { zh:'Ningle Terrace 森林小木屋', en:'Ningle Terrace', img:'e/e8/130503_Ningle_Terrace_Furano_Hokkaido_Japan03s.jpg',
-        lat:43.3234, lon:142.3563, q:'Ningle Terrace Furano',
-        desc:'飯店旁森林裡的 15 間小木屋商店，冬天晚上點燈、木棧道積滿雪，像童話裡的小村子。', tags:['飯店旁','夜間點燈'],
+      { zh:'巴士：新千歲機場 → 新富良野王子', en:'バスゴリライナーふらの New Chitose Airport – Furano Line', img:'f/f9/Shin-furano-price-hotel-2020-01.jpg', imgCap:'冬天的新富良野王子大飯店',
+        lat:43.32285, lon:142.3546, q:'43.32284875,142.3546',
+        desc:'✅ 已訂（Japan Bus Online）。18:10 從新千歲機場 23 號乘車處出發，21:05 直達新富良野王子大飯店門口，車程約 3 小時。', tags:['★已訂','18:10 → 21:05','2 人'],
         story:[
-          '名字來自富良野劇作家倉本聰的作品，「Ningle」是傳說中住在森林裡、只有 15 公分高的小精靈。每間小木屋都是一位手作職人的工作室，有木雕、蠟燭、玻璃、皮革等。',
-          { img:'6/6c/130503_Ningle_Terrace_Furano_Hokkaido_Japan02s.jpg', cap:'木棧道串起一間間小木屋' },
-          '冬季營業時間約 12:00–20:45（11 月有休館期，各店可能不定休），到飯店放好行李後散步過去剛好。',
+          '路線是「バスゴリライナーふらの（New Chitose Airport – Furano Line）」，由北海道巴士（Hokkaido Bus）營運。2 位大人共 ¥10,000，已付款。',
+          { img:'d/dc/Shari_bus_Ki200F_0316snow.JPG', cap:'北海道冬天的巴士（示意）' },
         ],
-        tips:['木棧道會結冰，穿防滑的鞋','小木屋裡請勿拍攝職人作品，拍照前先問'] },
+        tips:['<b>上車</b>：把電子票（確認信）給司機看。官方強烈建議<b>印出紙本</b>，拿不出票要重新買票；手機畫面也可以，但怕沒電','<b>乘車處</b>：新千歲機場 23 號乘車處（新千歳空港23番のりば）<a href="https://maps.google.co.jp/maps?q=42.788833,141.6805&z=18" target="_blank" rel="noopener">地圖 ↗</a>，17:50 前到','<b>停駛／誤點</b>：大雪可能停駛，出發前看 <a href="https://japanbusonline.com/" target="_blank" rel="noopener">Japan Bus Online ↗</a> 首頁的「Bus Cancellation Updates」','<b>巴士公司</b>：北海道巴士預約中心 <a href="tel:+815035330800">+81-50-3533-0800</a>（08:30–19:30）','預約編號、乘客姓名在確認信裡，搜尋信箱「japanbusonline」'] },
     ],
-    notes:['北海道 Resort Liner 等接駁巴士在滑雪季常客滿，<b>確定航班後就先訂</b>。','入住後先到飯店櫃台問清楚：往北之峰的接駁車時刻、雪具寄放處、溫泉時間。'] },
+    notes:['<b>巴士確認信請印出來帶著</b>，上車要給司機看。','21:05 才到飯店，Ningle Terrace（20:45 關）今晚來不及，改到 1/11 晚上去。','入住後先到飯店櫃台問清楚：往北之峰的接駁車時刻、雪具寄放處、溫泉時間。'] },
 
   { date:'2027-01-10', title:'自由滑雪・富良野市區・北之峰', subtitle:'自己滑，順便去市區採買、北之峰區走走', plan:'細節還沒安排',
     wx:SKI, hotel:'shinfurano',
@@ -613,6 +608,15 @@ const DAYS = [
         lat:43.3233, lon:142.3541, q:'New Furano Prince Hotel',
         desc:'新富良野王子大飯店有天然溫泉大浴場，上完課泡一下，腳比較不會痠。', tags:['飯店內'],
         tips:['日本溫泉要全裸入池，先在洗身處洗乾淨','大毛巾不能放進池子裡','有刺青的話先問飯店規定'] },
+      { zh:'Ningle Terrace 森林小木屋', en:'Ningle Terrace', img:'e/e8/130503_Ningle_Terrace_Furano_Hokkaido_Japan03s.jpg',
+        lat:43.3234, lon:142.3563, q:'Ningle Terrace Furano',
+        desc:'飯店旁森林裡的 15 間小木屋商店，冬天晚上點燈、木棧道積滿雪，像童話裡的小村子。', tags:['飯店旁','夜間點燈'],
+        story:[
+          '名字來自富良野劇作家倉本聰的作品，「Ningle」是傳說中住在森林裡、只有 15 公分高的小精靈。每間小木屋都是一位手作職人的工作室，有木雕、蠟燭、玻璃、皮革等。',
+          { img:'6/6c/130503_Ningle_Terrace_Furano_Hokkaido_Japan02s.jpg', cap:'木棧道串起一間間小木屋' },
+          '冬季營業時間約 12:00–20:45（11 月有休館期，各店可能不定休），上完課、泡完溫泉後晚上散步過去剛好。',
+        ],
+        tips:['木棧道會結冰，穿防滑的鞋','小木屋裡請勿拍攝職人作品，拍照前先問'] },
     ],
     notes:['FISS 回覆後，把確定的時間、集合地點和費用更新到這裡。'] },
 
@@ -1315,8 +1319,8 @@ function initFx() {
 // Packing list, grouped by occasion. `why` says when the item is needed; `opt` marks nice-to-haves.
 // Ticks are stored per item id so editing the list doesn't shuffle them.
 const CHECK = [
-  { group:'📌 待辦（還沒訂）', items:[
-    { id:'bus-airport', t:'接駁車：新千歲機場 → 新富良野王子', why:'1/9 14:05 落地。Resort Liner 等滑雪巴士常客滿，要先預約' },
+  { group:'📌 待辦', items:[
+    { id:'bus-ticket', t:'印出機場巴士的確認信', why:'1/9 18:10 新千歲 → 新富良野王子（已訂）。上車要給司機看，拿不出來要重新買票' },
     { id:'bus-sapporo', t:'接駁車：富良野 → 札幌', why:'1/15 退房後移動，高速巴士、JR 或 Resort Liner' },
     { id:'hotel-sapporo', t:'訂札幌飯店（1/15、1/16 兩晚）', why:'建議札幌站、大通或薄野一帶；1/17 要早上出發去機場' },
     { id:'bus-kitanomine', t:'確認往返北之峰的接駁車', why:'王子飯店房客專用接駁車的時刻與搭乘方式' },
