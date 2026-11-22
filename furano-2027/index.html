@@ -130,6 +130,15 @@ h3{font-size:18px;margin:0}
 .tips li{padding-left:1.3em;position:relative;margin:3px 0}
 .tips li::before{content:"💡";position:absolute;left:0;font-size:12px;top:2px}
 .place .img[data-full]{cursor:zoom-in}
+.bus h3{margin-bottom:2px}
+.bus-dir{font-size:13px;font-weight:600;margin:10px 0 6px}
+.times{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bus-dir + .times{margin-top:0}
+.times span{background:var(--surface-2);border-radius:8px;padding:4px 8px;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.times span.on,.hl-demo{background:var(--accent-soft);color:var(--accent);font-weight:700;border-radius:6px;padding:0 4px}
+.times span.on{padding:4px 8px}
+.times span.warn{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.trailmap img{display:block;width:100%;aspect-ratio:2000/1421;object-fit:cover;background:var(--surface-2);cursor:zoom-in}
 html{touch-action:manipulation}
 .lightbox{position:fixed;inset:0;z-index:300;display:none;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
 .lightbox.on{display:block}
@@ -299,7 +308,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   <div class="wrap">
     <div class="eyebrow">2027.01.09 – 01.17 · 9 天 8 夜</div>
     <h1>北海道<br>富良野滑雪之旅</h1>
-    <div class="sub">富良野滑雪場・北之峰・美瑛・札幌美食</div>
+    <div class="sub">富良野滑雪場・美瑛・旭川・札幌美食</div>
     <div class="countdown" id="countdown"></div>
   </div>
 </header>
@@ -353,6 +362,93 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 <!-- ============ 工具 ============ -->
 <section class="view" id="v-tools">
   <div class="wrap">
+    <h2>雪道地圖</h2>
+    <div class="card trailmap">
+      <img src="../assets/maps/furano-trail-map.jpg" data-full="../assets/maps/furano-trail-map.jpg" alt="富良野滑雪場雪道地圖（2025–26）" loading="lazy">
+      <div class="pad small">
+        <div class="muted">點地圖放大，雙指可以縮放。這是 <b>2025–26 季</b>的官方地圖，2026–27 季雪道可能有調整。</div>
+        <ul class="list" style="margin-top:8px">
+          <li>左邊是<b>富良野區</b>（新富良野王子、富良野纜車 A），右邊是<b>北之峰區</b>（北之峰纜車 K）。</li>
+          <li>兩區在山上靠 <b>H 連絡吊椅</b>相連，但連接路線偏難，我們不走。</li>
+          <li>地圖提醒：北之峰纜車（K）山頂站<b>沒有初級雪道</b>，初學者不要直接坐上去。</li>
+          <li>地圖上寫著<b>北之峰那間「富良野王子飯店」暫停營業</b>，我們住的是新富良野王子，不受影響。</li>
+          <li>雪場緊急電話：滑雪巡邏隊 <a href="tel:09033913340">090-3391-3340</a>・雪場辦公室 <a href="tel:0167221119">0167-22-1119</a></li>
+          <li>免費 Wi-Fi：SSID <b>FURANOSKI</b>（密碼印在地圖上）。</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>巴士・交通時刻</h2>
+    <p class="small muted" style="margin-top:-4px">除了已訂的機場巴士，<b>都是 2025–26 季（或更早）的時刻</b>，2026–27 季公布後要再對一次。<span class="hl-demo">綠底</span>是行程裡打算搭的班次。</p>
+    <div class="card pad bus">
+      <h3>✈️ 新千歲機場 → 新富良野王子（已訂）</h3>
+      <div class="small muted">1/9・バスゴリライナーふらの（北海道巴士）・2 人 ¥10,000</div>
+      <div class="bus-dir">新千歲機場 23 號乘車處 → 新富良野王子</div>
+      <div class="times"><span class="on">18:10 → 21:05</span></div>
+
+      <ul class="tips"><li><b>確認信印出來</b>，上車給司機看</li><li>客服 <a href="tel:+815035330800">050-3533-0800</a>；停駛、改點在 japanbusonline 通知</li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚌 新富良野王子 → JR 富良野站</h3>
+      <div class="small muted">薰衣草巴士（ラベンダー号）・約 20 分；晚上 Evening Shuttle Bus ¥500</div>
+      <div class="bus-dir">薰衣草巴士（* 是富良野站－飯店的特別班）</div>
+      <div class="times"><span>6:30 → 6:50</span><span>7:30 → 7:50</span><span>9:05 → 9:25</span><span class="on">10:30 → 10:50</span><span>11:30 → 11:47*</span><span>12:20 → 12:40</span><span>13:20 → 13:40</span><span>15:55 → 16:15</span></div>
+      <div class="bus-dir">Evening Shuttle Bus（晚餐用，¥500）</div>
+      <div class="times"><span class="on">17:00 → 17:20</span><span class="on">18:00 → 18:20</span><span>19:00 → 19:20</span></div>
+
+      <ul class="tips"><li>市區中途站：市場前、本通 5 丁目、十字街；Furano Marché 走路可到</li><li>Evening Shuttle 上季 12/19–3/15 行駛，<b>1/1、1/2 停駛</b>；19:00 那班只開到 2/28；坐滿就不能上車</li><li>薰衣草巴士 6:30、7:30、9:05… 這幾班會從富良野站<b>繼續開往旭川機場、旭川站</b>（1/13 去旭川可以直接搭）</li><li>詢問：ふらのバス <a href="tel:0167221911">0167-22-1911</a>・Evening Shuttle 富良野觀光協會 <a href="tel:0167233388">0167-23-3388</a></li><li><a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表 2025–26 ↗</a></li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚌 JR 富良野站 → 新富良野王子</h3>
+      <div class="small muted">薰衣草巴士・約 17 分</div>
+<div class="times"><span>8:00 → 8:17*</span><span>8:50 → 9:07*</span><span>9:40 → 9:57*</span><span>11:38 → 11:55</span><span class="on">12:38 → 12:55</span><span>14:13 → 14:30</span><span>15:38 → 15:55</span><span>17:28 → 17:45</span><span>18:28 → 18:45</span><span class="on">21:03 → 21:20 末班</span></div>
+      <ul class="tips"><li>* 是特別班（上季 12/1–3/31 每天）</li><li>21:03 是末班，晚餐吃くまげら回飯店就靠這班；錯過就搭計程車約 10 分鐘</li><li><a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表 2025–26 ↗</a></li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚐 飯店 ⇄ 北之峰 房客接駁車</h3>
+      <div class="small muted">新富良野王子房客專用・免費・中途停富良野纜車站</div>
+      <div class="bus-dir">新富良野王子 → 北之峰</div>
+      <div class="times"><span>8:55</span><span>9:20</span><span>10:20</span><span>13:20</span><span>16:15</span><span>18:30</span><span>19:30▲</span></div>
+      <div class="bus-dir">北之峰纜車售票中心 → 新富良野王子</div>
+      <div class="times"><span>9:05</span><span>10:05</span><span>13:05</span><span>16:00</span><span>17:20</span><span>18:20</span><span>19:20▲</span></div>
+
+      <ul class="tips"><li>▲ 只有週末、國定假日開（上季 1 月是 1–4、10–12、17、18、24、25、31 日）；夜滑停了也會停駛</li><li>車程約 10 分；路況不好時乘車處可能會換位置</li><li><a href="https://www.princehotels.co.jp/file.jsp?id=503910" target="_blank" rel="noopener">房客接駁車時刻表 2025–26 ↗</a></li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚃 1/12 美瑛・青池</h3>
+      <div class="small muted">JR 富良野線 → 美瑛站，再轉道北巴士（往白金溫泉）</div>
+      <div class="bus-dir">JR 富良野 → 美瑛</div>
+            <div class="small">約 40 分，一小時左右一班，出發前查 <a href="https://www.jrhokkaido.co.jp/travel/furanobiei/train/" target="_blank" rel="noopener">JR 富良野線 ↗</a></div>
+      <div class="bus-dir">道北巴士 美瑛站前 → 白金青い池（約 20 分、¥800）</div>
+      <div class="times"><span>10:34 → 10:56</span><span>15:49 → 16:11</span></div>
+      <div class="bus-dir">白金青い池 → 美瑛站前</div>
+      <div class="times"><span class="warn">末班約 18:05</span></div>
+
+      <ul class="tips"><li>道北巴士時刻是網路上非冬季的資料，<b>冬季班次可能不一樣</b>，一定要再查</li><li>末班 18:05 只有一個來源</li><li>白鬚瀑布在青池再往前約 10 分的「白金溫泉」站</li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚃 1/13 旭川・旭山動物園</h3>
+      <div class="small muted">JR 或薰衣草巴士到旭川站，再轉 41 號巴士</div>
+      <div class="bus-dir">富良野 → 旭川站</div>
+            <div class="small">JR 富良野線約 1 小時 10 分；或從飯店直接搭薰衣草巴士（約 1.5 小時，免轉乘）</div>
+      <div class="bus-dir">旭川站前 6 號乘車處 → 旭山動物園</div>
+            <div class="small">旭川電氣軌道 <b>41 號</b>，約 40 分</div>
+
+      <ul class="tips"><li>企鵝散步在上午，建議 8 點左右出發</li><li>回程從動物園搭 41 號回旭川站，在站前吃拉麵</li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚌 1/15 富良野 → 札幌（還沒訂）</h3>
+      <div class="small muted">中央巴士 高速ふらの號・富良野站前 → 札幌站前・約 2 小時 35 分・¥2,700</div>
+<div class="times"><span>7:00 → 9:35</span><span>8:30 → 11:05</span><span>10:00 → 12:35</span><span>13:10 → 15:45</span><span>14:30 → 17:05</span><span>15:40 → 18:15</span><span>16:50 → 19:25</span></div>
+      <ul class="tips"><li>這是 2026 年夏季時刻，冬季可能不同；官網沒寫要不要預約，問 中央巴士 <a href="tel:0570200600">0570-200-600</a></li><li>不停新富良野王子：先搭薰衣草巴士到富良野站（例如 9:05 → 9:25 接 10:00）</li><li>札幌端也停「時計台前」、「サッポロファクトリー前」，看住哪裡在哪站下</li><li>車上付現或刷 IC 卡</li><li><a href="http://www.chuo-bus.co.jp/highway/index.cgi?ope=det&n=9&t=173&o=2" target="_blank" rel="noopener">中央巴士 高速ふらの號 ↗</a></li></ul>
+    </div>
+    <div class="card pad bus">
+      <h3>🚃 1/17 札幌 → 新千歲機場</h3>
+      <div class="small muted">JR 快速 Airport・約 37 分・可刷 IC 卡</div>
+
+      <ul class="tips"><li>回程 BR165 12:10 起飛，最晚 9:30 左右從札幌站出發</li></ul>
+    </div>
+
     <h2>各地天氣</h2>
     <div class="card wx-list" id="wxList"><div class="pad muted">讀取天氣中…</div></div>
     <p class="small muted">資料來源：Open-Meteo。雪場山頂比山下冷很多（常低 5–10°C）；雪況可看 <a href="https://www.princehotels.co.jp/ski/furano/" target="_blank" rel="noopener">富良野滑雪場官網 ↗</a></p>
@@ -384,9 +480,9 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
     <div class="card pad small">
       <table class="tbl">
         <tr><th>機場 → 富良野</th><td>✅ <b>已訂</b>：1/9 18:10 新千歲機場 23 號乘車處 → 21:05 新富良野王子（バスゴリライナーふらの，2 人 ¥10,000）。<b>確認信印出來給司機看</b></td></tr>
-        <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店<b>房客專用接駁車</b>（免費）。2025–26 季：飯店 → 北之峰 8:55；北之峰 → 飯店 9:05、10:05、13:05、16:00、17:20、18:20、19:20（19:20 只有週末、假日）。白天也可以在山上滑過去。<a href="https://www.princehotels.co.jp/file.jsp?id=503910" target="_blank" rel="noopener">房客接駁車時刻表（2025–26）↗</a></td></tr>
-        <tr><th>飯店 ⇄ 市區</th><td><b>薰衣草巴士</b>約 20 分。<br>飯店 → 富良野站：9:05、10:30、11:30、12:20、13:20、15:55；晚上 <b>Evening Shuttle Bus</b> 17:00、18:00、19:00（¥500）<br>富良野站 → 飯店：11:38、12:38、14:13、15:38、17:28、18:28、<b>21:03（末班）</b><br>都是 2025–26 季時刻。<a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表（2025–26）↗</a></td></tr>
-        <tr><th>富良野 → 札幌</th><td>中央巴士高速巴士約 2.5 小時，或 JR 經瀧川約 2 小時（⚠️ 待預訂）</td></tr>
+        <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店<b>房客專用接駁車</b>（免費），每天約 7 班。完整時刻在「工具」</td></tr>
+        <tr><th>飯店 ⇄ 市區</th><td><b>薰衣草巴士</b>約 20 分；晚上 <b>Evening Shuttle Bus</b>（¥500）；富良野站回飯店末班 <b>21:03</b>。完整時刻在「工具」</td></tr>
+        <tr><th>富良野 → 札幌</th><td>中央巴士<b>高速ふらの號</b>，富良野站前出發約 2.5 小時、¥2,700（⚠️ 待預訂）。時刻在「工具」</td></tr>
         <tr><th>札幌 → 機場</th><td>JR 快速 Airport 約 37 分鐘，可刷 IC 卡</td></tr>
       </table>
     </div>
@@ -442,7 +538,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   <button data-v="days" class="on"><span class="i"><img src="../assets/icons/days.png" alt="" width="30" height="30"></span>行程</button>
   <button data-v="flights"><span class="i"><img src="../assets/icons/flights.png" alt="" width="30" height="30"></span>航班</button>
   <button data-v="hotels"><span class="i"><img src="../assets/icons/hotels.png" alt="" width="30" height="30"></span>住宿</button>
-  <button data-v="tools"><span class="i"><img src="../assets/icons/tools.png" alt="" width="30" height="30"></span>天氣</button>
+  <button data-v="tools"><span class="i"><img src="../assets/icons/tools.png" alt="" width="30" height="30"></span>工具</button>
   <button data-v="info"><span class="i"><img src="../assets/icons/info.png" alt="" width="30" height="30"></span>須知</button>
 </div></nav>
 
@@ -527,18 +623,17 @@ const DAYS = [
     ],
     notes:['<b>巴士確認信請印出來帶著</b>，上車要給司機看。','21:05 才到飯店，Ningle Terrace（20:45 關）今晚來不及，改到 1/11 晚上去。','入住後先到飯店櫃台問清楚：往北之峰的接駁車時刻、雪具寄放處、溫泉時間。'] },
 
-  { date:'2027-01-10', title:'富良野市區・北之峰滑雪・夜滑', subtitle:'早上搭巴士去市區，下午滑到北之峰，夜滑後搭房客接駁車回飯店', plan:'草案：時刻用 2025–26 季時刻表',
+  { date:'2027-01-10', title:'富良野市區・富良野區滑雪・夜滑', subtitle:'早上搭巴士去市區吃咖哩、採買，中午回飯店，下午在富良野區滑到夜滑', plan:'草案：時刻用 2025–26 季時刻表',
     wx:SKI, hotel:'shinfurano',
-    meals:{ b:'飯店', l:'唯我獨尊 香腸咖哩', d:'北之峰山腳（夜滑前或中間吃）' },
+    meals:{ b:'飯店', l:'唯我獨尊 香腸咖哩', d:'飯店或森林精靈露台附近' },
     timeline:[
-      ['10:30','新富良野王子 搭<b>薰衣草巴士</b>（先不帶雪具）→ 10:50 JR 富良野站前'],
+      ['10:30','新富良野王子 搭<b>薰衣草巴士</b> → 10:50 JR 富良野站前'],
       ['11:00','<b>唯我獨尊</b> 午餐（開店前就排隊），之後逛 Furano Marché、超市採買'],
       ['12:38','JR 富良野站前 搭薰衣草巴士 → 12:55 新富良野王子（下一班 14:13 → 14:30）'],
-      ['13:30','換好雪衣，從富良野區搭纜車／吊椅上山，<b>在山上滑到北之峰區</b>'],
-      ['16:00','北之峰區<b>夜滑</b>開始，週日滑到 19:30；晚餐在北之峰山腳的店吃'],
-      ['19:20','北之峰纜車售票中心 搭<b>王子飯店房客接駁車</b>（7 便）→ 19:30 新富良野王子'],
+      ['13:30','東西放回房間，換雪衣，在飯店租雪具，<b>富良野區</b>滑雪'],
+      ['16:00','富良野區<b>夜滑</b>，1/10 是週日，可以滑到 19:30'],
     ],
-    tlNotes:['兩區之間的連接吊椅傍晚就停了，夜滑完不能滑回富良野區，<b>一定要搭接駁車或計程車</b>回飯店','接駁車是<b>新富良野王子房客專用、免費</b>，上車可能要出示房卡','<b>19:20 那班（7 便）只在週末、國定假日開</b>，2025–26 季 1/10 有開；1/10/2027 是週日，應該也有，到了跟櫃台確認','保險一點可以搭 <b>18:20</b>（6 便）→ 18:30 到飯店，再在富良野區夜滑到 19:30（飯店門口）','錯過接駁車：請北之峰的店家叫計程車，到飯店約 10 分鐘','時刻來源：<a href="https://www.princehotels.co.jp/file.jsp?id=503910" target="_blank" rel="noopener">房客接駁車時刻表（2025–26）↗</a>・<a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表（2025–26）↗</a>；2026–27 季時刻表還沒公布，出發前再對一次'],
+    tlNotes:['<b>租雪具</b>：新富良野王子飯店裡就有租借店（Sportpia），8:15 開，有夜滑到 19:30 的日子開到 19:30，最晚關門前 1 小時要借出；要帶護照。房客另有飯店 GF 樓的專用置物櫃。 <a href="https://www.princehotels.co.jp/ski/furano/winter/info/" target="_blank" rel="noopener">雪場租借說明 ↗</a>','錯過 12:38 那班，下一班是 14:13，或在站前搭計程車約 10 分鐘','時刻來源：<a href="https://www.furanotourism.com/spro_cms/up/20251104202205515_44621.pdf" target="_blank" rel="noopener">富良野冬季巴士時刻表（2025–26）↗</a>；2026–27 季時刻表還沒公布，出發前再對一次'],
     places:[
       { zh:'富良野市區採買', en:'Furano Station & Furano Marché', img:'6/62/JRH_Furano_Station_20100908.jpg',
         lat:43.3424, lon:142.3866, q:'Furano Marche',
@@ -557,11 +652,6 @@ const DAYS = [
           '飯店旁的「富良野纜車 Ropeway」可以直上山頂，第一天先在中段的初中級雪道熱身，習慣雪況再往上。',
         ],
         tips:['雪票 1 日券 2025–26 季約 ¥8,000，2026–27 季價格以官網為準；12 歲以下兒童免費','纜車、吊椅約 8:30 開始；1 月下午 4 點多就暗了','山頂常常 −15°C 以下，臉、手指要包好'] },
-      { zh:'北之峰區', en:'Kitanomine Zone', img:'f/f7/Furano_Snow_Resort_view3.JPG',
-        lat:43.3441, lon:142.3661, q:'Kitanomine Gondola Furano',
-        desc:'山的另一側，坐北之峰纜車上山。山腳就是北之峰小鎮，有餐廳、居酒屋和雪具店。今天傍晚在這裡夜滑。',
-        tags:['可滑過去','夜滑到 19:30（週日）'],
-        tips:['<b>北之峰 → 新富良野王子 房客接駁車</b>（2025–26 季，免費）：17:20、18:20、19:20（19:20 只有週末、假日），從北之峰纜車售票中心出發，10 分鐘到','從富良野區可以在山上滑過去；回程傍晚連接吊椅停了以後就要搭接駁車','新富良野王子在北之峰也有拉麵店，富良野名店「とみ川」的新品牌就開在這裡'] },
     ],
     notes:[] },
 
@@ -1244,7 +1334,6 @@ const CHECK = [
     { id:'bus-ticket', t:'印出機場巴士的確認信', why:'1/9 18:10 新千歲 → 新富良野王子（已訂）。上車要給司機看，拿不出來要重新買票' },
     { id:'bus-sapporo', t:'接駁車：富良野 → 札幌', why:'1/15 退房後移動，高速巴士、JR 或 Resort Liner' },
     { id:'hotel-sapporo', t:'訂札幌飯店（1/15、1/16 兩晚）', why:'建議札幌站、大通或薄野一帶；1/17 要早上出發去機場' },
-    { id:'bus-kitanomine', t:'確認往返北之峰的接駁車', why:'王子飯店房客專用接駁車的時刻與搭乘方式' },
     { id:'fiss', t:'確認 FISS 教練（1/11）', why:'集合時間、地點、費用、雪票和裝備要不要自己準備' },
     { id:'skipass', t:'雪票：現場買或網路預購', why:'2026–27 季價格公布後比較；網路預購有時比較便宜' },
     { id:'rental', t:'雪具、雪衣租借', why:'飯店旁有租借店，旺季可以先在網路預約' },
@@ -1511,7 +1600,7 @@ function lbShow(i) {
   zReset(false);
 }
 function lbOpen(t) {
-  const scope = t.closest('.place') || document;
+  const scope = t.closest('.place, .trailmap') || document;
   lbList = [...scope.querySelectorAll('[data-full]')];
   lb.classList.add('on');
   document.body.style.overflow = 'hidden';
