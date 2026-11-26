@@ -306,7 +306,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
   <button class="theme-toggle search-btn" id="searchBtn" aria-label="搜尋">🔍</button>
   <button class="theme-toggle" id="themeBtn" aria-label="切換深淺色">◐</button>
   <div class="wrap">
-    <div class="eyebrow">2027.01.09 – 01.17 · 9 天 8 夜</div>
+    <div class="eyebrow">2027.01.08 – 01.17 · 10 天 9 夜</div>
     <h1>北海道<br>富良野滑雪之旅</h1>
     <div class="sub">富良野滑雪場・美瑛・旭川・札幌美食</div>
     <div class="countdown" id="countdown"></div>
@@ -380,6 +380,14 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
 
     <h2>巴士・交通時刻</h2>
     <p class="small muted" style="margin-top:-4px">除了已訂的機場巴士，<b>都是 2025–26 季（或更早）的時刻</b>，2026–27 季公布後要再對一次。<span class="hl-demo">綠底</span>是行程裡打算搭的班次。</p>
+    <div class="card pad bus">
+      <h3>🚐 桃園機場假日酒店 → 桃園機場（要預約）</h3>
+      <div class="small muted">1/9 早上・飯店接駁車・約 10–15 分</div>
+      <div class="times"><span>04:50</span><span>05:50</span><span class="on">06:50</span><span>08:50</span><span>10:50</span></div>
+      <div class="bus-dir">→ 高鐵桃園站（約 20–30 分）</div>
+      <div class="times"><span>08:50</span><span>10:50</span></div>
+      <ul class="tips"><li><b>前一天跟櫃台預約</b>，座位有限：<a href="tel:+88633856658">(03) 385-6658</a>・fd@holidayinntaoyuan.com</li><li>每人限 1 件 20 吋以上行李箱，雪板、雪具袋算 2 件，超過每件加收 NT$200</li></ul>
+    </div>
     <div class="card pad bus">
       <h3>✈️ 新千歲機場 → 新富良野王子（已訂）</h3>
       <div class="small muted">1/9・バスゴリライナーふらの（北海道巴士）・2 人 ¥10,000</div>
@@ -479,6 +487,7 @@ nav.tabs button.on .i img{filter:none;transform:scale(1.12);animation:hop .45s e
     <h2>交通</h2>
     <div class="card pad small">
       <table class="tbl">
+        <tr><th>飯店 → 桃園機場</th><td>1/8 住桃園機場假日酒店，1/9 搭飯店接駁車 <b>06:50</b>（要前一天預約）。時刻在「工具」</td></tr>
         <tr><th>機場 → 富良野</th><td>✅ <b>已訂</b>：1/9 18:10 新千歲機場 23 號乘車處 → 21:05 新富良野王子（バスゴリライナーふらの，2 人 ¥10,000）。<b>確認信印出來給司機看</b></td></tr>
         <tr><th>飯店 ⇄ 北之峰</th><td>王子飯店<b>房客專用接駁車</b>（免費），每天約 7 班。完整時刻在「工具」</td></tr>
         <tr><th>飯店 ⇄ 市區</th><td><b>薰衣草巴士</b>約 20 分；晚上 <b>Evening Shuttle Bus</b>（¥500）；富良野站回飯店末班 <b>21:03</b>。完整時刻在「工具」</td></tr>
@@ -575,6 +584,10 @@ const store = {
 
 /* ---------------- data ---------------- */
 const HOTELS = {
+  holidayinn: { name:'Holiday Inn Taoyuan Airport', zh:'桃園機場假日酒店', city:'桃園 大園', country:'tw',
+    tel:'+88633856658', telShow:'(03) 385-6658（接駁車預約也打這支）', addr:'桃園市大園區園航路 28 號 337001',
+    lat:25.0549, lon:121.1770, nights:['1/8・1 晚'],
+    note:'出發前一晚先住機場旁，隔天早上搭飯店接駁車到桃園機場，車程約 10–15 分鐘。接駁車要前一天跟櫃台預約。' },
   shinfurano: { name:'New Furano Prince Hotel', zh:'新富良野王子大飯店', city:'富良野', country:'jp',
     tel:'+81167221111', telShow:'+81 167-22-1111', addr:'北海道富良野市中御料 〒076-8511',
     lat:43.3233, lon:142.3541, nights:['1/9 – 1/14・6 晚'],
@@ -594,15 +607,30 @@ const SKI = { name:'富良野滑雪場', lat:43.3233, lon:142.3541 };
 const SAPPORO = { name:'札幌', lat:43.0618, lon:141.3545 };
 
 const DAYS = [
-  { date:'2027-01-09', title:'桃園 ✈ 新千歲 → 富良野', subtitle:'BR116 14:05 抵達，18:10 搭巴士，21:05 到富良野入住',
+  { date:'2027-01-08', country:'tw', title:'入住桃園機場假日酒店', subtitle:'出發前一晚先住機場旁，記得跟櫃台預約隔天早上的接駁車',
+    wx:{ name:'桃園機場', lat:25.0777, lon:121.2328 }, hotel:'holidayinn',
+    meals:{ b:'—', l:'—', d:'自理' },
+    timeline:[
+      ['入住','到桃園機場假日酒店 check-in（大園區園航路 28 號）'],
+      ['入住時','<b>跟櫃台預約隔天的機場接駁車</b>：建議 <b>06:50</b> 那班（約 07:05 到第二航廈）'],
+      ['睡前','護照、機場巴士確認信（紙本）、日圓、Visit Japan Web QR Code 再檢查一次'],
+    ],
+    tlNotes:['接駁車<b>不是固定班次，要前一天跟櫃台預約</b>，座位有限，越早訂越好。預約：<a href="tel:+88633856658">(03) 385-6658</a>・fd@holidayinntaoyuan.com',
+      '飯店 → 桃園機場：04:50、05:50、<b>06:50</b>、08:50、10:50，車程約 10–15 分鐘；另有 08:50、10:50 到高鐵桃園站',
+      'BR116 09:30 起飛，搭 06:50 約 07:05 到，國際線建議起飛前 2.5 小時報到；想更從容就搭 05:50',
+      '<b>行李限制</b>：每人限 1 件 20 吋以上行李箱（手提袋不算），<b>雪板、雪具袋這種長的算 2 件</b>，超過的每件加收 NT$200'],
+    places:[],
+    notes:[] },
+
+  { date:'2027-01-09', title:'桃園 ✈ 新千歲 → 富良野', subtitle:'06:50 飯店接駁車到機場，BR116 14:05 抵達，18:10 搭巴士，21:05 到富良野入住',
     wx:SKI, hotel:'shinfurano', flight:'BR116',
     meals:{ b:'自理', l:'機上（長榮）', d:'新千歲機場（18:10 上車前吃，例如拉麵道場）' },
     places:[
       { zh:'桃園國際機場 第二航廈', en:'Taoyuan International Airport T2', img:'e/e7/Taiwan_Taoyuan_International_Airport_Terminal_2_Check-in_Hall_20200815.jpg',
         lat:25.0777, lon:121.2328, q:'Taoyuan International Airport Terminal 2',
-        desc:'長榮航空 BR116 09:30 起飛，建議 07:00 前到機場報到。飛行約 3.5 小時，日本比台灣快 1 小時。', tags:['09:30 起飛','第二航廈'],
+        desc:'早上搭假日酒店的接駁車 06:50 出發，約 07:05 到第二航廈。長榮航空 BR116 09:30 起飛，飛行約 3.5 小時，日本比台灣快 1 小時。', tags:['06:50 飯店接駁','09:30 起飛','第二航廈'],
         story:[{ img:'a/ae/EVA_Air_Boeing_787-10_B-17807_taxiing_at_Taoyuan_May_2026.jpg', cap:'去程搭的長榮波音 787-10' }],
-        tips:['如果自備雪板、雪鞋，先查長榮的運動用品托運規定','行動電源只能放隨身行李','出發前在 <b>Visit Japan Web</b> 填好入境與海關資料，入境時出示 QR Code 比較快'] },
+        tips:['<b>飯店接駁車</b>（前一天預約）：04:50、05:50、06:50、08:50、10:50 從假日酒店出發，約 10–15 分到機場','如果自備雪板、雪鞋，先查長榮的運動用品托運規定','行動電源只能放隨身行李','出發前在 <b>Visit Japan Web</b> 填好入境與海關資料，入境時出示 QR Code 比較快'] },
       { zh:'新千歲機場', en:'New Chitose Airport', img:'8/87/Hokkaido_New_Chitose_Airport13n4272.jpg',
         lat:42.7868, lon:141.6830, q:'New Chitose Airport',
         desc:'當地時間 14:05 抵達國際線航廈。巴士 18:10 才開，入境、領行李後有大約 3 小時可以在機場吃晚餐、逛逛。', tags:['14:05 抵達','約 3 小時空檔'],
@@ -851,14 +879,14 @@ const DAYS = [
     notes:[] },
 ];
 
-const TRIP_START = '2027-01-09', TRIP_END = '2027-01-17';
+const TRIP_START = '2027-01-08', TRIP_END = '2027-01-17';
 
 /* ---------------- date helpers ---------------- */
 const WK = ['日','一','二','三','四','五','六'];
 const md = iso => { const [y,m,d] = iso.split('-').map(Number); return `${m}/${d}`; };
 const wk = iso => WK[new Date(iso + 'T12:00:00').getDay()];
-// The whole trip is in Japan, so "today" is judged on Japan time.
-const tzOf = () => 'Asia/Tokyo';
+// 1/8 is in Taiwan, the rest in Japan; "today" is judged on that day's local time.
+const tzOf = d => d && d.country === 'tw' ? 'Asia/Taipei' : 'Asia/Tokyo';
 // ?now=2027-01-11T09:00:00+09:00 simulates another moment (for checking the "today" logic)
 const NOW_OFFSET = (() => {
   const q = new URLSearchParams(location.search).get('now');
@@ -867,7 +895,7 @@ const NOW_OFFSET = (() => {
 })();
 const now = () => new Date(Date.now() + NOW_OFFSET);
 const isoIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit' }).format(now());
-const dayTz = () => 'Asia/Tokyo';
+const dayTz = i => tzOf(DAYS[i]);
 function todayIndex() {
   for (let i = 0; i < DAYS.length; i++) if (isoIn(dayTz(i)) === DAYS[i].date) return i;
   return -1;
@@ -1121,7 +1149,7 @@ function selectDay(i, scroll) {
 function renderDay() {
   document.body.style.overflow = '';
   const d = DAYS[current];
-  const flag = ['jp', '🇯🇵 日本'];
+  const flag = d.country === 'tw' ? ['tw', '🇹🇼 台灣'] : ['jp', '🇯🇵 日本'];
   const hotel = d.hotel && HOTELS[d.hotel];
   const flight = d.flight && FLIGHTS.find(f => f.no === d.flight);
 
@@ -1339,6 +1367,7 @@ function renderHotels() { $('#hotels').innerHTML = Object.keys(HOTELS).map(k => 
 // Ticks are stored per item id so editing the list doesn't shuffle them.
 const CHECK = [
   { group:'📌 待辦', items:[
+    { id:'tpe-shuttle', t:'預約假日酒店 → 桃園機場接駁車（1/9 06:50）', why:'最晚前一天（1/8 入住時）跟櫃台預約，座位有限；電話 (03) 385-6658' },
     { id:'bus-ticket', t:'印出機場巴士的確認信', why:'1/9 18:10 新千歲 → 新富良野王子（已訂）。上車要給司機看，拿不出來要重新買票' },
     { id:'bus-sapporo', t:'接駁車：富良野 → 札幌', why:'1/15 退房後移動，高速巴士、JR 或 Resort Liner' },
     { id:'hotel-sapporo', t:'訂札幌飯店（1/15、1/16 兩晚）', why:'建議札幌站、大通或薄野一帶；1/17 要早上出發去機場' },
@@ -1729,7 +1758,7 @@ renderFlights();
 renderHotels();
 renderChecklist();
 // before departure the packing list leads the info tab; once we've left it moves to the bottom
-const DEPART_AT = Date.parse('2027-01-09T07:00:00+08:00');
+const DEPART_AT = Date.parse('2027-01-08T15:00:00+08:00');
 function placeChecklist() {
   const sec = $('#checklistSec'), departed = now().getTime() >= DEPART_AT;
   (departed ? $('#checklistEnd') : $('#checklistHome')).before(sec);
